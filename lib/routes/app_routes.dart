@@ -43,7 +43,11 @@ class AppRoutes {
 
       case debugSwitchRT:
         if (!kDebugMode) {
-          break;
+          // Mengembalikan halaman default jika bukan mode debug
+          return MaterialPageRoute(
+            builder: (_) =>
+            const Scaffold(body: Center(child: Text('Page not found'))),
+          );
         }
         return MaterialPageRoute(builder: (_) => const SwitchRTDebugPage());
 

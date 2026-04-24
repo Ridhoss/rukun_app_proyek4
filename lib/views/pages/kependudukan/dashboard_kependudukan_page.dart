@@ -118,7 +118,7 @@ class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
             child: const Icon(Icons.location_city, color: ColorsUtils.b500),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
