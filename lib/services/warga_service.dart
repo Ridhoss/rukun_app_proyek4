@@ -1,3 +1,4 @@
+import 'package:rukun_app_proyek4/models/keluarga.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/services/session_context_service.dart';
 
@@ -5,37 +6,6 @@ import 'package:rukun_app_proyek4/services/session_context_service.dart';
 // warga_service.dart
 // Offline-first service untuk input KK/Warga oleh pengurus RT.
 // =============================================================
-
-class KKModel {
-  final int? id;
-  final String noKK;
-  final int rtId;
-  final String alamat;
-
-  KKModel({
-    this.id,
-    required this.noKK,
-    required this.rtId,
-    required this.alamat,
-  });
-
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'no_kk': noKK,
-    'rt_id': rtId,
-    'alamat': alamat,
-  };
-
-  factory KKModel.fromMap(Map<dynamic, dynamic> map) {
-    return KKModel(
-      id: map['id'] == null ? null : (map['id'] as num).toInt(),
-      noKK: (map['no_kk'] ?? '') as String,
-      rtId: (map['rt_id'] as num).toInt(),
-      alamat: ((map['alamat'] ?? map['address']) ?? '') as String,
-    );
-  }
-}
-
 class WargaModel {
   final int? id;
   final String nama;
@@ -211,7 +181,7 @@ class WargaService {
   // ─────────────────────────────────────────────
 
   /// Simpan data KK baru ke Hive lokal dan antri untuk sinkronisasi.
-  Future<bool> saveKK(KKModel kk) async {
+  Future<bool> saveKK(Keluarga kk) async {
     await _ensureContextLoaded();
     lastError = null;
     lastSavedKKId = null;
@@ -261,7 +231,7 @@ class WargaService {
   }
 
   /// Ambil semua KK berdasarkan RT dari storage lokal.
-  Future<List<KKModel>> getKKByRT(int rtId) async {
+  Future<List<Keluarga>> getKKByRT(int rtId) async {
     await _ensureContextLoaded();
     final kkBox = await HiveService().openBox<dynamic>(_kkBox);
     final result = kkBox.values
@@ -271,15 +241,14 @@ class WargaService {
               (row['rt_id'] as num?)?.toInt() == rtId &&
               (row['is_deleted'] as bool?) != true,
         )
-        .map(KKModel.fromMap)
+        .map(Keluarga.fromMap)
         .toList();
 
     result.sort((a, b) => b.id!.compareTo(a.id!));
     return result;
   }
-
   /// Update data KK lokal.
-  Future<bool> updateKK(String id, KKModel kk) async {
+  Future<bool> updateKK(String id, Keluarga kk) async {
     await _ensureContextLoaded();
     lastError = null;
     final kkId = int.tryParse(id);

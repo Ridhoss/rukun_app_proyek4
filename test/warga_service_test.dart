@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rukun_app_proyek4/models/keluarga.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/services/warga_service.dart';
 
@@ -22,7 +23,7 @@ void main() {
 
   test('saveKK sukses di RT aktif', () async {
     final ok = await service.saveKK(
-      KKModel(noKK: '3171011111111111', rtId: 1, alamat: 'Jl. Anggrek 10'),
+      Keluarga(noKK: '3171011111111111', rtId: 1, alamat: 'Jl. Anggrek 10', kodePos: '40535'),
     );
 
     expect(ok, isTrue);
@@ -31,11 +32,11 @@ void main() {
 
   test('saveKK gagal jika no KK duplikat', () async {
     await service.saveKK(
-      KKModel(noKK: '3171012222222222', rtId: 1, alamat: 'Jl. Mawar 12'),
+      Keluarga(noKK: '3171012222222222', rtId: 1, alamat: 'Jl. Mawar 12', kodePos: '40535'),
     );
 
     final second = await service.saveKK(
-      KKModel(noKK: '3171012222222222', rtId: 1, alamat: 'Jl. Melati 14'),
+      Keluarga(noKK: '3171012222222222', rtId: 1, alamat: 'Jl. Melati 14', kodePos: '40535'),
     );
 
     expect(second, isFalse);
@@ -44,7 +45,7 @@ void main() {
 
   test('saveKK gagal jika RT tidak sesuai konteks', () async {
     final ok = await service.saveKK(
-      KKModel(noKK: '3171013333333333', rtId: 2, alamat: 'Jl. Kenanga 2'),
+      Keluarga(noKK: '3171013333333333', rtId: 2, alamat: 'Jl. Kenanga 2', kodePos: '40535'),
     );
 
     expect(ok, isFalse);
@@ -56,7 +57,7 @@ void main() {
 
   test('saveWarga gagal saat NIK duplikat', () async {
     await service.saveKK(
-      KKModel(noKK: '3171014444444444', rtId: 1, alamat: 'Jl. Flamboyan 7'),
+      Keluarga(noKK: '3171014444444444', rtId: 1, alamat: 'Jl. Flamboyan 7', kodePos: '40535'),
     );
 
     final keluargaId = service.lastSavedKKId!;
@@ -106,7 +107,7 @@ void main() {
   test('saveWarga gagal jika keluarga berada di RT lain', () async {
     await service.setCurrentRTContext(rtId: 2, rtLabel: 'RT 002');
     await service.saveKK(
-      KKModel(noKK: '3171015555555555', rtId: 2, alamat: 'Jl. Cempaka 99'),
+      Keluarga(noKK: '3171015555555555', rtId: 2, alamat: 'Jl. Cempaka 99', kodePos: '40535'),
     );
     final rt2KeluargaId = service.lastSavedKKId!;
 

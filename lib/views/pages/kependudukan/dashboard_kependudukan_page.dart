@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:rukun_app_proyek4/models/keluarga.dart';
 import 'package:rukun_app_proyek4/routes/app_routes.dart';
 import 'package:rukun_app_proyek4/services/warga_service.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/keluarga_vm.dart';
+import 'package:provider/provider.dart';
 
 class DashboardKependudukanPage extends StatefulWidget {
   const DashboardKependudukanPage({super.key});
@@ -12,14 +15,11 @@ class DashboardKependudukanPage extends StatefulWidget {
 }
 
 class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
-  final WargaService _service = WargaService();
-
-  Future<List<KKModel>> _loadKK() async {
-    return _service.getKKByRT(_service.currentRtId);
-  }
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<KeluargaVM>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
@@ -32,68 +32,66 @@ class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
         ),
         centerTitle: true,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<List<KKModel>>(
-          future: _loadKK(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // HEADER
+            _buildHeaderInfo(vm),
 
-            final kkList = snapshot.data ?? [];
+            const SizedBox(height: 20),
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeaderInfo(),
-                const SizedBox(height: 20),
-                const Text(
-                  'Daftar Kartu Keluarga',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: ColorsUtils.black800,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: kkList.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'Belum ada data KK offline di RT aktif.',
-                            style: TextStyle(color: ColorsUtils.gray),
-                          ),
-                        )
-                      : ListView.separated(
-                          itemCount: kkList.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final kk = kkList[index];
-                            return _buildKKCard(context, kk);
-                          },
-                        ),
-                ),
-              ],
-            );
-          },
+            const Text(
+              'Daftar Kartu Keluarga',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: ColorsUtils.black800,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // LIST STATE
+            Expanded(
+              child: vm.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : vm.kkList.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'Belum ada data KK.',
+                        style: TextStyle(color: ColorsUtils.gray),
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: vm.kkList.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final kk = vm.kkList[index];
+                        return _buildKKCard(context, kk);
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
-      // Tombol untuk menambah KK Baru
+
       floatingActionButton: FloatingActionButton(
         backgroundColor: ColorsUtils.b500,
         child: const Icon(Icons.add, color: ColorsUtils.white),
         onPressed: () async {
           await Navigator.pushNamed(context, AppRoutes.addKK);
-          if (!mounted) return;
-          setState(() {});
+
+          // reload data setelah kembali
+          vm.loadKK(vm.currentRtId);
         },
       ),
     );
   }
 
-  Widget _buildHeaderInfo() {
+  Widget _buildHeaderInfo(KeluargaVM vm) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -126,10 +124,10 @@ class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
                   'Wilayah Aktif',
                   style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  '${_service.currentRtLabel} / RW 005',
-                  style: TextStyle(
+                  '${vm.currentRtLabel} / RW 005',
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: ColorsUtils.b400,
@@ -143,7 +141,7 @@ class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
     );
   }
 
-  Widget _buildKKCard(BuildContext context, KKModel kk) {
+  Widget _buildKKCard(BuildContext context, Keluarga kk) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -177,10 +175,8 @@ class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
               ],
             ),
           ),
-          // Tombol Edit yang melempar dummy data ke halaman AddKKPage
           IconButton(
             icon: const Icon(Icons.edit_outlined, color: ColorsUtils.b500),
-            tooltip: 'Edit Data KK',
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.addKK, arguments: kk);
             },

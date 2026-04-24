@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:rukun_app_proyek4/models/keluarga.dart';
 import 'package:rukun_app_proyek4/services/warga_service.dart';
 
 // ================================================================
@@ -31,7 +32,7 @@ class KKViewModel extends ChangeNotifier {
 
   // ── Init ───────────────────────────────────────────────────────
 
-  Future<void> init({KKModel? editData}) async {
+  Future<void> init({Keluarga? editData}) async {
     await loadRTList();
     if (editData != null) {
       selectedRTId = editData.rtId;
@@ -67,7 +68,7 @@ class KKViewModel extends ChangeNotifier {
 
   /// Simpan data KK baru / update KK.
   /// TODO (BE): isi _service.saveKK() / _service.updateKK() di warga_service.dart.
-  Future<bool> saveKK(KKModel kk) async {
+  Future<bool> saveKK(Keluarga kk) async {
     isLoadingKK = true;
     errorMessage = null;
     notifyListeners();
