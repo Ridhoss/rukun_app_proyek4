@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rukun_app_proyek4/routes/app_routes.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart'; // Tambahkan ini jika ingin menggunakan warna dari utils
 
@@ -33,7 +34,10 @@ class HomePage extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorsUtils.b300,
                 foregroundColor: ColorsUtils.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -48,7 +52,10 @@ class HomePage extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorsUtils.b300,
                 foregroundColor: ColorsUtils.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -58,6 +65,27 @@ class HomePage extends StatelessWidget {
                 Navigator.pushNamed(context, AppRoutes.dashboardKependudukan);
               },
             ),
+            if (kDebugMode) ...[
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.swap_horiz),
+                label: const Text("Debug: Switch RT Context"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange.shade700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.debugSwitchRT);
+                },
+              ),
+            ],
           ],
         ),
       ),

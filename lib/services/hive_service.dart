@@ -16,6 +16,23 @@ class HiveService {
     _isInitialized = true;
   }
 
+  Future<void> initForTest(String path) async {
+    if (_isInitialized) {
+      await Hive.close();
+      _isInitialized = false;
+    }
+
+    Hive.init(path);
+    _isInitialized = true;
+  }
+
+  Future<void> resetForTest() async {
+    if (_isInitialized) {
+      await Hive.close();
+    }
+    _isInitialized = false;
+  }
+
   Future<Box<T>> openBox<T>(String name) async {
     if (!_isInitialized) {
       await init();

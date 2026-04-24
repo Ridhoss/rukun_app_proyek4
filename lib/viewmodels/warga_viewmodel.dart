@@ -14,7 +14,7 @@ class WargaViewModel extends ChangeNotifier {
   final WargaService _service;
 
   WargaViewModel({WargaService? service})
-      : _service = service ?? WargaService();
+    : _service = service ?? WargaService();
 
   // ── State ──────────────────────────────────────────────────────
 
@@ -52,16 +52,55 @@ class WargaViewModel extends ChangeNotifier {
 
   // ── Setters dropdown ───────────────────────────────────────────
 
-  void setJK(String? v)              { selectedJK = v;              notifyListeners(); }
-  void setTglLahir(DateTime? v)      { tglLahir = v;                notifyListeners(); }
-  void setTglPerkawinan(DateTime? v) { tglPerkawinan = v;           notifyListeners(); }
-  void setAgama(String? v)           { selectedAgama = v;           notifyListeners(); }
-  void setPendidikan(String? v)      { selectedPendidikan = v;      notifyListeners(); }
-  void setPekerjaan(String? v)       { selectedPekerjaan = v;       notifyListeners(); }
-  void setGolDarah(String? v)        { selectedGolDarah = v;        notifyListeners(); }
-  void setStatusKawin(String? v)     { selectedStatusKawin = v;     notifyListeners(); }
-  void setStatusHubungan(String? v)  { selectedStatusHubungan = v;  notifyListeners(); }
-  void setKewarganegaraan(String? v) { selectedKewarganegaraan = v; notifyListeners(); }
+  void setJK(String? v) {
+    selectedJK = v;
+    notifyListeners();
+  }
+
+  void setTglLahir(DateTime? v) {
+    tglLahir = v;
+    notifyListeners();
+  }
+
+  void setTglPerkawinan(DateTime? v) {
+    tglPerkawinan = v;
+    notifyListeners();
+  }
+
+  void setAgama(String? v) {
+    selectedAgama = v;
+    notifyListeners();
+  }
+
+  void setPendidikan(String? v) {
+    selectedPendidikan = v;
+    notifyListeners();
+  }
+
+  void setPekerjaan(String? v) {
+    selectedPekerjaan = v;
+    notifyListeners();
+  }
+
+  void setGolDarah(String? v) {
+    selectedGolDarah = v;
+    notifyListeners();
+  }
+
+  void setStatusKawin(String? v) {
+    selectedStatusKawin = v;
+    notifyListeners();
+  }
+
+  void setStatusHubungan(String? v) {
+    selectedStatusHubungan = v;
+    notifyListeners();
+  }
+
+  void setKewarganegaraan(String? v) {
+    selectedKewarganegaraan = v;
+    notifyListeners();
+  }
 
   // ── Save / Update ──────────────────────────────────────────────
 
@@ -78,7 +117,8 @@ class WargaViewModel extends ChangeNotifier {
     if (success) {
       isSaved = true;
     } else {
-      errorMessage = 'Gagal menyimpan data warga. Coba lagi.';
+      errorMessage =
+          _service.lastError ?? 'Gagal menyimpan data warga. Coba lagi.';
     }
     notifyListeners();
     return success;
@@ -94,7 +134,9 @@ class WargaViewModel extends ChangeNotifier {
     final success = await _service.updateWarga(id, warga);
 
     isLoading = false;
-    if (!success) errorMessage = 'Gagal memperbarui data. Coba lagi.';
+    if (!success) {
+      errorMessage = _service.lastError ?? 'Gagal memperbarui data. Coba lagi.';
+    }
     notifyListeners();
     return success;
   }

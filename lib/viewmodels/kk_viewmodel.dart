@@ -13,8 +13,7 @@ import 'package:rukun_app_proyek4/services/warga_service.dart';
 class KKViewModel extends ChangeNotifier {
   final WargaService _service;
 
-  KKViewModel({WargaService? service})
-      : _service = service ?? WargaService();
+  KKViewModel({WargaService? service}) : _service = service ?? WargaService();
 
   // ── State ──────────────────────────────────────────────────────
 
@@ -37,8 +36,10 @@ class KKViewModel extends ChangeNotifier {
     if (editData != null) {
       selectedRTId = editData.rtId;
       kkSaved = true;
-      // TODO: load anggota dari service jika mode edit
-      // anggotaList = await _service.getWargaByKK(editData.id!);
+      savedKKId = editData.id;
+      if (editData.id != null) {
+        anggotaList = await _service.getWargaByKK(editData.id!);
+      }
     }
     notifyListeners();
   }
@@ -76,10 +77,9 @@ class KKViewModel extends ChangeNotifier {
     isLoadingKK = false;
     if (success) {
       kkSaved = true;
-      // TODO (BE): set savedKKId dari response API
-      // savedKKId = responseFromAPI.id;
+      savedKKId = _service.lastSavedKKId;
     } else {
-      errorMessage = 'Gagal menyimpan KK. Coba lagi.';
+      errorMessage = _service.lastError ?? 'Gagal menyimpan KK. Coba lagi.';
     }
     notifyListeners();
     return success;
@@ -108,7 +108,10 @@ class KKViewModel extends ChangeNotifier {
   /// Hapus anggota dari list lokal.
   /// TODO (BE): panggil _service.deleteWarga(id) sebelum remove dari list.
   Future<void> removeAnggota(int index) async {
-    // TODO (BE): if (anggotaList[index].id != null) await _service.deleteWarga(id);
+    final wargaId = anggotaList[index].id;
+    if (wargaId != null) {
+      await _service.deleteWarga(wargaId.toString());
+    }
     final list = [...anggotaList];
     list.removeAt(index);
     anggotaList = list;
