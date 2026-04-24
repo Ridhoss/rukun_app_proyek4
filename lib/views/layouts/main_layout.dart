@@ -14,7 +14,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   final _pages = [
     HomePage(),
-    TestPage()
+    TestPage(),
   ];
 
   @override

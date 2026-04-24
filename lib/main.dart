@@ -1,5 +1,6 @@
 import 'package:rukun_app_proyek4/routes/app_routes.dart';
-import 'package:rukun_app_proyek4/views/layouts/main_layout.dart';
+// import 'package:rukun_app_proyek4/views/layouts/';
+import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 void main() async {
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'RukunApp',
       debugShowCheckedModeBanner: false,
       onGenerateRoute: AppRoutes.generateRoute,
-      home: const MainLayout(),
+      home: const WelcomePage(),
     );
   }
 }
