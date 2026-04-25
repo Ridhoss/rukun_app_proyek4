@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rukun_app_proyek4/services/warga_service.dart';
+import 'package:rukun_app_proyek4/models/warga.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga_viewmodel.dart';
 

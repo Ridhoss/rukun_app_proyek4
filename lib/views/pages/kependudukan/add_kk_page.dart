@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/keluarga.dart';
-import 'package:rukun_app_proyek4/services/warga_service.dart';
+import 'package:rukun_app_proyek4/models/warga.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/kependudukan/add_warga_page.dart';
@@ -124,7 +124,7 @@ class _AddKKPageState extends State<AddKKPage> {
       noKK: _noKKCtrl.text.trim(),
       rtId: _vm.selectedRTId!,
       alamat: _addressCtrl.text.trim(),
-      kodePos: "40535"
+      kodePos: "40535",
     );
 
     final success = await _vm.saveKK(kk); // logika ada di VM

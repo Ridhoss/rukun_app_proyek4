@@ -1,106 +1,13 @@
 import 'package:rukun_app_proyek4/models/keluarga.dart';
+import 'package:rukun_app_proyek4/models/warga.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
+import 'package:rukun_app_proyek4/services/local/local_warga_service.dart';
 import 'package:rukun_app_proyek4/services/session_context_service.dart';
 
 // =============================================================
 // warga_service.dart
 // Offline-first service untuk input KK/Warga oleh pengurus RT.
 // =============================================================
-class WargaModel {
-  final int? id;
-  final String nama;
-  final String nik;
-  final String jk;
-  final String tempatLahir;
-  final DateTime? tglLahir;
-  final String agama;
-  final String pendidikan;
-  final String jenisPekerjaan;
-  final String golonganDarah;
-  final String statusPerkawinan;
-  final DateTime? tglPerkawinan;
-  final String statusHubungan;
-  final String kewarganegaraan;
-  final String? noPaspor;
-  final String? noKitap;
-  final String namaAyah;
-  final String namaIbu;
-  final int? keluargaId;
-
-  WargaModel({
-    this.id,
-    required this.nama,
-    required this.nik,
-    required this.jk,
-    required this.tempatLahir,
-    this.tglLahir,
-    required this.agama,
-    required this.pendidikan,
-    required this.jenisPekerjaan,
-    required this.golonganDarah,
-    required this.statusPerkawinan,
-    this.tglPerkawinan,
-    required this.statusHubungan,
-    required this.kewarganegaraan,
-    this.noPaspor,
-    this.noKitap,
-    required this.namaAyah,
-    required this.namaIbu,
-    this.keluargaId,
-  });
-
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'nama': nama,
-    'nik': nik,
-    'jk': jk,
-    'tempat_lahir': tempatLahir,
-    'tgl_lahir': tglLahir?.toIso8601String(),
-    'agama': agama,
-    'pendidikan': pendidikan,
-    'jenis_pekerjaan': jenisPekerjaan,
-    'golongan_darah': golonganDarah,
-    'status_perkawinan': statusPerkawinan,
-    'tgl_perkawinan': tglPerkawinan?.toIso8601String(),
-    'status_hubungan': statusHubungan,
-    'kewarganegaraan': kewarganegaraan,
-    'no_paspor': noPaspor,
-    'no_kitap': noKitap,
-    'nama_ayah': namaAyah,
-    'nama_ibu': namaIbu,
-    'keluarga_id': keluargaId,
-  };
-
-  factory WargaModel.fromMap(Map<dynamic, dynamic> map) {
-    return WargaModel(
-      id: map['id'] == null ? null : (map['id'] as num).toInt(),
-      nama: (map['nama'] ?? '') as String,
-      nik: (map['nik'] ?? '') as String,
-      jk: (map['jk'] ?? '') as String,
-      tempatLahir: (map['tempat_lahir'] ?? '') as String,
-      tglLahir: map['tgl_lahir'] == null
-          ? null
-          : DateTime.tryParse(map['tgl_lahir'] as String),
-      agama: (map['agama'] ?? '') as String,
-      pendidikan: (map['pendidikan'] ?? '') as String,
-      jenisPekerjaan: (map['jenis_pekerjaan'] ?? '') as String,
-      golonganDarah: (map['golongan_darah'] ?? '') as String,
-      statusPerkawinan: (map['status_perkawinan'] ?? '') as String,
-      tglPerkawinan: map['tgl_perkawinan'] == null
-          ? null
-          : DateTime.tryParse(map['tgl_perkawinan'] as String),
-      statusHubungan: (map['status_hubungan'] ?? '') as String,
-      kewarganegaraan: (map['kewarganegaraan'] ?? '') as String,
-      noPaspor: map['no_paspor'] as String?,
-      noKitap: map['no_kitap'] as String?,
-      namaAyah: (map['nama_ayah'] ?? '') as String,
-      namaIbu: (map['nama_ibu'] ?? '') as String,
-      keluargaId: map['keluarga_id'] == null
-          ? null
-          : (map['keluarga_id'] as num).toInt(),
-    );
-  }
-}
 
 class WargaService {
   // Singleton
@@ -109,7 +16,6 @@ class WargaService {
   WargaService._internal();
 
   static const String _kkBox = 'keluarga_offline';
-  static const String _wargaBox = 'warga_offline';
   static const String _metaBox = 'metadata_offline';
   static const String _syncQueueBox = 'sync_queue_offline';
 
@@ -117,6 +23,7 @@ class WargaService {
   String _currentRtLabel = 'RT 001';
   bool _contextLoaded = false;
   final SessionContextService _sessionContextService = SessionContextService();
+  final LocalWargaService _localWargaService = LocalWargaService();
 
   int? lastSavedKKId;
   String? lastError;
@@ -172,8 +79,343 @@ class WargaService {
       'entity_id': entityId,
       'payload': payload,
       'sync_status': 'pending',
+      'retry_count': 0,
+      'last_error': null,
+      'attempted_at': null,
+      'next_retry_at': null,
       'created_at': DateTime.now().toIso8601String(),
     });
+  }
+
+  Duration _retryBackoff(int retryCount) {
+    if (retryCount <= 1) {
+      return const Duration(minutes: 1);
+    }
+    if (retryCount == 2) {
+      return const Duration(minutes: 5);
+    }
+    if (retryCount == 3) {
+      return const Duration(minutes: 15);
+    }
+    if (retryCount == 4) {
+      return const Duration(minutes: 30);
+    }
+    return const Duration(minutes: 60);
+  }
+
+  Future<bool> markSyncProcessing(int queueId) async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final raw = queue.get(queueId);
+    if (raw is! Map) {
+      return false;
+    }
+
+    final updated = {
+      ...Map<String, dynamic>.from(raw),
+      'sync_status': 'processing',
+      'attempted_at': DateTime.now().toIso8601String(),
+    };
+    await queue.put(queueId, updated);
+    return true;
+  }
+
+  Future<bool> markSyncSuccess(int queueId) async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final raw = queue.get(queueId);
+    if (raw is! Map) {
+      return false;
+    }
+
+    final updated = {
+      ...Map<String, dynamic>.from(raw),
+      'sync_status': 'synced',
+      'attempted_at': DateTime.now().toIso8601String(),
+      'next_retry_at': null,
+      'last_error': null,
+    };
+    await queue.put(queueId, updated);
+    return true;
+  }
+
+  Future<bool> markSyncFailed(int queueId, {required String error}) async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final raw = queue.get(queueId);
+    if (raw is! Map) {
+      return false;
+    }
+
+    final currentRetry = ((raw['retry_count'] as num?)?.toInt() ?? 0) + 1;
+    final now = DateTime.now();
+    final nextRetryAt = now.add(_retryBackoff(currentRetry));
+
+    final updated = {
+      ...Map<String, dynamic>.from(raw),
+      'sync_status': 'failed',
+      'retry_count': currentRetry,
+      'last_error': error,
+      'attempted_at': now.toIso8601String(),
+      'next_retry_at': nextRetryAt.toIso8601String(),
+    };
+    await queue.put(queueId, updated);
+    return true;
+  }
+
+  /// Paksa item antrean kembali retry sekarang (tanpa menambah retry_count).
+  Future<bool> forceRetryQueueItem(int queueId) async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final raw = queue.get(queueId);
+    if (raw is! Map) {
+      return false;
+    }
+
+    final updated = {
+      ...Map<String, dynamic>.from(raw),
+      'sync_status': 'pending',
+      'next_retry_at': null,
+      'last_error': null,
+    };
+    await queue.put(queueId, updated);
+    return true;
+  }
+
+  /// Kembalikan item yang terlalu lama di status processing agar bisa dicoba ulang.
+  Future<int> resetStaleProcessingQueue({
+    Duration olderThan = const Duration(minutes: 5),
+  }) async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final threshold = DateTime.now().subtract(olderThan);
+    int affected = 0;
+
+    for (final key in queue.keys) {
+      final raw = queue.get(key);
+      if (raw is! Map) {
+        continue;
+      }
+
+      final item = Map<String, dynamic>.from(raw);
+      if ((item['sync_status'] ?? '').toString() != 'processing') {
+        continue;
+      }
+
+      final attemptedRaw = item['attempted_at'] as String?;
+      final attemptedAt = attemptedRaw == null
+          ? null
+          : DateTime.tryParse(attemptedRaw);
+      if (attemptedAt != null && attemptedAt.isAfter(threshold)) {
+        continue;
+      }
+
+      final updated = {
+        ...item,
+        'sync_status': 'failed',
+        'last_error': 'Recovered stale processing item',
+        'next_retry_at': DateTime.now().toIso8601String(),
+      };
+      await queue.put(key, updated);
+      affected += 1;
+    }
+
+    return affected;
+  }
+
+  /// Hapus item synced yang sudah lama agar ukuran queue tetap terjaga.
+  Future<int> purgeSyncedQueue({
+    Duration olderThan = const Duration(days: 7),
+    int? limit,
+  }) async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final threshold = DateTime.now().subtract(olderThan);
+    int removed = 0;
+
+    for (final key in queue.keys) {
+      if (limit != null && limit > 0 && removed >= limit) {
+        break;
+      }
+
+      final raw = queue.get(key);
+      if (raw is! Map) {
+        continue;
+      }
+
+      final item = Map<String, dynamic>.from(raw);
+      if ((item['sync_status'] ?? '').toString() != 'synced') {
+        continue;
+      }
+
+      final attemptedRaw = item['attempted_at'] as String?;
+      final createdRaw = item['created_at'] as String?;
+      final baselineTime =
+          DateTime.tryParse(attemptedRaw ?? '') ??
+          DateTime.tryParse(createdRaw ?? '');
+      if (baselineTime == null || baselineTime.isAfter(threshold)) {
+        continue;
+      }
+
+      await queue.delete(key);
+      removed += 1;
+    }
+
+    return removed;
+  }
+
+  /// Ambil antrean sinkronisasi yang pending dan sudah waktunya diproses.
+  Future<List<Map<String, dynamic>>> getPendingSyncQueue({int? limit}) async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final now = DateTime.now();
+
+    final entries = queue.values
+        .whereType<Map>()
+        .map((raw) => Map<String, dynamic>.from(raw))
+        .where((item) {
+          final status = (item['sync_status'] ?? '').toString();
+          if (status != 'pending' && status != 'failed') {
+            return false;
+          }
+
+          final nextRetryRaw = item['next_retry_at'] as String?;
+          if (nextRetryRaw == null || nextRetryRaw.isEmpty) {
+            return true;
+          }
+
+          final nextRetryAt = DateTime.tryParse(nextRetryRaw);
+          if (nextRetryAt == null) {
+            return true;
+          }
+
+          return !nextRetryAt.isAfter(now);
+        })
+        .toList();
+
+    entries.sort((a, b) {
+      final aId = (a['id'] as num?)?.toInt() ?? 0;
+      final bId = (b['id'] as num?)?.toInt() ?? 0;
+      return aId.compareTo(bId);
+    });
+
+    if (limit == null || limit <= 0) {
+      return entries;
+    }
+
+    if (entries.length <= limit) {
+      return entries;
+    }
+
+    return entries.take(limit).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getSyncQueueByStatus(
+    String status, {
+    int? limit,
+  }) async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final entries = queue.values
+        .whereType<Map>()
+        .map((raw) => Map<String, dynamic>.from(raw))
+        .where((item) => (item['sync_status'] ?? '').toString() == status)
+        .toList();
+
+    entries.sort((a, b) {
+      final aId = (a['id'] as num?)?.toInt() ?? 0;
+      final bId = (b['id'] as num?)?.toInt() ?? 0;
+      return aId.compareTo(bId);
+    });
+
+    if (limit == null || limit <= 0 || entries.length <= limit) {
+      return entries;
+    }
+
+    return entries.take(limit).toList();
+  }
+
+  Future<Map<String, int>> getSyncQueueStats() async {
+    final queue = await HiveService().openBox<dynamic>(_syncQueueBox);
+    final now = DateTime.now();
+    int pending = 0;
+    int processing = 0;
+    int synced = 0;
+    int failed = 0;
+    int retryable = 0;
+
+    for (final raw in queue.values.whereType<Map>()) {
+      final item = Map<String, dynamic>.from(raw);
+      final status = (item['sync_status'] ?? '').toString();
+
+      if (status == 'pending') {
+        pending += 1;
+      }
+      if (status == 'processing') {
+        processing += 1;
+      }
+      if (status == 'synced') {
+        synced += 1;
+      }
+      if (status == 'failed') {
+        failed += 1;
+      }
+
+      if (status == 'pending' || status == 'failed') {
+        final nextRetryRaw = item['next_retry_at'] as String?;
+        if (nextRetryRaw == null || nextRetryRaw.isEmpty) {
+          retryable += 1;
+        } else {
+          final nextRetryAt = DateTime.tryParse(nextRetryRaw);
+          if (nextRetryAt == null || !nextRetryAt.isAfter(now)) {
+            retryable += 1;
+          }
+        }
+      }
+    }
+
+    return {
+      'total': queue.length,
+      'pending': pending,
+      'processing': processing,
+      'synced': synced,
+      'failed': failed,
+      'retryable': retryable,
+    };
+  }
+
+  /// Proses antrean sync yang due dengan callback processor (mis. cloud sender).
+  Future<Map<String, int>> processPendingSyncQueue({
+    required Future<void> Function(Map<String, dynamic> queueItem) processor,
+    int? limit,
+  }) async {
+    final dueItems = await getPendingSyncQueue(limit: limit);
+
+    int success = 0;
+    int failed = 0;
+    int skipped = 0;
+
+    for (final item in dueItems) {
+      final queueId = (item['id'] as num?)?.toInt();
+      if (queueId == null) {
+        skipped += 1;
+        continue;
+      }
+
+      final markedProcessing = await markSyncProcessing(queueId);
+      if (!markedProcessing) {
+        skipped += 1;
+        continue;
+      }
+
+      try {
+        await processor(item);
+        await markSyncSuccess(queueId);
+        success += 1;
+      } catch (e) {
+        await markSyncFailed(queueId, error: e.toString());
+        failed += 1;
+      }
+    }
+
+    return {
+      'picked': dueItems.length,
+      'success': success,
+      'failed': failed,
+      'skipped': skipped,
+    };
   }
 
   // ─────────────────────────────────────────────
@@ -247,6 +489,7 @@ class WargaService {
     result.sort((a, b) => b.id!.compareTo(a.id!));
     return result;
   }
+
   /// Update data KK lokal.
   Future<bool> updateKK(String id, Keluarga kk) async {
     await _ensureContextLoaded();
@@ -311,53 +554,23 @@ class WargaService {
   Future<bool> saveWarga(WargaModel warga) async {
     await _ensureContextLoaded();
     lastError = null;
-
-    if (warga.keluargaId == null) {
-      lastError = 'Keluarga wajib dipilih sebelum menambah warga.';
-      return false;
-    }
-
-    final kkBox = await HiveService().openBox<dynamic>(_kkBox);
-    final keluargaRaw = kkBox.get(warga.keluargaId);
-    if (keluargaRaw is! Map) {
-      lastError = 'Data keluarga tidak ditemukan.';
-      return false;
-    }
-    if ((keluargaRaw['rt_id'] as num).toInt() != _currentRtId) {
-      lastError = 'Anda tidak bisa menambah warga di KK milik RT lain.';
-      return false;
-    }
-
-    final wargaBox = await HiveService().openBox<dynamic>(_wargaBox);
-    final nikNormalized = warga.nik.trim();
-    final duplicateNik = wargaBox.values.whereType<Map>().any((row) {
-      final sameNik = ((row['nik'] ?? '') as String).trim() == nikNormalized;
-      final notDeleted = (row['is_deleted'] as bool?) != true;
-      return sameNik && notDeleted;
-    });
-    if (duplicateNik) {
-      lastError = 'NIK sudah terdaftar.';
-      return false;
-    }
-
     final id = await _nextId('seq.warga');
-    final payload = {
-      ...warga.toMap(),
-      'id': id,
-      'nik': nikNormalized,
-      'sync_status': 'pending',
-      'created_by_user_id': 1,
-      'created_at': DateTime.now().toIso8601String(),
-      'updated_at': DateTime.now().toIso8601String(),
-      'is_deleted': false,
-    };
+    final writeResult = await _localWargaService.saveWarga(
+      wargaData: warga.toMap(),
+      currentRtId: _currentRtId,
+      newWargaId: id,
+    );
 
-    await wargaBox.put(id, payload);
+    if (!writeResult.success) {
+      lastError = writeResult.error;
+      return false;
+    }
+
     await _enqueueSync(
       entity: 'warga',
       operation: 'create',
-      entityId: id,
-      payload: payload,
+      entityId: writeResult.entityId!,
+      payload: writeResult.payload!,
     );
 
     return true;
@@ -366,78 +579,34 @@ class WargaService {
   /// Ambil semua warga berdasarkan keluarga_id dari storage lokal.
   Future<List<WargaModel>> getWargaByKK(int kkId) async {
     await _ensureContextLoaded();
-    final wargaBox = await HiveService().openBox<dynamic>(_wargaBox);
-    final result = wargaBox.values
-        .whereType<Map>()
-        .where(
-          (row) =>
-              (row['keluarga_id'] as num?)?.toInt() == kkId &&
-              (row['is_deleted'] as bool?) != true,
-        )
-        .map(WargaModel.fromMap)
-        .toList();
+    final result = await _localWargaService.getWargaByKK(kkId);
 
-    result.sort((a, b) => b.id!.compareTo(a.id!));
-    return result;
+    final mapped = result.map(WargaModel.fromMap).toList();
+
+    mapped.sort((a, b) => b.id!.compareTo(a.id!));
+    return mapped;
   }
 
   /// Update warga lokal dengan validasi NIK unik.
   Future<bool> updateWarga(String id, WargaModel warga) async {
     await _ensureContextLoaded();
     lastError = null;
-    final wargaId = int.tryParse(id);
-    if (wargaId == null) {
-      lastError = 'ID warga tidak valid.';
+    final writeResult = await _localWargaService.updateWarga(
+      id: id,
+      wargaData: warga.toMap(),
+      currentRtId: _currentRtId,
+    );
+
+    if (!writeResult.success) {
+      lastError = writeResult.error;
       return false;
     }
 
-    final wargaBox = await HiveService().openBox<dynamic>(_wargaBox);
-    final raw = wargaBox.get(wargaId);
-    if (raw is! Map) {
-      lastError = 'Data warga tidak ditemukan.';
-      return false;
-    }
-
-    final nikNormalized = warga.nik.trim();
-    final duplicateNik = wargaBox.values.whereType<Map>().any((row) {
-      final rowId = (row['id'] as num?)?.toInt();
-      final sameNik = ((row['nik'] ?? '') as String).trim() == nikNormalized;
-      final notDeleted = (row['is_deleted'] as bool?) != true;
-      return rowId != wargaId && sameNik && notDeleted;
-    });
-    if (duplicateNik) {
-      lastError = 'NIK sudah dipakai warga lain.';
-      return false;
-    }
-
-    if (warga.keluargaId == null) {
-      lastError = 'Keluarga tidak valid.';
-      return false;
-    }
-
-    final kkBox = await HiveService().openBox<dynamic>(_kkBox);
-    final keluargaRaw = kkBox.get(warga.keluargaId);
-    if (keluargaRaw is! Map ||
-        (keluargaRaw['rt_id'] as num).toInt() != _currentRtId) {
-      lastError = 'Anda tidak bisa memindahkan warga ke KK di RT lain.';
-      return false;
-    }
-
-    final updated = {
-      ...Map<String, dynamic>.from(raw),
-      ...warga.toMap(),
-      'id': wargaId,
-      'nik': nikNormalized,
-      'sync_status': 'pending',
-      'updated_at': DateTime.now().toIso8601String(),
-    };
-
-    await wargaBox.put(wargaId, updated);
     await _enqueueSync(
       entity: 'warga',
       operation: 'update',
-      entityId: wargaId,
-      payload: updated,
+      entityId: writeResult.entityId!,
+      payload: writeResult.payload!,
     );
 
     return true;
@@ -447,32 +616,18 @@ class WargaService {
   Future<bool> deleteWarga(String id) async {
     await _ensureContextLoaded();
     lastError = null;
-    final wargaId = int.tryParse(id);
-    if (wargaId == null) {
-      lastError = 'ID warga tidak valid.';
+    final writeResult = await _localWargaService.deleteWarga(id);
+
+    if (!writeResult.success) {
+      lastError = writeResult.error;
       return false;
     }
 
-    final wargaBox = await HiveService().openBox<dynamic>(_wargaBox);
-    final raw = wargaBox.get(wargaId);
-    if (raw is! Map) {
-      lastError = 'Data warga tidak ditemukan.';
-      return false;
-    }
-
-    final updated = {
-      ...Map<String, dynamic>.from(raw),
-      'is_deleted': true,
-      'sync_status': 'pending',
-      'updated_at': DateTime.now().toIso8601String(),
-    };
-
-    await wargaBox.put(wargaId, updated);
     await _enqueueSync(
       entity: 'warga',
       operation: 'delete',
-      entityId: wargaId,
-      payload: updated,
+      entityId: writeResult.entityId!,
+      payload: writeResult.payload!,
     );
 
     return true;
