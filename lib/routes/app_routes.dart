@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/views/pages/test_page.dart';
-import 'package:rukun_app_proyek4/views/pages/login_page.dart';
-import 'package:rukun_app_proyek4/views/pages/register_page.dart';
+import 'package:rukun_app_proyek4/views/pages/auth/login_page.dart';
+import 'package:rukun_app_proyek4/views/pages/auth/register_page.dart';
 
 class AppRoutes {
   static const String test = '/test';

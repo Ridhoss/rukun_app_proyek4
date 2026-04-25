@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final nikController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    nikController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final vm = context.watch<AuthViewModel>();
+
     return Scaffold(
       backgroundColor: ColorsUtils.white,
       body: SafeArea(
@@ -36,19 +56,48 @@ class LoginPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 30),
-              _inputField("NIK", Icons.person_outline), 
+
+              _inputField(
+                "NIK",
+                Icons.person_outline,
+                controller: nikController,
+                keyboardType: TextInputType.number,
+              ),
 
               const SizedBox(height: 16),
-              _inputField("Password", Icons.lock_outline, isPassword: true),
 
-              const SizedBox(height: 30),
+              _inputField(
+                "Password",
+                Icons.lock_outline,
+                controller: passwordController,
+                isPassword: true,
+              ),
+
+              const SizedBox(height: 16),
+
+              if (vm.errorMessage != null)
+                Text(
+                  vm.errorMessage!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+
+              const SizedBox(height: 20),
+
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/signup');
-                  },
+                  onPressed: vm.isLoading
+                      ? null
+                      : () async {
+                          await vm.login(
+                            nikController.text,
+                            passwordController.text,
+                          );
+
+                          if (vm.errorMessage == null) {
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorsUtils.yellow,
                     foregroundColor: ColorsUtils.white,
@@ -57,10 +106,15 @@ class LoginPage extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    "Log In",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
+                  child: vm.isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Log In",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
 
@@ -69,15 +123,15 @@ class LoginPage extends StatelessWidget {
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/login');
+                    Navigator.pushNamed(context, '/signup');
                   },
-                  child: RichText(
-                    text: const TextSpan(
-                      text: "Sudah punya akun? ",
+                  child: const Text.rich(
+                    TextSpan(
+                      text: "Belum punya akun? ",
                       style: TextStyle(color: Colors.grey),
                       children: [
                         TextSpan(
-                          text: "Masuk di sini",
+                          text: "Daftar di sini",
                           style: TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.w600,
@@ -98,10 +152,17 @@ class LoginPage extends StatelessWidget {
   static Widget _inputField(
     String hint,
     IconData icon, {
+    required TextEditingController controller,
     bool isPassword = false,
+    TextInputType? keyboardType,
   }) {
     return TextField(
+      controller: controller,
       obscureText: isPassword,
+      keyboardType: keyboardType,
+      inputFormatters: keyboardType == TextInputType.number
+          ? [FilteringTextInputFormatter.digitsOnly]
+          : null,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, color: Colors.grey),
@@ -116,3 +177,4 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+

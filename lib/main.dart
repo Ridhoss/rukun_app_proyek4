@@ -1,12 +1,20 @@
 import 'package:rukun_app_proyek4/routes/app_routes.dart';
-// import 'package:rukun_app_proyek4/views/layouts/';
 import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
+import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+// ignore: unnecessary_import
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => AuthViewModel())],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
