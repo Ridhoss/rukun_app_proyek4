@@ -136,6 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 await vm.register(
                                   nikController.text,
                                   passwordController.text,
+                                  confirmPasswordController.text
                                 );
 
                                 if (!mounted) return;
