@@ -24,6 +24,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthViewModel>().initAuth();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final vm = context.watch<AuthViewModel>();
 
@@ -41,8 +49,9 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               const SizedBox(height: 10),
+
               const Text(
-                "Selamat Datang Kembali",
+                "Selamat Datang ",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -51,13 +60,13 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               const SizedBox(height: 6),
+
               const Text(
-                "Masuk ke akun Anda untuk melanjutkan",
+                "Silahkan Masuk dengan akun anda",
                 style: TextStyle(color: Colors.grey),
               ),
 
               const SizedBox(height: 30),
-
               _inputField(
                 "NIK",
                 Icons.person_outline,
@@ -66,7 +75,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               const SizedBox(height: 16),
-
               _inputField(
                 "Password",
                 Icons.lock_outline,
@@ -75,26 +83,34 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               const SizedBox(height: 16),
-
               if (vm.errorMessage != null)
                 Text(
                   vm.errorMessage!,
                   style: const TextStyle(color: Colors.red),
                 ),
+              if (vm.isLocked)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    "Tunggu ${vm.lockSeconds} detik sebelum mencoba lagi",
+                    style: const TextStyle(color: Colors.orange),
+                  ),
+                ),
 
               const SizedBox(height: 20),
-
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: vm.isLoading
+                  onPressed: (vm.isLoading || vm.isLocked)
                       ? null
                       : () async {
                           await vm.login(
                             nikController.text,
                             passwordController.text,
                           );
+
+                          if (!context.mounted) return;
 
                           if (vm.errorMessage == null && vm.authData != null) {
                             Navigator.pushReplacement(
@@ -114,10 +130,17 @@ class _LoginPageState extends State<LoginPage> {
                     elevation: 0,
                   ),
                   child: vm.isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Log In",
-                          style: TextStyle(
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          vm.isLocked ? "Tunggu (${vm.lockSeconds})" : "Masuk",
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -126,7 +149,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               const SizedBox(height: 16),
-
               Center(
                 child: GestureDetector(
                   onTap: () {

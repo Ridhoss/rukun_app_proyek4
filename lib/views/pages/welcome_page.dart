@@ -62,7 +62,7 @@ class WelcomePage extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: const Text(
-                    "Log in",
+                    "Masuk",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -86,7 +86,7 @@ class WelcomePage extends StatelessWidget {
                     side: BorderSide.none,
                   ),
                   child: const Text(
-                    "Sign up",
+                    "Daftar",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
