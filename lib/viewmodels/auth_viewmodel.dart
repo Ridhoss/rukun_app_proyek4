@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/helpers/log_helper.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
-import 'package:rukun_app_proyek4/models/warga_model.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 
 class AuthViewModel extends ChangeNotifier {
