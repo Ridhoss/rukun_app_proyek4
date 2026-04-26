@@ -112,6 +112,45 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> checkAuth() async {
+    debugPrint("CHECK AUTH START");
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final token = await _authRepository.getToken();
+      debugPrint("TOKEN: $token");
+
+      if (token == null || token.isEmpty) {
+        authData = null;
+        return;
+      }
+
+      final user = await _authRepository.getMe(token);
+
+      authData = AuthResponse(token: token, user: user);
+
+      debugPrint("AUTH SUCCESS");
+    } catch (e, st) {
+      debugPrint("AUTH ERROR: $e");
+
+      await LogHelper.writeLog(
+        "CheckAuth gagal: $e",
+        source: "AuthViewModel.checkAuth",
+        level: 1,
+        error: e,
+        stackTrace: st,
+      );
+
+      authData = null;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+      debugPrint("CHECK AUTH DONE");
+    }
+  }
+
   void _onLoginFailed(String message) {
     _failedLoginCount++;
     errorMessage = message;
