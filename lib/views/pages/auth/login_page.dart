@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -95,7 +96,13 @@ class _LoginPageState extends State<LoginPage> {
                             passwordController.text,
                           );
 
-                          if (vm.errorMessage == null) {
+                          if (vm.errorMessage == null && vm.authData != null) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const HomePage(),
+                              ),
+                            );
                           }
                         },
                   style: ElevatedButton.styleFrom(
@@ -177,4 +184,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
