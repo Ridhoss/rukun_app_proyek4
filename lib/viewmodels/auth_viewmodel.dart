@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/helpers/log_helper.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
+import 'package:rukun_app_proyek4/models/warga_model.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 
 class AuthViewModel extends ChangeNotifier {
@@ -24,6 +25,9 @@ class AuthViewModel extends ChangeNotifier {
   int get lockSeconds => _lockSeconds;
   int get failedLoginCount => _failedLoginCount;
 
+  bool useMock = true; //sementara
+  Warga? wargaData;
+
   void initAuth() {
     errorMessage = null;
     isLoading = false;
@@ -43,13 +47,33 @@ class AuthViewModel extends ChangeNotifier {
     authData = null;
 
     notifyListeners();
-
     try {
-      final result = await _authRepository.login(nik, password);
+      late AuthResponse result;
+
+      if (useMock) {
+        //dummy mockup
+        await Future.delayed(const Duration(milliseconds: 800));
+
+        result = AuthResponse(
+          token: "dummy_token",
+          user: User(
+            id: 1,
+            wargaId: 10,
+            role: Role.pengurus,
+            createdAt: DateTime.now(),
+          ),
+        );
+      } else {
+        result = await _authRepository.login(nik, password);
+      }
+
+      // try {
+      //   final result = await _authRepository.login(nik, password);
 
       _failedLoginCount = 0;
       errorMessage = null;
       authData = result;
+      await fetchWarga(); //sementara
     } catch (e, st) {
       final message = e.toString().replaceAll("Exception: ", "");
       _onLoginFailed(message);
@@ -103,12 +127,36 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void logout() {
+  Future<void> logout() async {
+    if (!useMock) {
+      //sementara
+      await _authRepository.logout();
+    }
+    // void logout() {
     authData = null;
     errorMessage = null;
     _failedLoginCount = 0;
     _isLocked = false;
     _lockSeconds = 0;
+    notifyListeners();
+  }
+
+  Future<void> fetchWarga() async {//sementara
+    final wargaId = authData?.user.wargaId;
+
+    if (wargaId == null) {
+      debugPrint("WARGA ID NULL");
+      return;
+    }
+
+    if (useMock) {
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      wargaData = Warga(id: wargaId, nama: "Admin RW", nik: "3201010101010001");
+    } else {
+      wargaData = await _authRepository.getWarga(wargaId);
+    }
+
     notifyListeners();
   }
 
@@ -119,19 +167,45 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final token = await _authRepository.getToken();
-      debugPrint("TOKEN: $token");
+      // sementara
+      if (useMock) {
+        await Future.delayed(const Duration(milliseconds: 500));
 
-      if (token == null || token.isEmpty) {
-        authData = null;
-        return;
+        authData = AuthResponse(
+          token: "dummy_token",
+          user: User(
+            id: 1,
+            wargaId: 10,
+            role: Role.pengurus,
+            createdAt: DateTime.now(),
+          ),
+        );
+      } else {
+        final token = await _authRepository.getToken();
+
+        if (token == null || token.isEmpty) {
+          authData = null;
+        } else {
+          final user = await _authRepository.getMe(token);
+
+          authData = AuthResponse(token: token, user: user);
+          await fetchWarga(); //sementara
+        }
       }
+      // try {
+      //   final token = await _authRepository.getToken();
+      //   debugPrint("TOKEN: $token");
 
-      final user = await _authRepository.getMe(token);
+      //   if (token == null || token.isEmpty) {
+      //     authData = null;
+      //     return;
+      //   }
 
-      authData = AuthResponse(token: token, user: user);
+      //   final user = await _authRepository.getMe(token);
 
-      debugPrint("AUTH SUCCESS");
+      //   authData = AuthResponse(token: token, user: user);
+
+      //   debugPrint("AUTH SUCCESS");
     } catch (e, st) {
       debugPrint("AUTH ERROR: $e");
 

@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: ColorsUtils.b400,
                 ),
               ),
 
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
 
               const Text(
                 "Silahkan Masuk dengan akun anda",
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: ColorsUtils.black800),
               ),
 
               const SizedBox(height: 30),

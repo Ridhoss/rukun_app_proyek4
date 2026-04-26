@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
+import 'package:rukun_app_proyek4/models/warga_model.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 
@@ -71,5 +72,14 @@ class AuthRepository {
     if (result['status'] != 'success') {
       throw Exception(result['message'] ?? "Unknown error");
     }
+  }
+
+  //sementara dummy
+  @override
+  // ignore: override_on_non_overriding_member
+  Future<Warga> getWarga(int id) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    return Warga(id: id, nama: "Admin RW", nik: "3201010101010001");
   }
 }
