@@ -68,9 +68,6 @@ class Warga {
     this.keluargaId,
   });
 
-  // =========================
-  // FROM JSON (IMPORTANT)
-  // =========================
   factory Warga.fromJson(Map<String, dynamic> json) {
     return Warga(
       id: json['id'],
