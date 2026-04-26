@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/home_page.dart';
+import 'package:rukun_app_proyek4/views/layouts/main_layout.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -116,7 +116,8 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const HomePage(),
+                                builder: (_) =>
+                                    MainLayout(user: vm.authData!.user),
                               ),
                             );
                           }

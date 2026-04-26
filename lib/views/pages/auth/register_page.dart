@@ -27,6 +27,11 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
+
+    nikController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthViewModel>().initAuth();
     });
@@ -39,166 +44,174 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       backgroundColor: ColorsUtils.white,
       resizeToAvoidBottomInset: true,
+
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight:
-                    MediaQuery.of(context).size.height -
-                    MediaQuery.of(context).padding.top,
-              ),
-              child: IntrinsicHeight(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back),
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Buat Akun Baru",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
                     ),
+                  ),
 
-                    const SizedBox(height: 10),
+                  const SizedBox(height: 6),
 
-                    const Text(
-                      "Buat Akun Baru",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
+                  const Text(
+                    "Silahkan Daftar menggunakan NIK yang sudah terdaftar",
+                    style: TextStyle(color: Colors.grey),
+                  ),
 
-                    const SizedBox(height: 6),
+                  const SizedBox(height: 30),
+                  _inputField(
+                    "NIK",
+                    Icons.person_outline,
+                    controller: nikController,
+                    keyboardType: TextInputType.number,
+                  ),
 
-                    const Text(
-                      "Silahkan Daftar menggunakan NIK yang sudah terdaftar",
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                  const SizedBox(height: 16),
+                  _inputField(
+                    "Password",
+                    Icons.lock_outline,
+                    controller: passwordController,
+                    isPassword: true,
+                  ),
 
-                    const SizedBox(height: 30),
-                    _inputField(
-                      "NIK",
-                      Icons.person_outline,
-                      controller: nikController,
-                      keyboardType: TextInputType.number,
-                    ),
+                  const SizedBox(height: 16),
+                  _inputField(
+                    "Confirm Password",
+                    Icons.lock_outline,
+                    controller: confirmPasswordController,
+                    isPassword: true,
+                  ),
 
-                    const SizedBox(height: 16),
-                    _inputField(
-                      "Password",
-                      Icons.lock_outline,
-                      controller: passwordController,
-                      isPassword: true,
-                    ),
+                  const SizedBox(height: 16),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    child: vm.errorMessage == null
+                        ? const SizedBox()
+                        : Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              // ignore: deprecated_member_use
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              vm.errorMessage!,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                  ),
 
-                    const SizedBox(height: 16),
-                    _inputField(
-                      "Confirm Password",
-                      Icons.lock_outline,
-                      controller: confirmPasswordController,
-                      isPassword: true,
-                    ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: vm.isLoading
+                          ? null
+                          : () async {
+                              FocusScope.of(context).unfocus();
 
-                    const SizedBox(height: 16),
-                    if (vm.errorMessage != null)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          vm.errorMessage!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: vm.isLoading
-                            ? null
-                            : () async {
-                                if (passwordController.text !=
-                                    confirmPasswordController.text) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Password tidak sama"),
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                await vm.register(
-                                  nikController.text,
-                                  passwordController.text,
+                              if (passwordController.text !=
+                                  confirmPasswordController.text) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Password tidak sama"),
+                                  ),
                                 );
+                                return;
+                              }
 
-                                if (!mounted) return;
+                              await vm.register(
+                                nikController.text,
+                                passwordController.text,
+                              );
 
-                                if (vm.errorMessage == null && !vm.isLoading) {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    '/login',
-                                  );
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorsUtils.yellow,
-                          foregroundColor: ColorsUtils.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          elevation: 0,
+                              if (!context.mounted) return;
+
+                              if (vm.errorMessage == null &&
+                                  vm.authData != null &&
+                                  !vm.isLoading) {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/login',
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorsUtils.yellow,
+                        foregroundColor: ColorsUtils.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        child: vm.isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                "Daftar",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        elevation: 0,
+                      ),
+
+                      child: vm.isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
                               ),
+                            )
+                          : const Text(
+                              "Daftar",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
+                      child: const Text.rich(
+                        TextSpan(
+                          text: "Sudah punya akun? ",
+                          style: TextStyle(color: Colors.grey),
+                          children: [
+                            TextSpan(
+                              text: "Masuk di sini",
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 16),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/login');
-                        },
-                        child: const Text.rich(
-                          TextSpan(
-                            text: "Sudah punya akun? ",
-                            style: TextStyle(color: Colors.grey),
-                            children: [
-                              TextSpan(
-                                text: "Masuk di sini",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
