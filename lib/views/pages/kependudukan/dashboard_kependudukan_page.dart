@@ -60,19 +60,19 @@ class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
                   ? const Center(child: CircularProgressIndicator())
                   : vm.kkList.isEmpty
                   ? const Center(
-                      child: Text(
-                        'Belum ada data KK.',
-                        style: TextStyle(color: ColorsUtils.gray),
-                      ),
-                    )
+                child: Text(
+                  'Belum ada data KK.',
+                  style: TextStyle(color: ColorsUtils.gray),
+                ),
+              )
                   : ListView.separated(
-                      itemCount: vm.kkList.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final kk = vm.kkList[index];
-                        return _buildKKCard(context, kk);
-                      },
-                    ),
+                itemCount: vm.kkList.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final kk = vm.kkList[index];
+                  return _buildKKCard(context, kk);
+                },
+              ),
             ),
           ],
         ),
@@ -142,6 +142,8 @@ class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
   }
 
   Widget _buildKKCard(BuildContext context, Keluarga kk) {
+    final vm = context.read<KeluargaVM>(); // Ambil VM tanpa listen
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -175,14 +177,51 @@ class _DashboardKependudukanPageState extends State<DashboardKependudukanPage> {
               ],
             ),
           ),
+          // Tombol Edit
           IconButton(
             icon: const Icon(Icons.edit_outlined, color: ColorsUtils.b500),
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.addKK, arguments: kk);
             },
           ),
+          // Tombol Hapus
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            onPressed: () => _confirmDelete(context, vm, kk),
+          ),
         ],
       ),
+    );
+  }
+
+// Fungsi Dialog Konfirmasi Hapus
+  void _confirmDelete(BuildContext context, KeluargaVM vm, Keluarga kk) {
+    showDialog(
+      context: context,
+      builder: (ctx) =>
+          AlertDialog(
+            title: const Text('Hapus Data KK?'),
+            content: Text('Yakin ingin menghapus No. KK ${kk
+                .noKK}? Data anggota di dalamnya juga tidak akan muncul.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text(
+                    'Batal', style: TextStyle(color: ColorsUtils.gray)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  if (kk.id != null) {
+                    await vm.deleteKK(kk.id!);
+                  }
+                },
+                child: const Text(
+                    'Hapus', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
     );
   }
 }

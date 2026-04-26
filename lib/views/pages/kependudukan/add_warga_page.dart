@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/warga.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga_viewmodel.dart';
+import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
+import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
+import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
+import 'package:rukun_app_proyek4/services/warga_service.dart';
+
 
 // ================================================================
 // AddWargaPage
@@ -36,7 +41,9 @@ class _AddWargaPageState extends State<AddWargaPage> {
   @override
   void initState() {
     super.initState();
-    _vm = WargaViewModel();
+    final wargaRepo = WargaRepository(localService: WargaService());
+    _vm = WargaViewModel(repository: wargaRepo);
+
     if (widget.editData != null) {
       final w = widget.editData!;
       _namaCtrl.text = w.nama;
@@ -46,7 +53,7 @@ class _AddWargaPageState extends State<AddWargaPage> {
       _noKitapCtrl.text = w.noKitap ?? '';
       _namaAyahCtrl.text = w.namaAyah;
       _namaIbuCtrl.text = w.namaIbu;
-      _vm.populateFromModel(w); // state dropdown/date → VM
+      _vm.populateFromModel(w);
     }
   }
 
@@ -636,50 +643,52 @@ class _AddWargaPageState extends State<AddWargaPage> {
   }
 
   Widget _buildBottomBar() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      decoration: BoxDecoration(
-        color: ColorsUtils.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: ElevatedButton(
-          onPressed: _vm.isLoading ? null : _onSave,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: ColorsUtils.b500,
-            foregroundColor: ColorsUtils.white,
-            disabledBackgroundColor: ColorsUtils.b75,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        decoration: BoxDecoration(
+          color: ColorsUtils.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, -4),
             ),
-            elevation: 0,
+          ],
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            onPressed: _vm.isLoading ? null : _onSave,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorsUtils.b500,
+              foregroundColor: ColorsUtils.white,
+              disabledBackgroundColor: ColorsUtils.b75,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            child: _vm.isLoading
+                ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: ColorsUtils.white,
+              ),
+            )
+                : Text(
+              widget.editData != null
+                  ? 'Simpan Perubahan'
+                  : 'Tambah Anggota',
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
           ),
-          child: _vm.isLoading
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: ColorsUtils.white,
-                  ),
-                )
-              : Text(
-                  widget.editData != null
-                      ? 'Simpan Perubahan'
-                      : 'Tambah Anggota',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
         ),
       ),
     );

@@ -12,6 +12,8 @@ import 'package:rukun_app_proyek4/views/pages/kependudukan/add_kk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/kependudukan/add_warga_page.dart';
 import 'package:rukun_app_proyek4/views/pages/kependudukan/dashboard_kependudukan_page.dart';
 import 'package:rukun_app_proyek4/views/pages/test_page.dart';
+import 'package:rukun_app_proyek4/services/warga_service.dart';
+
 
 class AppRoutes {
   static const String test = '/test';
@@ -28,14 +30,16 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const TestPage());
 
       case dashboardKependudukan:
+        final service = WargaService();
         return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
             create: (_) => KeluargaVM(
               repository: KKRepository(
                 cloud: CloudKKService(),
                 local: LocalKkService(),
+                syncService: WargaService(),
               ),
-            )..loadKK(1),
+            )..loadKK(null),
             child: const DashboardKependudukanPage(),
           ),
         );

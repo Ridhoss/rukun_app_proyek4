@@ -4,6 +4,11 @@ import 'package:rukun_app_proyek4/models/warga.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/kependudukan/add_warga_page.dart';
+import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
+import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
+import 'package:rukun_app_proyek4/services/local/local_kk_service.dart';
+import 'package:rukun_app_proyek4/services/warga_service.dart';
 
 // ================================================================
 // AddKKPage
@@ -35,7 +40,15 @@ class _AddKKPageState extends State<AddKKPage> {
   @override
   void initState() {
     super.initState();
-    _vm = KKViewModel();
+    final syncService = WargaService();
+    final kkRepo = KKRepository(
+      cloud: CloudKKService(),
+      local: LocalKkService(),
+      syncService: syncService,
+    );
+    final wargaRepo = WargaRepository(localService: syncService);
+
+    _vm = KKViewModel(kkRepository: kkRepo, wargaRepository: wargaRepo);
     _vm.init(editData: widget.editData);
 
     if (widget.editData != null) {
@@ -657,53 +670,55 @@ class _AddKKPageState extends State<AddKKPage> {
   }
 
   Widget _buildBottomBar() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      decoration: BoxDecoration(
-        color: ColorsUtils.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: ElevatedButton(
-          onPressed: _onSelesai,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _vm.anggotaList.isNotEmpty
-                ? Colors.green
-                : ColorsUtils.b500,
-            foregroundColor: ColorsUtils.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        decoration: BoxDecoration(
+          color: ColorsUtils.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, -4),
             ),
-            elevation: 0,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                _vm.anggotaList.isNotEmpty
-                    ? Icons.check_circle_outline
-                    : Icons.arrow_forward,
-                size: 18,
+          ],
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            onPressed: _onSelesai,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _vm.anggotaList.isNotEmpty
+                  ? Colors.green
+                  : ColorsUtils.b500,
+              foregroundColor: ColorsUtils.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-              const SizedBox(width: 8),
-              Text(
-                _vm.anggotaList.isNotEmpty
-                    ? 'Selesai (${_vm.anggotaList.length} anggota)'
-                    : 'Selesai Tanpa Anggota',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
+              elevation: 0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _vm.anggotaList.isNotEmpty
+                      ? Icons.check_circle_outline
+                      : Icons.arrow_forward,
+                  size: 18,
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Text(
+                  _vm.anggotaList.isNotEmpty
+                      ? 'Selesai (${_vm.anggotaList.length} anggota)'
+                      : 'Selesai Tanpa Anggota',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

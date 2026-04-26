@@ -19,13 +19,24 @@ class KeluargaVM extends ChangeNotifier {
     await loadKK(currentRtId);
   }
 
-  Future<void> loadKK(int rtId) async {
+  Future<void> loadKK(int? rtId) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      kkList = await repository.getKKByRT(rtId);
+      final rtList = await repository.getRTList();
+
+      if (rtList.isNotEmpty) {
+        // Update state VM dengan data asli dari Hive
+        currentRtId = rtList.first['id'] as int;
+        currentRtLabel = rtList.first['name'] as String;
+      } else if (rtId != null) {
+        currentRtId = rtId;
+      }
+
+      // 2. Sekarang ambil data KK menggunakan ID yang sudah pasti benar
+      kkList = await repository.getKKByRT(currentRtId);
     } catch (e) {
       errorMessage = e.toString();
       kkList = [];
@@ -33,6 +44,23 @@ class KeluargaVM extends ChangeNotifier {
 
     isLoading = false;
     notifyListeners();
+  }
+
+  Future<bool> deleteKK(int id) async {
+    isLoading = true;
+    notifyListeners();
+
+    final success = await repository.deleteKK(id);
+
+    if (success) {
+      await loadKK(currentRtId); // Muat ulang data setelah hapus
+    } else {
+      errorMessage = "Gagal menghapus data.";
+      isLoading = false;
+      notifyListeners();
+    }
+
+    return success;
   }
 
   Future<void> refresh() async {

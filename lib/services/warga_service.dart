@@ -633,6 +633,35 @@ class WargaService {
     return true;
   }
 
+  Future<bool> deleteKK(String id) async {
+    await _ensureContextLoaded();
+    lastError = null;
+    final kkId = int.tryParse(id);
+
+    final kkBox = await HiveService().openBox<dynamic>(_kkBox);
+    final raw = kkBox.get(kkId);
+
+    if (raw is Map) {
+      final updated = {
+        ...Map<String, dynamic>.from(raw),
+        'is_deleted': true,
+        'sync_status': 'pending',
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      await kkBox.put(kkId, updated);
+
+      await _enqueueSync(
+        entity: 'keluarga',
+        operation: 'delete',
+        entityId: kkId!,
+        payload: updated,
+      );
+      return true;
+    }
+    return false;
+  }
+
   // ─────────────────────────────────────────────
   // RT List (untuk dropdown)
   // ─────────────────────────────────────────────

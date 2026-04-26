@@ -1,21 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:rukun_app_proyek4/models/warga.dart';
-import 'package:rukun_app_proyek4/services/warga_service.dart';
+import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 
 // ================================================================
 // WargaViewModel
-// Tanggung jawab: menyimpan state form warga + submit ke service.
+// Tanggung jawab: menyimpan state form warga + submit ke repository.
 //
-// PEMBAGIAN KERJA:
+// PEMBAGIAN KERJA (Revisi):
 //   ViewModel (FE) : definisi state, notifyListeners, struktur method
-//   Service  (BE)  : isi koneksi Hive / API di warga_service.dart
+//   Repository     : jembatan antara ViewModel dan Service (BE)
 // ================================================================
 
 class WargaViewModel extends ChangeNotifier {
-  final WargaService _service;
+  final WargaRepository repository;
 
-  WargaViewModel({WargaService? service})
-    : _service = service ?? WargaService();
+  WargaViewModel({required this.repository});
 
   // ── State ──────────────────────────────────────────────────────
 
@@ -105,38 +104,36 @@ class WargaViewModel extends ChangeNotifier {
 
   // ── Save / Update ──────────────────────────────────────────────
 
-  /// Simpan warga baru.
-  /// TODO (BE): isi _service.saveWarga() di warga_service.dart.
+  /// Simpan warga baru menggunakan Repository
   Future<bool> saveWarga(WargaModel warga) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
-    final success = await _service.saveWarga(warga);
+    final success = await repository.saveWarga(warga);
 
     isLoading = false;
     if (success) {
       isSaved = true;
     } else {
       errorMessage =
-          _service.lastError ?? 'Gagal menyimpan data warga. Coba lagi.';
+          repository.lastError ?? 'Gagal menyimpan data warga. Coba lagi.';
     }
     notifyListeners();
     return success;
   }
 
-  /// Update warga yang sudah ada.
-  /// TODO (BE): isi _service.updateWarga() di warga_service.dart.
+  /// Update warga yang sudah ada menggunakan Repository
   Future<bool> updateWarga(String id, WargaModel warga) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
-    final success = await _service.updateWarga(id, warga);
+    final success = await repository.updateWarga(id, warga);
 
     isLoading = false;
     if (!success) {
-      errorMessage = _service.lastError ?? 'Gagal memperbarui data. Coba lagi.';
+      errorMessage = repository.lastError ?? 'Gagal memperbarui data. Coba lagi.';
     }
     notifyListeners();
     return success;
