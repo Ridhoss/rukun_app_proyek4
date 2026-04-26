@@ -188,7 +188,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
 
                   const SizedBox(height: 16),
-
                   Center(
                     child: GestureDetector(
                       onTap: () {
