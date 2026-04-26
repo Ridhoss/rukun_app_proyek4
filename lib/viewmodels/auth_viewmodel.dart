@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/helpers/log_helper.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
-import 'package:rukun_app_proyek4/models/warga_model.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 
 class AuthViewModel extends ChangeNotifier {
@@ -25,15 +24,6 @@ class AuthViewModel extends ChangeNotifier {
   int get lockSeconds => _lockSeconds;
   int get failedLoginCount => _failedLoginCount;
 
-  final List<Warga> _dummyWarga = [
-    Warga(id: 1, nik: "3275010101010001", nama: "Budi"),
-    Warga(id: 2, nik: "3275010101010002", nama: "Siti"),
-  ];
-
-  final List<User> _dummyUsers = [
-    User(id: 1, wargaId: 1, role: Role.warga, createdAt: DateTime.now()),
-  ];
-
   void initAuth() {
     errorMessage = null;
     isLoading = false;
@@ -53,8 +43,6 @@ class AuthViewModel extends ChangeNotifier {
     authData = null;
 
     notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1));
 
     try {
       final result = await _authRepository.login(nik, password);
@@ -79,48 +67,36 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(String nik, String password) async {
+  Future<void> register(
+    String nik,
+    String password,
+    String confirmPassword,
+  ) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 1));
-
     try {
-      final warga = _dummyWarga.where((w) => w.nik == nik).firstOrNull;
-
-      if (warga == null) {
-        errorMessage = "NIK belum terdaftar oleh RT";
-        isLoading = false;
-        notifyListeners();
-        return;
-      }
-
-      final existingUser = _dummyUsers
-          .where((u) => u.wargaId == warga.id)
-          .firstOrNull;
-
-      if (existingUser != null) {
-        errorMessage = "Akun sudah terdaftar";
-        isLoading = false;
-        notifyListeners();
-        return;
-      }
-
-      final newUser = User(
-        id: _dummyUsers.length + 1,
-        wargaId: warga.id,
-        role: Role.warga,
-        createdAt: DateTime.now(),
+      await _authRepository.register(
+        nik: nik,
+        password: password,
+        confirmPassword: confirmPassword,
       );
 
-      _dummyUsers.add(newUser);
-
-      authData = AuthResponse(token: "dummy_token_123", user: newUser);
-
+      _failedLoginCount = 0;
       errorMessage = null;
-    } catch (e) {
-      errorMessage = "Gagal register";
+    } catch (e, st) {
+      final message = e.toString().replaceAll("Exception: ", "");
+
+      errorMessage = message;
+
+      await LogHelper.writeLog(
+        "Register gagal: $message",
+        source: "AuthViewModel.register",
+        level: 1,
+        error: e,
+        stackTrace: st,
+      );
     }
 
     isLoading = false;

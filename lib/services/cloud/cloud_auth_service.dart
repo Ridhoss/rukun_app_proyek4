@@ -14,8 +14,19 @@ class CloudAuthService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> register(Map<String, dynamic> data) async {
-    final response = await _dio.post('/api/v1/user/register', data: data);
+  Future<Map<String, dynamic>> register({
+    required String nik,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    final response = await _dio.post(
+      '/api/v1/user/register',
+      data: {
+        "nik": nik,
+        "password": password,
+        "confirm_password": confirmPassword,
+      },
+    );
 
     return response.data;
   }

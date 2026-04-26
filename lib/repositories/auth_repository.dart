@@ -9,41 +9,59 @@ class AuthRepository {
   AuthRepository(this.service);
 
   Future<AuthResponse> login(String nik, String password) async {
-    try {
-      final result = await service.login(nik, password);
+    final result = await _safeCall(
+      () => service.login(nik, password),
+    );
 
-      if (result['status'] != 'success') {
-        throw Exception(result['message']);
-      }
+    _validateStatus(result);
 
-      return AuthResponse.fromJson(result['data']);
-    } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? "Terjadi kesalahan";
-
-      throw Exception(message);
-    }
+    return AuthResponse.fromJson(result['data']);
   }
 
-  Future<void> register(Map<String, dynamic> data) async {
-    final result = await service.register(data);
+  Future<void> register({
+    required String nik,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    final result = await _safeCall(
+      () => service.register(
+        nik: nik,
+        password: password,
+        confirmPassword: confirmPassword,
+      ),
+    );
 
-    final meta = result['meta'];
-
-    if (meta['code'] != 201) {
-      throw Exception(meta['message']);
-    }
+    _validateStatus(result);
   }
 
   Future<User> getMe(String token) async {
-    final result = await service.getMe(token);
+    final result = await _safeCall(
+      () => service.getMe(token),
+    );
 
-    final meta = result['meta'];
-    final data = result['data'];
+    _validateStatus(result);
 
-    if (meta['code'] != 200) {
-      throw Exception(meta['message']);
+    return User.fromJson(result['data']);
+  }
+
+  Future<Map<String, dynamic>> _safeCall(
+    Future<Map<String, dynamic>> Function() fn,
+  ) async {
+    try {
+      return await fn();
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? "Terjadi kesalahan";
+
+      throw Exception(message);
+    } catch (e) {
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
+  }
 
-    return User.fromJson(data);
+  void _validateStatus(Map<String, dynamic> result) {
+    if (result['status'] != 'success') {
+      throw Exception(result['message'] ?? "Unknown error");
+    }
   }
 }
