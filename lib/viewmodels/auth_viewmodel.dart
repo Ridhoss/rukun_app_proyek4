@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:rukun_app_proyek4/helpers/log_helper.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/models/warga_model.dart';
+import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 
 class AuthViewModel extends ChangeNotifier {
+  final AuthRepository _authRepository;
+
+  AuthViewModel(this._authRepository);
+
   bool isLoading = false;
   String? errorMessage;
   AuthResponse? authData;
@@ -11,7 +17,6 @@ class AuthViewModel extends ChangeNotifier {
   int _failedLoginCount = 0;
   bool _isLocked = false;
   int _lockSeconds = 0;
-
 
   bool get isLoggedIn => authData != null;
   User? get currentUser => authData?.user;
@@ -36,57 +41,43 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> login(String nik, String password) async {
-  if (_isLocked) {
-    errorMessage =
-        "Terlalu banyak percobaan. Coba lagi dalam $_lockSeconds detik";
-    notifyListeners();
-    return;
-  }
-
-  isLoading = true;
-  errorMessage = null;
-
-  authData = null;
-
-  notifyListeners();
-
-  await Future.delayed(const Duration(seconds: 1));
-
-  try {
-    final warga = _dummyWarga.where((w) => w.nik == nik).firstOrNull;
-
-    if (warga == null) {
-      _onLoginFailed("NIK tidak terdaftar");
+    if (_isLocked) {
+      errorMessage =
+          "Terlalu banyak percobaan. Coba lagi dalam $_lockSeconds detik";
+      notifyListeners();
       return;
     }
 
-    final user =
-        _dummyUsers.where((u) => u.wargaId == warga.id).firstOrNull;
-
-    if (user == null) {
-      _onLoginFailed("Akun belum dibuat oleh RT");
-      return;
-    }
-
-    if (password != "123456") {
-      _onLoginFailed("Password salah");
-      return;
-    }
-
-    _failedLoginCount = 0;
+    isLoading = true;
     errorMessage = null;
+    authData = null;
 
-    authData = AuthResponse(
-      token: "dummy_token_123",
-      user: user,
-    );
-  } catch (e) {
-    errorMessage = "Terjadi kesalahan";
+    notifyListeners();
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    try {
+      final result = await _authRepository.login(nik, password);
+
+      _failedLoginCount = 0;
+      errorMessage = null;
+      authData = result;
+    } catch (e, st) {
+      final message = e.toString().replaceAll("Exception: ", "");
+      _onLoginFailed(message);
+
+      await LogHelper.writeLog(
+        "Login gagal: $message",
+        source: "AuthViewModel.login",
+        level: 1,
+        error: e,
+        stackTrace: st,
+      );
+    }
+
+    isLoading = false;
+    notifyListeners();
   }
-
-  isLoading = false;
-  notifyListeners();
-}
 
   Future<void> register(String nik, String password) async {
     isLoading = true;

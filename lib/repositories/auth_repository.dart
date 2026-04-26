@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
@@ -8,16 +9,19 @@ class AuthRepository {
   AuthRepository(this.service);
 
   Future<AuthResponse> login(String nik, String password) async {
-    final result = await service.login(nik, password);
+    try {
+      final result = await service.login(nik, password);
 
-    final meta = result['meta'];
-    final data = result['data'];
+      if (result['status'] != 'success') {
+        throw Exception(result['message']);
+      }
 
-    if (meta['code'] != 200) {
-      throw Exception(meta['message']);
+      return AuthResponse.fromJson(result['data']);
+    } on DioException catch (e) {
+      final message = e.response?.data?['message'] ?? "Terjadi kesalahan";
+
+      throw Exception(message);
     }
-
-    return AuthResponse.fromJson(data);
   }
 
   Future<void> register(Map<String, dynamic> data) async {
