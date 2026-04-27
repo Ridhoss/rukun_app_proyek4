@@ -39,7 +39,7 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
-    await local.clear();
+    await local.clearToken();
   }
 
   Future<String?> getToken() async {
@@ -72,14 +72,5 @@ class AuthRepository {
     if (result['status'] != 'success') {
       throw Exception(result['message'] ?? "Unknown error");
     }
-  }
-
-  //sementara dummy
-  @override
-  // ignore: override_on_non_overriding_member
-  Future<Warga> getWarga(int id) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    return Warga(id: id, nama: "Admin RW", nik: "3201010101010001");
   }
 }

@@ -1,3 +1,4 @@
+import 'package:rukun_app_proyek4/models/warga_model.dart';
 enum Role { warga, pengurus }
 
 class User {
@@ -5,8 +6,15 @@ class User {
   final int? wargaId;
   final Role role;
   final DateTime? createdAt;
+  final Warga? warga;
 
-  User({required this.id, this.wargaId, required this.role, this.createdAt});
+  User({
+    required this.id,
+    this.wargaId,
+    required this.role,
+    this.createdAt,
+    this.warga,
+  });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -15,6 +23,10 @@ class User {
       role: _roleFromString(json['role']),
       createdAt: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
+          : null,
+
+      warga: json['warga'] != null
+          ? Warga.fromJson(json['warga'])
           : null,
     );
   }
@@ -25,6 +37,7 @@ class User {
       'warga_id': wargaId,
       'role': role.name,
       'waktu_dibuat': createdAt?.toIso8601String(),
+      'warga': warga?.toJson(),
     };
   }
 

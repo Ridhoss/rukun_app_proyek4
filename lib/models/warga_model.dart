@@ -182,4 +182,115 @@ class Warga {
         return null;
     }
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nama': nama,
+      'nik': nik,
+
+      'jk': _jkToString(jk),
+      'tempat_lahir': tempatLahir,
+      'tgl_lahir': tglLahir?.toIso8601String(),
+
+      'agama': _agamaToString(agama),
+      'pendidikan': pendidikan,
+      'jenis_pekerjaan': jenisPekerjaan,
+      'golongan_darah': golonganDarah,
+
+      'status_perkawinan': _statusKawinToString(statusPerkawinan),
+      'tgl_perkawinan': tglPerkawinan?.toIso8601String(),
+
+      'status_hubungan': _statusHubunganToString(statusHubungan),
+      'kewarganegaraan': _kwnToString(kewarganegaraan),
+
+      'no_paspor': noPaspor,
+      'no_kitap': noKitap,
+      'nama_ayah': namaAyah,
+      'nama_ibu': namaIbu,
+
+      'keluarga_id': keluargaId,
+    };
+  }
+
+  static String? _jkToString(JenisKelamin? value) {
+    switch (value) {
+      case JenisKelamin.lakiLaki:
+        return "Laki-Laki";
+      case JenisKelamin.perempuan:
+        return "Perempuan";
+      default:
+        return null;
+    }
+  }
+
+  static String? _agamaToString(Agama? value) {
+    switch (value) {
+      case Agama.islam:
+        return "Islam";
+      case Agama.kristen:
+        return "Kristen";
+      case Agama.katolik:
+        return "Katolik";
+      case Agama.hindu:
+        return "Hindu";
+      case Agama.buddha:
+        return "Buddha";
+      case Agama.konghucu:
+        return "Konghucu";
+      default:
+        return null;
+    }
+  }
+
+  static String? _statusKawinToString(StatusPerkawinan? value) {
+    switch (value) {
+      case StatusPerkawinan.belumKawin:
+        return "Belum Kawin";
+      case StatusPerkawinan.kawin:
+        return "Kawin";
+      case StatusPerkawinan.ceraiHidup:
+        return "Cerai Hidup";
+      case StatusPerkawinan.ceraiMati:
+        return "Cerai Mati";
+      default:
+        return null;
+    }
+  }
+
+  static String? _statusHubunganToString(StatusHubungan? value) {
+    switch (value) {
+      case StatusHubungan.kepalaKeluarga:
+        return "Kepala Keluarga"; // 🔥 fix dari sebelumnya
+      case StatusHubungan.suami:
+        return "Suami";
+      case StatusHubungan.istri:
+        return "Istri";
+      case StatusHubungan.anak:
+        return "Anak";
+      case StatusHubungan.menantu:
+        return "Menantu";
+      case StatusHubungan.cucu:
+        return "Cucu";
+      case StatusHubungan.orangTua:
+        return "Orang Tua";
+      case StatusHubungan.mertua:
+        return "Mertua";
+      case StatusHubungan.familiLain:
+        return "Famili Lain";
+      default:
+        return null;
+    }
+  }
+
+  static String? _kwnToString(Kewarganegaraan? value) {
+    switch (value) {
+      case Kewarganegaraan.wni:
+        return "WNI";
+      case Kewarganegaraan.wna:
+        return "WNA";
+      default:
+        return null;
+    }
+  }
 }

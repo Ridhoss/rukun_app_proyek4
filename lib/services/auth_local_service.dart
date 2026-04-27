@@ -20,6 +20,11 @@ class AuthLocalService {
     return box.get('token');
   }
 
+  Future<void> clearToken() async {
+    final box = await _box();
+    await box.delete('token');
+  }
+
   Future<void> clear() async {
     final box = await _box();
     await box.clear();

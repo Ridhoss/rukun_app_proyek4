@@ -11,7 +11,7 @@ class PengurusProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
 
-    final warga = authVM.wargaData;
+    final warga = authVM.currentUser?.warga;
 
     final nama = warga?.nama ?? "-";
     final nik = warga?.nik ?? "-";
