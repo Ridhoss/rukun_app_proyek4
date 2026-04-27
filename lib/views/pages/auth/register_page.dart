@@ -16,6 +16,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
   @override
   void dispose() {
     nikController.dispose();
@@ -92,6 +95,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     Icons.lock_outline,
                     controller: passwordController,
                     isPassword: true,
+                    obscureText: _obscurePassword,
+                    onToggle: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
 
                   const SizedBox(height: 16),
@@ -100,6 +109,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     Icons.lock_outline,
                     controller: confirmPasswordController,
                     isPassword: true,
+                    obscureText: _obscureConfirmPassword,
+                    onToggle: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
                   ),
 
                   const SizedBox(height: 16),
@@ -210,7 +225,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
-
                 ],
               ),
             ),
@@ -225,11 +239,13 @@ class _RegisterPageState extends State<RegisterPage> {
     IconData icon, {
     required TextEditingController controller,
     bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggle,
     TextInputType? keyboardType,
   }) {
     return TextField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword ? obscureText : false,
       keyboardType: keyboardType,
       inputFormatters: keyboardType == TextInputType.number
           ? [FilteringTextInputFormatter.digitsOnly]
@@ -237,6 +253,16 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, color: Colors.grey),
+
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  obscureText ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: onToggle,
+              )
+            : null,
+
         filled: true,
         fillColor: Colors.grey.shade100,
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
