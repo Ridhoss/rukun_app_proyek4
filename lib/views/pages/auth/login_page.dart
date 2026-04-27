@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/home_page.dart';
+import 'package:rukun_app_proyek4/views/layouts/main_layout.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: ColorsUtils.b400,
                 ),
               ),
 
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
 
               const Text(
                 "Silahkan Masuk dengan akun anda",
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: ColorsUtils.black800),
               ),
 
               const SizedBox(height: 30),
@@ -116,7 +116,8 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const HomePage(),
+                                builder: (_) =>
+                                    MainLayout(user: vm.authData!.user),
                               ),
                             );
                           }

@@ -9,92 +9,98 @@ class WelcomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorsUtils.b500,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 120),
+                      Center(
+                        child: Image.asset(
+                          "assets/images/icon_rukun.png",
+                          height: 190,
+                        ),
+                      ),
 
-              Center(
-                child: Image.asset("assets/images/icon_rukun.png", height: 220),
-              ),
+                      const SizedBox(height: 80),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: const Text(
+                          "Selamat Datang\ndi RukunApp",
+                          style: TextStyle(
+                            color: ColorsUtils.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
 
-              const SizedBox(height: 40),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: const Text(
+                        "Pantau data penduduk, kelola iuran, dan informasi RT/RW dalam satu aplikasi",
+                          style: TextStyle(
+                            color: ColorsUtils.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
 
-              const Text(
-                "Selamat Datang\ndi RukunApp",
-                style: TextStyle(
-                  color: ColorsUtils.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
+                      SizedBox(height: 80),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/login');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorsUtils.yellow,
+                            foregroundColor: ColorsUtils.b400,
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          child: const Text("Masuk"),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/register');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorsUtils.white,
+                            foregroundColor: ColorsUtils.b400,
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          child: const Text("Daftar"),
+                        ),
+                      ),
+
+                      const SizedBox(height: 30),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-
-              const SizedBox(height: 12),
-              const Text(
-                "Pantau data penduduk, kelola iuran, dan informasi RT/RW dalam satu aplikasi",
-                style: TextStyle(
-                  color: ColorsUtils.white,
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-              ),
-
-              const Spacer(),
-              const SizedBox(height: 20),
-
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/login');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorsUtils.yellow,
-                    foregroundColor: ColorsUtils.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    "Masuk",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/register');
-                  },
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    side: BorderSide.none,
-                  ),
-                  child: const Text(
-                    "Daftar",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 50
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
