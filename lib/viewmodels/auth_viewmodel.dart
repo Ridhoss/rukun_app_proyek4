@@ -7,7 +7,9 @@ import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 class AuthViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
 
-  AuthViewModel(this._authRepository);
+  AuthViewModel(this._authRepository) {
+    checkAuth();
+  }
 
   bool isLoading = false;
   String? errorMessage;
