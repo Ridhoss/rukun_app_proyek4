@@ -32,10 +32,9 @@ class NavItem {
 
 class NavViewModel {
   List<NavItem> getNavItems(User user) {
-    final role = user.appRole;
 
 // RW
-if (role == AppRole.rw) {
+if (user.pengurus?.level == "RW") {
   return [
     NavItem(icon: Icons.home, label: "Home", page: const RwHomePage()),
     NavItem(icon: Icons.groups, label: "Penduduk", page: const RwPendudukPage()),
@@ -46,7 +45,7 @@ if (role == AppRole.rw) {
 }
 
 // RT
-if (role == AppRole.rt) {
+if (user.pengurus?.level == "RT") {
   return [
     NavItem(icon: Icons.home, label: "Home", page: const RtHomePage()),
     NavItem(icon: Icons.groups, label: "Penduduk", page: const RtPendudukPage()),
@@ -62,7 +61,7 @@ if (role == AppRole.rt) {
       NavItem(
         icon: Icons.upload_file,
         label: "Upload",
-        page: WargaIuranPage(), // ini bagian upload iuran warga
+        page: WargaIuranPage(),
       ),
       NavItem(icon: Icons.history, label: "Riwayat", page: RiwayatIuranPage()),
       NavItem(icon: Icons.description, label: "Surat", page: WargaSuratPage()),

@@ -11,10 +11,10 @@ class RwProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
 
-    final warga = authVM.wargaData;
+    final warga = authVM.currentUser;
 
-    final nama = warga?.nama ?? "-";
-    final nik = warga?.nik ?? "-";
+    final nama = warga?.warga?.nama ?? "-";
+    final nik = warga?.warga?.nik ?? "-";
 
     return Scaffold(
       backgroundColor: ColorsUtils.white,

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
-import 'package:rukun_app_proyek4/models/warga_model.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 
@@ -19,7 +18,10 @@ class AuthRepository {
     final auth = AuthResponse.fromJson(result['data']);
     await local.saveToken(auth.token);
 
-    return AuthResponse.fromJson(result['data']);
+    final me = await service.getMe(auth.token);
+    final user = User.fromJson(me['data']);
+
+    return AuthResponse(token: auth.token, user: user);
   }
 
   Future<void> register({
