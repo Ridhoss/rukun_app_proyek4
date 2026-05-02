@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/views/pages/auth/login_page.dart';
+import 'package:rukun_app_proyek4/views/pages/auth/register_page.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -44,7 +46,7 @@ class WelcomePage extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(left: 12),
                         child: const Text(
-                        "Pantau data penduduk, kelola iuran, dan informasi RT/RW dalam satu aplikasi",
+                          "Pantau data penduduk, kelola iuran, dan informasi RT/RW dalam satu aplikasi",
                           style: TextStyle(
                             color: ColorsUtils.white,
                             fontSize: 15,
@@ -59,7 +61,12 @@ class WelcomePage extends StatelessWidget {
                         height: 52,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/login');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginPage(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorsUtils.yellow,
@@ -80,7 +87,12 @@ class WelcomePage extends StatelessWidget {
                         height: 52,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/register');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RegisterPage(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorsUtils.white,
