@@ -7,6 +7,7 @@ import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 class WargaProfilePage extends StatelessWidget {
   const WargaProfilePage({super.key});
 
+// ignore: annotate_overrides
 Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
 
