@@ -70,7 +70,7 @@ class WelcomePage extends StatelessWidget {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorsUtils.yellow,
-                            foregroundColor: ColorsUtils.b400,
+                            foregroundColor: ColorsUtils.white,
                             textStyle: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
