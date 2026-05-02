@@ -80,6 +80,6 @@ class AuthRepository {
   Future<Warga> getWarga(int id) async {
     await Future.delayed(const Duration(milliseconds: 500));
 
-    return Warga(id: id, nama: "Admin RW", nik: "3201010101010001");
+    return Warga(id: id, nama: "Pengurus", nik: "3201010101010001");
   }
 }
