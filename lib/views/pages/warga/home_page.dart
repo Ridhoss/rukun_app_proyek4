@@ -4,7 +4,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/menucard_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/routes/app_routes.dart';
+
 class WargaHomePage extends StatelessWidget {
   const WargaHomePage({super.key});
 
@@ -18,19 +18,19 @@ class WargaHomePage extends StatelessWidget {
         "title": "Ajukan Surat",
         "subtitle": "Buat pengajuan surat",
         "image": "assets/images/add_surat.png",
-         "route": AppRoutes.ajukanSurat,
+        "route": "/ajukan-surat",
       },
       {
         "title": "Riwayat Surat",
         "subtitle": "Lihat status pengajuan",
         "image": "assets/images/history_surat.png",
-        "route": AppRoutes.riwayatSurat,
+        "route": "/riwayat-surat",
       },
       {
         "title": "Iuran Saya",
         "subtitle": "Status & bukti pembayaran",
         "image": "assets/images/fee.png",
-        "route": AppRoutes.iuran,
+        "route": "/iuran",
       },
     ];
 
