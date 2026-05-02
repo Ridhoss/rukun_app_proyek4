@@ -1,10 +1,13 @@
 import 'package:rukun_app_proyek4/models/warga_model.dart';
 enum Role { warga, pengurus }
 
+enum AppRole { warga, rt, rw }
+
 class User {
   final int id;
   final int? wargaId;
   final Role role;
+  final String? level;
   final DateTime? createdAt;
   final Warga? warga;
 
@@ -21,6 +24,7 @@ class User {
       id: json['id'],
       wargaId: json['warga_id'],
       role: _roleFromString(json['role']),
+      level: json['level'],
       createdAt: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
@@ -36,6 +40,7 @@ class User {
       'id': id,
       'warga_id': wargaId,
       'role': role.name,
+      'level': level,
       'waktu_dibuat': createdAt?.toIso8601String(),
       'warga': warga?.toJson(),
     };

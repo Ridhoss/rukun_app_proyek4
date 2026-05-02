@@ -4,14 +4,14 @@ import 'package:rukun_app_proyek4/utils/avatar_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 
-class PengurusProfilePage extends StatelessWidget {
-  const PengurusProfilePage({super.key});
+class RwProfilePage extends StatelessWidget {
+  const RwProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
 
-    final warga = authVM.currentUser?.warga;
+    final warga = authVM.wargaData;
 
     final nama = warga?.nama ?? "-";
     final nik = warga?.nik ?? "-";
@@ -25,8 +25,7 @@ class PengurusProfilePage extends StatelessWidget {
             padding: const EdgeInsets.only(top: 60, bottom: 30),
             decoration: const BoxDecoration(
               color: ColorsUtils.b400,
-              borderRadius: BorderRadius.vertical(
-              ),
+              borderRadius: BorderRadius.vertical(),
             ),
             child: Column(
               children: [
@@ -80,8 +79,31 @@ class PengurusProfilePage extends StatelessWidget {
             iconColor: Colors.red,
             iconBg: Colors.red.shade50,
             onTap: () async {
-              await authVM.logout();
-              Navigator.pushReplacementNamed(context, '/login');
+              final confirm = await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text("Konfirmasi"),
+                  content: Text("Apakah kamu yakin ingin keluar?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text("Batal"),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(
+                        "Keluar",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                await authVM.logout();
+                Navigator.pushReplacementNamed(context, '/login');
+              }
             },
           ),
         ],

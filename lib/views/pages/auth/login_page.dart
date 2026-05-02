@@ -16,6 +16,8 @@ class _LoginPageState extends State<LoginPage> {
   final nikController = TextEditingController();
   final passwordController = TextEditingController();
 
+  bool _obscurePassword = true;
+
   @override
   void dispose() {
     nikController.dispose();
@@ -80,6 +82,12 @@ class _LoginPageState extends State<LoginPage> {
                 Icons.lock_outline,
                 controller: passwordController,
                 isPassword: true,
+                obscureText: _obscurePassword,
+                onToggle: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
               ),
 
               const SizedBox(height: 16),
@@ -184,11 +192,13 @@ class _LoginPageState extends State<LoginPage> {
     IconData icon, {
     required TextEditingController controller,
     bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggle,
     TextInputType? keyboardType,
   }) {
     return TextField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword ? obscureText : false,
       keyboardType: keyboardType,
       inputFormatters: keyboardType == TextInputType.number
           ? [FilteringTextInputFormatter.digitsOnly]
@@ -196,6 +206,16 @@ class _LoginPageState extends State<LoginPage> {
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, color: Colors.grey),
+
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  obscureText ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: onToggle,
+              )
+            : null,
+
         filled: true,
         fillColor: Colors.grey.shade100,
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
