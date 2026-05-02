@@ -121,12 +121,13 @@ class _LoginPageState extends State<LoginPage> {
                           if (!context.mounted) return;
 
                           if (vm.errorMessage == null && vm.authData != null) {
-                            Navigator.pushReplacement(
+                            Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
                                 builder: (_) =>
                                     MainLayout(user: vm.authData!.user),
                               ),
+                              (route) => false,
                             );
                           }
                         },
