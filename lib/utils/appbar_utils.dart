@@ -5,6 +5,11 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 class AppBarUtils {
   static PreferredSizeWidget buildAppBar({
     required String name,
+    required String title,
+    String? subtitle,
+    bool showName = true,
+    bool showAvatar = true,
+    bool showGreeting = true,
     Widget? leading,
     Widget? trailing,
   }) {
@@ -12,41 +17,67 @@ class AppBarUtils {
       automaticallyImplyLeading: false,
       backgroundColor: ColorsUtils.b500,
       elevation: 0,
-      toolbarHeight: 80,
+      toolbarHeight: 90,
       leading: leading,
 
-      title: Row(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircleAvatar(radius: 23, child: buildAvatar(name)),
+          Row(
+            children: [
+              // ignore: unnecessary_null_comparison
+              if (showAvatar && name != null)
+                CircleAvatar(radius: 23, child: buildAvatar(name)),
+              const SizedBox(width: 12),
 
-          const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (showGreeting)
+                      Text(
+                        _getGreeting(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
 
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _getGreeting(),
-                  style: const TextStyle(
-                    fontSize: 18.5,
-                    fontWeight: FontWeight.bold,
-                    color: ColorsUtils.white,
-                  ),
+                    // ignore: unnecessary_null_comparison
+                    if (showName && name != null)
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: ColorsUtils.white,
+                        ),
+                      ),
+                  ],
                 ),
+              ),
 
-                const SizedBox(height: 2),
+              // ignore: use_null_aware_elements
+              if (trailing != null) trailing,
+            ],
+          ),
 
-                Text(
-                  name,
-                  style: const TextStyle(fontSize: 15, color: ColorsUtils.white),
-                ),
-              ],
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
 
-          // ignore: use_null_aware_elements
-          if (trailing != null) trailing,
+          if (subtitle != null)
+            Text(
+              subtitle,
+              style: const TextStyle(fontSize: 12, color: Colors.white70),
+            ),
         ],
       ),
     );
@@ -55,14 +86,9 @@ class AppBarUtils {
   static String _getGreeting() {
     final hour = DateTime.now().hour;
 
-    if (hour >= 5 && hour < 12) {
-      return 'Selamat Pagi';
-    } else if (hour >= 12 && hour < 16) {
-      return 'Selamat Siang';
-    } else if (hour >= 16 && hour < 18) {
-      return 'Selamat Sore';
-    } else {
-      return 'Selamat Malam';
-    }
+    if (hour < 12) return "Selamat Pagi";
+    if (hour < 16) return "Selamat Siang";
+    if (hour < 18) return "Selamat Sore";
+    return "Selamat Malam";
   }
 }

@@ -6,9 +6,10 @@ import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/pengajuan_surat_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 // ignore: unnecessary_import
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ThemeData;
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -30,6 +31,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (context) => AuthViewModel(context.read()),
         ),
+        ChangeNotifierProvider(create: (_) => PengajuanSuratViewModel()),
       ],
       child: const MyApp(),
     ),
@@ -46,6 +48,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       onGenerateRoute: AppRoutes.generateRoute,
       home: const AuthGate(),
+      builder: (context, child) {
+        return Container(color: const Color.fromARGB(255, 75, 59, 59), child: child);
+      },
     );
   }
 }

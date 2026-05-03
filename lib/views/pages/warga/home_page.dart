@@ -4,6 +4,9 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/menucard_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/surat_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/history_surat_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/iuran_page.dart';
 
 class WargaHomePage extends StatelessWidget {
   const WargaHomePage({super.key});
@@ -18,30 +21,30 @@ class WargaHomePage extends StatelessWidget {
         "title": "Ajukan Surat",
         "subtitle": "Buat pengajuan surat",
         "image": "assets/images/add_surat.png",
-        "route": "/ajukan-surat",
+        "builder": (BuildContext context) => const WargaSuratPage(),
       },
       {
         "title": "Riwayat Surat",
         "subtitle": "Lihat status pengajuan",
         "image": "assets/images/history_surat.png",
-        "route": "/riwayat-surat",
+        "builder": (BuildContext context) => const WargaHistorySurat(),
       },
       {
         "title": "Iuran Saya",
         "subtitle": "Status & bukti pembayaran",
         "image": "assets/images/fee.png",
-        "route": "/iuran",
+        "builder": (BuildContext context) => const WargaIuranPage(),
       },
     ];
-
     return Scaffold(
       appBar: AppBarUtils.buildAppBar(
         name: nama,
+        title: "",
+        showName: true,
+        showAvatar: true,
+        showGreeting: true,
         trailing: IconButton(
-          icon: const Icon(
-            Icons.notifications_none,
-            color: ColorsUtils.white,
-          ),
+          icon: const Icon(Icons.notifications_none, color: ColorsUtils.white),
           onPressed: () {},
         ),
       ),
@@ -52,10 +55,7 @@ class WargaHomePage extends StatelessWidget {
           const SizedBox(height: 20),
           const Text(
             "Menu Utama",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
 
           const SizedBox(height: 12),
@@ -63,11 +63,19 @@ class WargaHomePage extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: MenuCard(
-                title: menu["title"]!,
-                subtitle: menu["subtitle"]!,
-                imagePath: menu["image"]!,
+                title: menu["title"] as String,
+                subtitle: menu["subtitle"] as String,
+                imagePath: menu["image"] as String,
                 onTap: () {
-                  Navigator.pushNamed(context, menu["route"]!);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          (menu["builder"] as Widget Function(BuildContext))(
+                            context,
+                          ),
+                    ),
+                  );
                 },
               ),
             );
@@ -76,10 +84,7 @@ class WargaHomePage extends StatelessWidget {
           const SizedBox(height: 24),
           const Text(
             "Aktivitas Terbaru",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 10),
@@ -89,9 +94,7 @@ class WargaHomePage extends StatelessWidget {
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Center(
-              child: Text("Belum ada aktivitas"),
-            ),
+            child: const Center(child: Text("Belum ada aktivitas")),
           ),
 
           const SizedBox(height: 20),

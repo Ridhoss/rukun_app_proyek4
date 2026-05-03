@@ -30,11 +30,13 @@ class MenuCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 13),
         decoration: BoxDecoration(
-          color: ColorsUtils.b100.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(20),
+          // ignore: deprecated_member_use
+          color: ColorsUtils.white,
+          borderRadius: BorderRadius.circular(13),
           boxShadow: [
             BoxShadow(
-              color: ColorsUtils.b100.withOpacity(0.5),
+              // ignore: deprecated_member_use
+              color: ColorsUtils.b75.withOpacity(0.5),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -91,12 +93,12 @@ class MenuCard extends StatelessWidget {
 
             // accent color bar
             Container(
-              height: 20,
+              height: 8,
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
                 ),
               ),
             ),
