@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_kk_page.dart';
 
@@ -144,9 +145,24 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
         backgroundColor: ColorsUtils.b500,
         child: const Icon(Icons.add, color: ColorsUtils.white),
         onPressed: () {
+          if (user.rt == null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('RT tidak ditemukan')));
+            return;
+          }
+
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddKKPage()),
+            MaterialPageRoute(
+              builder: (context) => ChangeNotifierProvider(
+                create: (_) => AddKKViewModel(
+                  kkRepository: context.read(),
+                  rtId: user.rt!.id,
+                ),
+                child: const AddKKPage(),
+              ),
+            ),
           );
         },
       ),

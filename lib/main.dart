@@ -31,8 +31,15 @@ void main() async {
         Provider(
           create: (context) => AuthRepository(context.read(), context.read()),
         ),
-        
+
         Provider(create: (_) => CloudKKService()),
+
+        Provider(
+          create: (context) => KKRepository(
+            context.read<CloudKKService>(),
+            context.read<AuthLocalService>(),
+          ),
+        ),
 
         ChangeNotifierProvider(
           create: (context) => AuthViewModel(context.read()),
@@ -40,10 +47,7 @@ void main() async {
 
         ChangeNotifierProvider(
           create: (context) => KeluargaVM(
-            kkRepository: KKRepository(
-              context.read(),
-              context.read(),
-            ),
+            kkRepository: context.read<KKRepository>(),
           ),
         ),
       ],
