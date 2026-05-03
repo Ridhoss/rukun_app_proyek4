@@ -1,54 +1,90 @@
 import 'package:dio/dio.dart';
-import 'package:rukun_app_proyek4/models/keluarga.dart';
 import '../api/dio_client.dart';
 
 class CloudKKService {
   final Dio _dio = DioClient().dio;
 
-  Future<List<Keluarga>> getKKByRT(int rtId) async {
+  Future<Map<String, dynamic>> getAllKK(String token) async {
     final response = await _dio.get(
       '/keluarga',
-      queryParameters: {'rt_id': rtId},
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
     );
 
-    final List data = response.data['data'] ?? [];
-
-    return data.map((e) => Keluarga.fromMap(e)).toList();
+    return response.data;
   }
 
-  Future<Keluarga?> getKKById(int id) async {
-    final response = await _dio.get('/keluarga/$id');
+  Future<Map<String, dynamic>> getKKByRT(
+    int rtId,
+    String token,
+  ) async {
+    final response = await _dio.get(
+      '/keluarga/rt/$rtId',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
 
-    final data = response.data['data'];
-
-    if (data == null) return null;
-
-    return Keluarga.fromMap(data);
+    return response.data;
   }
 
-  Future<Keluarga?> createKK(Keluarga kk) async {
+  Future<Map<String, dynamic>> getKKById(
+    int id,
+    String token,
+  ) async {
+    final response = await _dio.get(
+      '/keluarga/$id',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> createKK(
+    Map<String, dynamic> data,
+    String token,
+  ) async {
     final response = await _dio.post(
       '/keluarga',
-      data: kk.toMap(),
+      data: data,
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
     );
 
-    final data = response.data['data'];
-
-    return Keluarga.fromMap(data);
+    return response.data;
   }
 
-  Future<Keluarga?> updateKK(int id, Keluarga kk) async {
+  Future<Map<String, dynamic>> updateKK(
+    int id,
+    Map<String, dynamic> data,
+    String token,
+  ) async {
     final response = await _dio.put(
       '/keluarga/$id',
-      data: kk.toMap(),
+      data: data,
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
     );
 
-    final data = response.data['data'];
-
-    return Keluarga.fromMap(data);
+    return response.data;
   }
 
-  Future<void> deleteKK(int id) async {
-    await _dio.delete('/keluarga/$id');
+  Future<Map<String, dynamic>> deleteKK(
+    int id,
+    String token,
+  ) async {
+    final response = await _dio.delete(
+      '/keluarga/$id',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+
+    return response.data;
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:rukun_app_proyek4/routes/app_routes.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart'; // Tambahkan ini jika ingin menggunakan warna dari utils
 
 class HomePage extends StatelessWidget {
@@ -22,7 +21,6 @@ class HomePage extends StatelessWidget {
             ElevatedButton(
               child: const Text("Test Page"),
               onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.test);
               },
             ),
             const SizedBox(height: 20),
@@ -43,7 +41,6 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.addKK);
               },
             ),
             ElevatedButton.icon(
@@ -62,7 +59,6 @@ class HomePage extends StatelessWidget {
               ),
               onPressed: () {
                 // Arahkan ke halaman Dashboard yang baru dibuat
-                Navigator.pushNamed(context, AppRoutes.dashboardKependudukan);
               },
             ),
             if (kDebugMode) ...[
@@ -82,7 +78,6 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.debugSwitchRT);
                 },
               ),
             ],
