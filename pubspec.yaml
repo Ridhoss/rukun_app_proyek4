@@ -48,6 +48,8 @@ dependencies:
   provider: ^6.1.5+1
   curved_navigation_bar: ^1.0.6
   dio: ^5.7.0
+  flutter_dotenv: ^6.0.0
+  
 
 
 dev_dependencies:
@@ -69,6 +71,7 @@ flutter:
   assets:
     - assets/images/
     - assets/animation/
+    - .env
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

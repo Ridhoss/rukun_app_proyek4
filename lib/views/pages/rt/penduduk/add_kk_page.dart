@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
@@ -101,8 +104,63 @@ class AddKKPage extends StatelessWidget {
             decoration: const InputDecoration(labelText: 'Kode Pos'),
             onChanged: (value) => vm.kodePos = value,
           ),
+
+          const SizedBox(height: 16),
+
+          _buildFotoKK(vm),
         ],
       ),
+    );
+  }
+
+  Widget _buildFotoKK(AddKKViewModel vm) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Foto Kartu Keluarga",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+
+        const SizedBox(height: 10),
+
+        GestureDetector(
+          onTap: () async {
+            final picker = ImagePicker();
+            final picked = await picker.pickImage(
+              source: ImageSource.gallery,
+              imageQuality: 70,
+            );
+
+            if (picked != null) {
+              vm.fotoKK = File(picked.path);
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            height: 160,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ColorsUtils.b500),
+            ),
+            child: vm.fotoKK == null
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.upload_file, size: 40),
+                        SizedBox(height: 8),
+                        Text("Upload Foto KK"),
+                      ],
+                    ),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(vm.fotoKK!, fit: BoxFit.cover),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 
