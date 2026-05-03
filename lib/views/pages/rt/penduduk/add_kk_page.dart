@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_warga_page.dart';
 
 class AddKKPage extends StatelessWidget {
   const AddKKPage({super.key});
@@ -27,10 +26,7 @@ class AddKKPage extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          if (vm.isKKSaved)
-            _buildAfterSaved(context, vm)
-          else
-            _buildSaveButton(context, vm),
+          _buildSaveButton(context, vm),
         ],
       ),
     );
@@ -44,9 +40,21 @@ class AddKKPage extends StatelessWidget {
               await vm.createKK();
 
               if (vm.errorMessage != null) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(vm.errorMessage!)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(vm.errorMessage!),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Kartu Keluarga berhasil disimpan'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+
+                Navigator.pop(context);
               }
             },
       style: OutlinedButton.styleFrom(
@@ -74,6 +82,7 @@ class AddKKPage extends StatelessWidget {
       child: Column(
         children: [
           TextField(
+            keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'No KK'),
             onChanged: (value) => vm.noKK = value,
           ),
@@ -88,53 +97,12 @@ class AddKKPage extends StatelessWidget {
           const SizedBox(height: 10),
 
           TextField(
+            keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'Kode Pos'),
             onChanged: (value) => vm.kodePos = value,
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildAfterSaved(BuildContext context, AddKKViewModel vm) {
-    return Column(
-      children: [
-        _buildCard(
-          header: _buildSectionHeader('Anggota Keluarga', Icons.people_outline),
-          child: Column(
-            children: [
-              const Text('KK berhasil disimpan'),
-              const SizedBox(height: 10),
-
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => AddWargaPage()),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: ColorsUtils.b500),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Tambah Anggota',
-                      style: TextStyle(
-                        color: ColorsUtils.b500,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
