@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/avatar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/auth/login_page.dart';
 
 class WargaProfilePage extends StatelessWidget {
   const WargaProfilePage({super.key});
@@ -102,7 +103,12 @@ Widget build(BuildContext context) {
 
               if (confirm == true) {
                 await authVM.logout();
-                Navigator.pushReplacementNamed(context, '/login');
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  (route) => false,
+                );
               }
             },
           ),

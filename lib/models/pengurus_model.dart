@@ -1,5 +1,5 @@
 class Pengurus {
-  final int id;
+  final int? id;
   final int userId;
   final String level;
   final int? rtId;
@@ -8,7 +8,7 @@ class Pengurus {
   final DateTime? createdAt;
 
   Pengurus({
-    required this.id,
+    this.id,
     required this.userId,
     required this.level,
     this.rtId,
@@ -19,14 +19,14 @@ class Pengurus {
 
   factory Pengurus.fromJson(Map<String, dynamic> json) {
     return Pengurus(
-      id: json['id'],
-      userId: json['user_id'],
-      level: json['level'],
-      rtId: json['rt_id'],
-      rwId: json['rw_id'],
+      id: json['id'] as int?,
+      userId: json['user_id'] ?? 0,
+      level: json['level'] ?? '',
+      rtId: json['rt_id'] as int?,
+      rwId: json['rw_id'] as int?,
       posisi: json['posisi'],
       createdAt: json['waktu_dibuat'] != null
-          ? DateTime.parse(json['waktu_dibuat'])
+          ? DateTime.tryParse(json['waktu_dibuat'])
           : null,
     );
   }

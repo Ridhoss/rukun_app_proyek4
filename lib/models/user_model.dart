@@ -1,4 +1,6 @@
 import 'package:rukun_app_proyek4/models/pengurus_model.dart';
+import 'package:rukun_app_proyek4/models/rt_model.dart';
+import 'package:rukun_app_proyek4/models/rw_model.dart';
 import 'package:rukun_app_proyek4/models/warga_model.dart';
 
 class User {
@@ -8,6 +10,8 @@ class User {
   final DateTime? createdAt;
   final Warga? warga;
   final Pengurus? pengurus;
+  final RtModel? rt;
+  final RwModel? rw;
 
   User({
     required this.id,
@@ -16,6 +20,8 @@ class User {
     this.createdAt,
     this.warga,
     this.pengurus,
+    this.rt,
+    this.rw,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -30,6 +36,8 @@ class User {
       warga: json['warga'] != null ? Warga.fromJson(json['warga']) : null,
 
       pengurus: json['pengurus'] != null ? Pengurus.fromJson(json['pengurus']) : null,
+      rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
+      rw: json['rw'] != null ? RwModel.fromJson(json['rw']) : null,
     );
   }
 
@@ -41,6 +49,8 @@ class User {
       'waktu_dibuat': createdAt?.toIso8601String(),
       'warga': warga?.toJson(),
       'pengurus': pengurus?.toJson(),
+      'rt': rt?.toJson(),
+      'rw': rw?.toJson(),
     };
   }
 }
