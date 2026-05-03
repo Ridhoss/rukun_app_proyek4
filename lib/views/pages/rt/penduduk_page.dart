@@ -4,6 +4,7 @@ import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_kk_page.dart';
 
 class RtPendudukPage extends StatefulWidget {
   final User user;
@@ -109,7 +110,6 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
 
             const SizedBox(height: 12),
 
-            // LIST DUMMY
             Expanded(
               child: Consumer<KeluargaVM>(
                 builder: (context, vm, _) {
@@ -144,7 +144,10 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
         backgroundColor: ColorsUtils.b500,
         child: const Icon(Icons.add, color: ColorsUtils.white),
         onPressed: () {
-          // sementara kosong
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddKKPage()),
+          );
         },
       ),
     );
