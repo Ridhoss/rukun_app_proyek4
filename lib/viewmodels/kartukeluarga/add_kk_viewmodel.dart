@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
@@ -5,6 +7,7 @@ import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
 class AddKKViewModel extends ChangeNotifier {
   final KKRepository kkRepository;
   final int rtId;
+  File? fotoKK;
 
   AddKKViewModel({
     required this.kkRepository,

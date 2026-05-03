@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_warga_page.dart';
 
 class AddKKPage extends StatelessWidget {
   const AddKKPage({super.key});
@@ -27,10 +29,7 @@ class AddKKPage extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          if (vm.isKKSaved)
-            _buildAfterSaved(context, vm)
-          else
-            _buildSaveButton(context, vm),
+          _buildSaveButton(context, vm),
         ],
       ),
     );
@@ -44,9 +43,21 @@ class AddKKPage extends StatelessWidget {
               await vm.createKK();
 
               if (vm.errorMessage != null) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(vm.errorMessage!)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(vm.errorMessage!),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Kartu Keluarga berhasil disimpan'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+
+                Navigator.pop(context);
               }
             },
       style: OutlinedButton.styleFrom(
@@ -74,6 +85,7 @@ class AddKKPage extends StatelessWidget {
       child: Column(
         children: [
           TextField(
+            keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'No KK'),
             onChanged: (value) => vm.noKK = value,
           ),
@@ -88,50 +100,64 @@ class AddKKPage extends StatelessWidget {
           const SizedBox(height: 10),
 
           TextField(
+            keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'Kode Pos'),
             onChanged: (value) => vm.kodePos = value,
           ),
+
+          const SizedBox(height: 16),
+
+          _buildFotoKK(vm),
         ],
       ),
     );
   }
 
-  Widget _buildAfterSaved(BuildContext context, AddKKViewModel vm) {
+  Widget _buildFotoKK(AddKKViewModel vm) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildCard(
-          header: _buildSectionHeader('Anggota Keluarga', Icons.people_outline),
-          child: Column(
-            children: [
-              const Text('KK berhasil disimpan'),
-              const SizedBox(height: 10),
+        const Text(
+          "Foto Kartu Keluarga",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
 
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => AddWargaPage()),
-                  );
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: ColorsUtils.b500),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Tambah Anggota',
-                      style: TextStyle(
-                        color: ColorsUtils.b500,
-                        fontWeight: FontWeight.w600,
-                      ),
+        const SizedBox(height: 10),
+
+        GestureDetector(
+          onTap: () async {
+            final picker = ImagePicker();
+            final picked = await picker.pickImage(
+              source: ImageSource.gallery,
+              imageQuality: 70,
+            );
+
+            if (picked != null) {
+              vm.fotoKK = File(picked.path);
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            height: 160,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: ColorsUtils.b500),
+            ),
+            child: vm.fotoKK == null
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.upload_file, size: 40),
+                        SizedBox(height: 8),
+                        Text("Upload Foto KK"),
+                      ],
                     ),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(vm.fotoKK!, fit: BoxFit.cover),
                   ),
-                ),
-              ),
-            ],
           ),
         ),
       ],

@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rukun_app_proyek4/core/network/dio_client.dart';
 import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
@@ -13,6 +14,8 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: ".env");
 
   final hiveService = HiveService();
   await hiveService.init();
