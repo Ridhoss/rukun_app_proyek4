@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_warga_page.dart';
 
 class DetailKKPage extends StatelessWidget {
   final Keluarga kk;
@@ -216,7 +217,12 @@ class DetailKKPage extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddWargaPage()),
+                );
+              },
               icon: const Icon(Icons.add),
               label: const Text("Tambah Anggota"),
               style: OutlinedButton.styleFrom(
