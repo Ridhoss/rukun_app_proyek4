@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/pengajuan_surat_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -49,10 +50,11 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) => KeluargaVM(
-            kkRepository: context.read<KKRepository>(),
-          ),
+          create: (context) =>
+              KeluargaVM(kkRepository: context.read<KKRepository>()),
         ),
+
+        ChangeNotifierProvider(create: (_) => PengajuanSuratViewModel()),
       ],
       child: const MyApp(),
     ),
@@ -68,9 +70,6 @@ class MyApp extends StatelessWidget {
       title: 'RukunApp',
       debugShowCheckedModeBanner: false,
       home: const AuthGate(),
-      builder: (context, child) {
-        return Container(color: const Color.fromARGB(255, 75, 59, 59), child: child);
-      },
     );
   }
 }

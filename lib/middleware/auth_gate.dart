@@ -6,6 +6,7 @@ import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthViewModel>();

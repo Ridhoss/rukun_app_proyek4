@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/pengajuan_surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 
 class WargaSuratPage extends StatefulWidget {
