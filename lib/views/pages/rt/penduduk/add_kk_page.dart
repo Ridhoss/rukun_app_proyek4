@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
 
 class AddKKPage extends StatelessWidget {
@@ -43,18 +41,11 @@ class AddKKPage extends StatelessWidget {
               await vm.createKK();
 
               if (vm.errorMessage != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(vm.errorMessage!),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                NotificationUtils.showError(context, vm.errorMessage!);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Kartu Keluarga berhasil disimpan'),
-                    backgroundColor: Colors.green,
-                  ),
+                NotificationUtils.showSuccess(
+                  context,
+                  "Kartu Keluarga berhasil disimpan",
                 );
 
                 Navigator.pop(context);
@@ -125,16 +116,8 @@ class AddKKPage extends StatelessWidget {
         const SizedBox(height: 10),
 
         GestureDetector(
-          onTap: () async {
-            final picker = ImagePicker();
-            final picked = await picker.pickImage(
-              source: ImageSource.gallery,
-              imageQuality: 70,
-            );
-
-            if (picked != null) {
-              vm.fotoKK = File(picked.path);
-            }
+          onTap: () {
+            vm.pickFotoKK();
           },
           child: Container(
             width: double.infinity,

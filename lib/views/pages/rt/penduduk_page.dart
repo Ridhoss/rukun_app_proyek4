@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
+import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_kk_page.dart';
@@ -17,13 +20,16 @@ class RtPendudukPage extends StatefulWidget {
 }
 
 class _RtPendudukPageState extends State<RtPendudukPage> {
+  bool _isInitialized = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final user = widget.user;
-    final rtId = user.rt?.id;
+    if (_isInitialized) return;
+    _isInitialized = true;
 
+    final rtId = widget.user.rt?.id;
     if (rtId == null) return;
 
     context.read<KeluargaVM>().init(rtId);
@@ -123,12 +129,21 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
                   }
 
                   if (vm.kkList.isEmpty) {
-                    return const Center(child: Text("Belum ada data KK"));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text("Belum ada data KK"),
+                          SizedBox(height: 8),
+                          Text("Tekan + untuk menambah"),
+                        ],
+                      ),
+                    );
                   }
 
                   return ListView.separated(
                     itemCount: vm.kkList.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final kk = vm.kkList[index];
                       return _buildKKCard(kk);
@@ -146,10 +161,7 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
         child: const Icon(Icons.add, color: ColorsUtils.white),
         onPressed: () {
           if (user.rt == null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('RT tidak ditemukan')));
-            return;
+            NotificationUtils.showError(context, 'RT tidak ditemukan');
           }
 
           Navigator.push(
@@ -157,7 +169,8 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
             MaterialPageRoute(
               builder: (context) => ChangeNotifierProvider(
                 create: (_) => AddKKViewModel(
-                  kkRepository: context.read(),
+                  kkRepository: context.read<KKRepository>(),
+                  cloudinaryService: context.read<CloudinaryService>(),
                   rtId: user.rt!.id,
                 ),
                 child: const AddKKPage(),
@@ -210,10 +223,38 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
 
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
-            onPressed: () {
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text("Hapus KK"),
+                  content: const Text("Yakin ingin menghapus data ini?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text("Batal"),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text("Hapus"),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm != true) return;
+
               final id = kk.id;
               if (id == null) return;
-              context.read<KeluargaVM>().deleteKK(id);
+
+              final vm = context.read<KeluargaVM>();
+              await vm.deleteKK(id);
+
+              if (vm.errorMessage != null) {
+                NotificationUtils.showError(context, vm.errorMessage!);
+              } else {
+                NotificationUtils.showSuccess(context, "KK berhasil dihapus");
+              }
             },
           ),
         ],

@@ -7,6 +7,7 @@ import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -37,6 +38,8 @@ void main() async {
 
         Provider(create: (_) => CloudKKService()),
 
+        Provider<CloudinaryService>(create: (_) => CloudinaryService()),
+
         Provider(
           create: (context) => KKRepository(
             context.read<CloudKKService>(),
@@ -49,9 +52,8 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) => KeluargaVM(
-            kkRepository: context.read<KKRepository>(),
-          ),
+          create: (context) =>
+              KeluargaVM(kkRepository: context.read<KKRepository>()),
         ),
       ],
       child: const MyApp(),
