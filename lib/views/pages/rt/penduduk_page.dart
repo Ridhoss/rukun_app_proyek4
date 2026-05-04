@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
+import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_kk_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/penduduk/detail_kk_page.dart';
 
 class RtPendudukPage extends StatefulWidget {
   final User user;
@@ -17,13 +21,16 @@ class RtPendudukPage extends StatefulWidget {
 }
 
 class _RtPendudukPageState extends State<RtPendudukPage> {
+  bool _isInitialized = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final user = widget.user;
-    final rtId = user.rt?.id;
+    if (_isInitialized) return;
+    _isInitialized = true;
 
+    final rtId = widget.user.rt?.id;
     if (rtId == null) return;
 
     context.read<KeluargaVM>().init(rtId);
@@ -111,6 +118,10 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
 
             const SizedBox(height: 12),
 
+            _buildAddButton(context, user),
+
+            const SizedBox(height: 12),
+
             Expanded(
               child: Consumer<KeluargaVM>(
                 builder: (context, vm, _) {
@@ -123,7 +134,16 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
                   }
 
                   if (vm.kkList.isEmpty) {
-                    return const Center(child: Text("Belum ada data KK"));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text("Belum ada data KK"),
+                          SizedBox(height: 8),
+                          Text("Tekan + untuk menambah"),
+                        ],
+                      ),
+                    );
                   }
 
                   return ListView.separated(
@@ -140,15 +160,68 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
           ],
         ),
       ),
+    );
+  }
 
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: ColorsUtils.b500,
-        child: const Icon(Icons.add, color: ColorsUtils.white),
+  Widget _buildKKCard(Keluarga kk) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => DetailKKPage(kk: kk)),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: ColorsUtils.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.credit_card, size: 28, color: ColorsUtils.gray),
+            const SizedBox(width: 16),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'No. KK: ${kk.noKK}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: ColorsUtils.black800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    kk.alamat ?? '-',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: ColorsUtils.gray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Icon(Icons.chevron_right, color: ColorsUtils.gray),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddButton(BuildContext context, User user) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
         onPressed: () {
           if (user.rt == null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('RT tidak ditemukan')));
+            NotificationUtils.showError(context, 'RT tidak ditemukan');
             return;
           }
 
@@ -157,66 +230,30 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
             MaterialPageRoute(
               builder: (context) => ChangeNotifierProvider(
                 create: (_) => AddKKViewModel(
-                  kkRepository: context.read(),
+                  kkRepository: context.read<KKRepository>(),
+                  cloudinaryService: context.read<CloudinaryService>(),
                   rtId: user.rt!.id,
                 ),
                 child: const AddKKPage(),
               ),
             ),
-          );
+          ).then((_) {
+            final rtId = user.rt?.id;
+            if (rtId != null) {
+              context.read<KeluargaVM>().init(rtId);
+            }
+          });
         },
-      ),
-    );
-  }
-
-  Widget _buildKKCard(Keluarga kk) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: ColorsUtils.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.credit_card, size: 28, color: ColorsUtils.gray),
-          const SizedBox(width: 16),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'No. KK: ${kk.noKK}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: ColorsUtils.black800,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  kk.alamat ?? '-',
-                  style: const TextStyle(fontSize: 12, color: ColorsUtils.gray),
-                ),
-              ],
-            ),
+        icon: const Icon(Icons.add),
+        label: const Text("Tambah Kartu Keluarga"),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: ColorsUtils.b500,
+          side: BorderSide(color: ColorsUtils.b500, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-
-          IconButton(
-            icon: const Icon(Icons.edit_outlined, color: ColorsUtils.b500),
-            onPressed: () {},
-          ),
-
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.red),
-            onPressed: () {
-              final id = kk.id;
-              if (id == null) return;
-              context.read<KeluargaVM>().deleteKK(id);
-            },
-          ),
-        ],
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
       ),
     );
   }

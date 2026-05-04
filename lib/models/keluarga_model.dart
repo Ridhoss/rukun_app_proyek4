@@ -4,6 +4,7 @@ class Keluarga {
   final int rtId;
   final String? alamat;
   final String? kodePos;
+  final String? imgRef;
 
   Keluarga({
     this.id,
@@ -11,6 +12,7 @@ class Keluarga {
     required this.rtId,
     this.alamat,
     this.kodePos,
+    this.imgRef,
   });
 
   factory Keluarga.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Keluarga {
       rtId: json['rt_id'] ?? 0,
       alamat: json['alamat'],
       kodePos: json['kode_pos'],
+      imgRef: json['img_referensi'],
     );
   }
 
@@ -30,6 +33,7 @@ class Keluarga {
       'rt_id': rtId,
       'alamat': alamat,
       'kode_pos': kodePos,
+      'img_referensi': imgRef,
     };
   }
 
@@ -39,6 +43,7 @@ class Keluarga {
     int? rtId,
     String? alamat,
     String? kodePos,
+    String? imgRef,
   }) {
     return Keluarga(
       id: id ?? this.id,
@@ -46,6 +51,7 @@ class Keluarga {
       rtId: rtId ?? this.rtId,
       alamat: alamat ?? this.alamat,
       kodePos: kodePos ?? this.kodePos,
+      imgRef: imgRef ?? this.imgRef,
     );
   }
 }

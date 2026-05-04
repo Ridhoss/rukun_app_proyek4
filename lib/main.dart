@@ -7,6 +7,7 @@ import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/pengajuan_surat_viewmodel.dart';
@@ -37,6 +38,8 @@ void main() async {
         ),
 
         Provider(create: (_) => CloudKKService()),
+
+        Provider<CloudinaryService>(create: (_) => CloudinaryService()),
 
         Provider(
           create: (context) => KKRepository(

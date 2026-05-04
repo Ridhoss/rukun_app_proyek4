@@ -8,6 +8,7 @@ class AddWargaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+
       appBar: AppBar(
         backgroundColor: ColorsUtils.b500,
         foregroundColor: ColorsUtils.white,
@@ -18,39 +19,112 @@ class AddWargaPage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
+
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
         children: [
+          _header(),
+
+          const SizedBox(height: 16),
+
           _buildSection('Data Pribadi', Icons.person_outline, _dataPribadi()),
-          const SizedBox(height: 16),
-
-          _buildSection('Data Identitas', Icons.badge_outlined, _dataIdentitas()),
-          const SizedBox(height: 16),
-
-          _buildSection('Status Perkawinan', Icons.favorite_border, _dataPerkawinan()),
-          const SizedBox(height: 16),
-
-          _buildSection('Kewarganegaraan & Dokumen', Icons.article_outlined, _dataKewarganegaraan()),
-          const SizedBox(height: 16),
-
-          _buildSection('Data Keluarga', Icons.family_restroom, _dataKeluarga()),
+          _buildSection(
+            'Data Identitas',
+            Icons.badge_outlined,
+            _dataIdentitas(),
+          ),
+          _buildSection(
+            'Status Perkawinan',
+            Icons.favorite_border,
+            _dataPerkawinan(),
+          ),
+          _buildSection(
+            'Kewarganegaraan',
+            Icons.public,
+            _dataKewarganegaraan(),
+          ),
+          _buildSection(
+            'Data Keluarga',
+            Icons.family_restroom,
+            _dataKeluarga(),
+          ),
         ],
       ),
+
       bottomNavigationBar: _bottomBar(),
     );
   }
 
+  // ================= HEADER =================
+  Widget _header() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ColorsUtils.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: ColorsUtils.b50,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.person_add, color: ColorsUtils.b500),
+          ),
+          const SizedBox(width: 16),
+          const Expanded(
+            child: Text(
+              'Lengkapi data warga dengan benar sesuai dokumen resmi',
+              style: TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= SECTION =================
+  Widget _buildSection(String title, IconData icon, Widget child) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: ColorsUtils.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: ColorsUtils.b500),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+
+          Padding(padding: const EdgeInsets.all(16), child: child),
+        ],
+      ),
+    );
+  }
+
+  // ================= FORM =================
   Widget _dataPribadi() {
     return Column(
       children: [
         _textField('Nama Lengkap'),
-        const SizedBox(height: 14),
-
         _textField('NIK', keyboard: TextInputType.number),
-        const SizedBox(height: 14),
-
         _dropdown('Jenis Kelamin', ['Laki-Laki', 'Perempuan']),
-        const SizedBox(height: 14),
 
         Row(
           children: [
@@ -59,7 +133,7 @@ class AddWargaPage extends StatelessWidget {
             Expanded(child: _dateField('Tanggal Lahir')),
           ],
         ),
-      ],
+      ].withSpacing(),
     );
   }
 
@@ -67,22 +141,22 @@ class AddWargaPage extends StatelessWidget {
     return Column(
       children: [
         _dropdown('Agama', [
-          'Islam','Kristen','Katolik','Hindu','Buddha','Konghucu'
+          'Islam',
+          'Kristen',
+          'Katolik',
+          'Hindu',
+          'Buddha',
+          'Konghucu',
         ]),
-        const SizedBox(height: 14),
-
-        _dropdown('Pendidikan', [
-          'SD','SMP','SMA','D3','S1','S2','S3'
-        ]),
-        const SizedBox(height: 14),
-
+        _dropdown('Pendidikan', ['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2', 'S3']),
         _dropdown('Pekerjaan', [
-          'Belum Bekerja','Pelajar','Karyawan','Wiraswasta'
+          'Belum Bekerja',
+          'Pelajar',
+          'Karyawan',
+          'Wiraswasta',
         ]),
-        const SizedBox(height: 14),
-
-        _dropdown('Golongan Darah', ['A','B','AB','O']),
-      ],
+        _dropdown('Golongan Darah', ['A', 'B', 'AB', 'O']),
+      ].withSpacing(),
     );
   }
 
@@ -90,26 +164,23 @@ class AddWargaPage extends StatelessWidget {
     return Column(
       children: [
         _dropdown('Status Perkawinan', [
-          'Belum Kawin','Kawin','Cerai Hidup','Cerai Mati'
+          'Belum Kawin',
+          'Kawin',
+          'Cerai Hidup',
+          'Cerai Mati',
         ]),
-        const SizedBox(height: 14),
-
         _dateField('Tanggal Perkawinan'),
-      ],
+      ].withSpacing(),
     );
   }
 
   Widget _dataKewarganegaraan() {
     return Column(
       children: [
-        _dropdown('Kewarganegaraan', ['WNI','WNA']),
-        const SizedBox(height: 14),
-
+        _dropdown('Kewarganegaraan', ['WNI', 'WNA']),
         _textField('No. Paspor'),
-        const SizedBox(height: 14),
-
         _textField('No. KITAP'),
-      ],
+      ].withSpacing(),
     );
   }
 
@@ -117,56 +188,28 @@ class AddWargaPage extends StatelessWidget {
     return Column(
       children: [
         _dropdown('Status Hubungan', [
-          'Kepala Keluarga','Suami','Istri','Anak','Menantu',
-          'Cucu','Orang Tua','Mertua','Famili Lain'
+          'Kepala Keluarga',
+          'Suami',
+          'Istri',
+          'Anak',
         ]),
-        const SizedBox(height: 14),
-
         _textField('Nama Ayah'),
-        const SizedBox(height: 14),
-
         _textField('Nama Ibu'),
-      ],
+      ].withSpacing(),
     );
   }
 
-  Widget _buildSection(String title, IconData icon, Widget child) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorsUtils.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Icon(icon),
-                const SizedBox(width: 8),
-                Text(title),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: child,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _textField(String label, {TextInputType keyboard = TextInputType.text}) {
+  // ================= INPUT =================
+  Widget _textField(
+    String label, {
+    TextInputType keyboard = TextInputType.text,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label),
         const SizedBox(height: 6),
-        TextField(
-          keyboardType: keyboard,
-          decoration: _input(),
-        ),
+        TextField(keyboardType: keyboard, decoration: _input()),
       ],
     );
   }
@@ -178,7 +221,9 @@ class AddWargaPage extends StatelessWidget {
         Text(label),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          items: items
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
           onChanged: (_) {},
           decoration: _input(),
           hint: Text('Pilih $label'),
@@ -210,22 +255,35 @@ class AddWargaPage extends StatelessWidget {
     );
   }
 
+  // ================= BUTTON =================
   Widget _bottomBar() {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: ColorsUtils.white,
+          border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+        ),
         child: ElevatedButton(
           onPressed: () {},
           style: ElevatedButton.styleFrom(
             backgroundColor: ColorsUtils.b500,
-            foregroundColor: ColorsUtils.white
+            foregroundColor: ColorsUtils.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          child: const Text('Simpan Data'),
+          child: const Text(
+            'Simpan Data Warga',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );
   }
 
+  // ================= DECORATION =================
   InputDecoration _input() {
     return InputDecoration(
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -244,5 +302,12 @@ class AddWargaPage extends StatelessWidget {
       filled: true,
       fillColor: ColorsUtils.white,
     );
+  }
+}
+
+extension Spacing on List<Widget> {
+  List<Widget> withSpacing([double space = 14]) {
+    return expand((widget) => [widget, SizedBox(height: space)]).toList()
+      ..removeLast();
   }
 }

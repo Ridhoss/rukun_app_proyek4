@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
 
 class AddKKPage extends StatelessWidget {
@@ -18,16 +16,25 @@ class AddKKPage extends StatelessWidget {
 
       appBar: AppBar(
         backgroundColor: ColorsUtils.b500,
-        foregroundColor: Colors.white,
-        title: const Text('Tambah Kartu Keluarga'),
+        foregroundColor: ColorsUtils.white,
+        elevation: 0,
+        title: const Text(
+          'Tambah Kartu Keluarga',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+        ),
+        centerTitle: true,
       ),
 
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+        padding: const EdgeInsets.all(16),
         children: [
-          _buildKKSection(vm),
+          _buildHeader(),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          _buildFormCard(vm),
+
+          const SizedBox(height: 16),
 
           _buildSaveButton(context, vm),
         ],
@@ -35,51 +42,49 @@ class AddKKPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSaveButton(BuildContext context, AddKKViewModel vm) {
-    return OutlinedButton(
-      onPressed: vm.isSaving
-          ? null
-          : () async {
-              await vm.createKK();
-
-              if (vm.errorMessage != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(vm.errorMessage!),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Kartu Keluarga berhasil disimpan'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-
-                Navigator.pop(context);
-              }
-            },
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(color: ColorsUtils.b500, width: 1.5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        foregroundColor: ColorsUtils.b500,
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ColorsUtils.white,
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: vm.isSaving
-          ? const SizedBox(
-              height: 18,
-              width: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : const Text(
-              'Simpan Kartu Keluarga',
-              style: TextStyle(fontWeight: FontWeight.w600),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: ColorsUtils.b50,
+              shape: BoxShape.circle,
             ),
+            child: const Icon(Icons.credit_card, color: ColorsUtils.b500),
+          ),
+          const SizedBox(width: 16),
+
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Tambah Data",
+                style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
+              ),
+              SizedBox(height: 4),
+              Text(
+                "Kartu Keluarga",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: ColorsUtils.b400,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildKKSection(AddKKViewModel vm) {
+  Widget _buildFormCard(AddKKViewModel vm) {
     return _buildCard(
       header: _buildSectionHeader('Data Kartu Keluarga', Icons.home_outlined),
       child: Column(
@@ -90,14 +95,14 @@ class AddKKPage extends StatelessWidget {
             onChanged: (value) => vm.noKK = value,
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
           TextField(
             decoration: const InputDecoration(labelText: 'Alamat'),
             onChanged: (value) => vm.alamat = value,
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
           TextField(
             keyboardType: TextInputType.number,
@@ -125,42 +130,108 @@ class AddKKPage extends StatelessWidget {
         const SizedBox(height: 10),
 
         GestureDetector(
-          onTap: () async {
-            final picker = ImagePicker();
-            final picked = await picker.pickImage(
-              source: ImageSource.gallery,
-              imageQuality: 70,
-            );
-
-            if (picked != null) {
-              vm.fotoKK = File(picked.path);
-            }
-          },
+          onTap: vm.pickFotoKK,
           child: Container(
             width: double.infinity,
-            height: 160,
+            height: 170,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: ColorsUtils.b500),
+              color: vm.fotoKK == null
+                  ? const Color(0xFFF9FAFB)
+                  : Colors.transparent,
             ),
             child: vm.fotoKK == null
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.upload_file, size: 40),
-                        SizedBox(height: 8),
-                        Text("Upload Foto KK"),
-                      ],
-                    ),
+                ? const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.upload_file, size: 40),
+                      SizedBox(height: 8),
+                      Text("Upload Foto KK"),
+                      SizedBox(height: 4),
+                      Text("Format JPG/PNG", style: TextStyle(fontSize: 11)),
+                    ],
                   )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(vm.fotoKK!, fit: BoxFit.cover),
+                : Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(
+                          vm.fotoKK!,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+
+                      // overlay edit
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: const Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSaveButton(BuildContext context, AddKKViewModel vm) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: vm.isSaving
+            ? null
+            : () async {
+                await vm.createKK();
+
+                if (vm.errorMessage != null) {
+                  NotificationUtils.showError(context, vm.errorMessage!);
+                } else {
+                  NotificationUtils.showSuccess(
+                    context,
+                    "Kartu Keluarga berhasil disimpan",
+                  );
+                  Navigator.pop(context);
+                }
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: ColorsUtils.b500,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+        child: vm.isSaving
+            ? const SizedBox(
+                height: 18,
+                width: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Text(
+                'Simpan Kartu Keluarga',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+      ),
     );
   }
 
