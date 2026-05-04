@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/warga/add_warga_viewmodel.dart';
 
 class AddWargaPage extends StatelessWidget {
   const AddWargaPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<AddWargaViewModel>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
 
@@ -27,35 +32,38 @@ class AddWargaPage extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          _buildSection('Data Pribadi', Icons.person_outline, _dataPribadi()),
+          _buildSection(
+            'Data Pribadi',
+            Icons.person_outline,
+            _dataPribadi(context, vm),
+          ),
           _buildSection(
             'Data Identitas',
             Icons.badge_outlined,
-            _dataIdentitas(),
+            _dataIdentitas(vm),
           ),
           _buildSection(
             'Status Perkawinan',
             Icons.favorite_border,
-            _dataPerkawinan(),
+            _dataPerkawinan(context, vm),
           ),
           _buildSection(
             'Kewarganegaraan',
             Icons.public,
-            _dataKewarganegaraan(),
+            _dataKewarganegaraan(vm),
           ),
           _buildSection(
             'Data Keluarga',
             Icons.family_restroom,
-            _dataKeluarga(),
+            _dataKeluarga(vm),
           ),
         ],
       ),
 
-      bottomNavigationBar: _bottomBar(),
+      bottomNavigationBar: _bottomBar(context, vm),
     );
   }
 
-  // ================= HEADER =================
   Widget _header() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -85,7 +93,6 @@ class AddWargaPage extends StatelessWidget {
     );
   }
 
-  // ================= SECTION =================
   Widget _buildSection(String title, IconData icon, Widget child) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -118,145 +125,190 @@ class AddWargaPage extends StatelessWidget {
     );
   }
 
-  // ================= FORM =================
-  Widget _dataPribadi() {
+  Widget _dataPribadi(BuildContext context, AddWargaViewModel vm) {
     return Column(
       children: [
-        _textField('Nama Lengkap'),
-        _textField('NIK', keyboard: TextInputType.number),
-        _dropdown('Jenis Kelamin', ['Laki-Laki', 'Perempuan']),
+        _textField('Nama Lengkap', onChanged: vm.setNama),
+        _textField('NIK', keyboard: TextInputType.number, onChanged: vm.setNik),
+
+        _dropdown(
+          'Jenis Kelamin',
+          ['Laki-Laki', 'Perempuan'],
+          value: vm.jenisKelamin,
+          onChanged: vm.setJenisKelamin,
+        ),
 
         Row(
           children: [
-            Expanded(child: _textField('Tempat Lahir')),
+            Expanded(
+              child: _textField('Tempat Lahir', onChanged: vm.setTempatLahir),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _dateField('Tanggal Lahir')),
+            Expanded(
+              child: _dateField(
+                context,
+                'Tanggal Lahir',
+                vm.tanggalLahir,
+                vm.setTanggalLahir,
+              ),
+            ),
           ],
         ),
       ].withSpacing(),
     );
   }
 
-  Widget _dataIdentitas() {
+  Widget _dataIdentitas(AddWargaViewModel vm) {
     return Column(
       children: [
-        _dropdown('Agama', [
-          'Islam',
-          'Kristen',
-          'Katolik',
-          'Hindu',
-          'Buddha',
-          'Konghucu',
-        ]),
-        _dropdown('Pendidikan', ['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2', 'S3']),
-        _dropdown('Pekerjaan', [
-          'Belum Bekerja',
-          'Pelajar',
-          'Karyawan',
-          'Wiraswasta',
-        ]),
-        _dropdown('Golongan Darah', ['A', 'B', 'AB', 'O']),
+        _dropdown(
+          'Agama',
+          ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'],
+          value: vm.agama,
+          onChanged: vm.setAgama,
+        ),
+
+        _dropdown(
+          'Pendidikan',
+          ['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2', 'S3'],
+          value: vm.pendidikan,
+          onChanged: vm.setPendidikan,
+        ),
+
+        _dropdown(
+          'Pekerjaan',
+          ['Belum Bekerja', 'Pelajar', 'Karyawan', 'Wiraswasta'],
+          value: vm.pekerjaan,
+          onChanged: vm.setPekerjaan,
+        ),
+
+        _dropdown(
+          'Golongan Darah',
+          ['A', 'B', 'AB', 'O'],
+          value: vm.golonganDarah,
+          onChanged: vm.setGolDarah,
+        ),
       ].withSpacing(),
     );
   }
 
-  Widget _dataPerkawinan() {
+  Widget _dataPerkawinan(BuildContext context, AddWargaViewModel vm) {
     return Column(
       children: [
-        _dropdown('Status Perkawinan', [
-          'Belum Kawin',
-          'Kawin',
-          'Cerai Hidup',
-          'Cerai Mati',
-        ]),
-        _dateField('Tanggal Perkawinan'),
+        _dropdown(
+          'Status Perkawinan',
+          ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'],
+          value: vm.statusPerkawinan,
+          onChanged: vm.setStatusPerkawinan,
+        ),
+
+        _dateField(
+          context,
+          'Tanggal Perkawinan',
+          vm.tanggalPerkawinan,
+          vm.setTanggalPerkawinan,
+        ),
       ].withSpacing(),
     );
   }
 
-  Widget _dataKewarganegaraan() {
+  Widget _dataKewarganegaraan(AddWargaViewModel vm) {
     return Column(
       children: [
-        _dropdown('Kewarganegaraan', ['WNI', 'WNA']),
+        _dropdown(
+          'Kewarganegaraan',
+          ['WNI', 'WNA'],
+          value: vm.kewarganegaraan,
+          onChanged: vm.setKewarganegaraan,
+        ),
+
+        if (vm.kewarganegaraan == 'WNA')
+          _textField('Negara Asal', onChanged: vm.setNegara),
+
         _textField('No. Paspor'),
         _textField('No. KITAP'),
       ].withSpacing(),
     );
   }
 
-  Widget _dataKeluarga() {
+  Widget _dataKeluarga(AddWargaViewModel vm) {
     return Column(
       children: [
-        _dropdown('Status Hubungan', [
-          'Kepala Keluarga',
-          'Suami',
-          'Istri',
-          'Anak',
-        ]),
-        _textField('Nama Ayah'),
-        _textField('Nama Ibu'),
+        _dropdown(
+          'Status Hubungan',
+          [
+            'Kepala Keluarga',
+            'Suami',
+            'Istri',
+            'Anak',
+            'Orang Tua',
+            'Cucu',
+            'Cicit',
+            'Menantu',
+            'Mertua',
+            'Famili Lain',
+          ],
+          value: vm.statusHubungan,
+          onChanged: vm.setStatusHubungan,
+        ),
+
+        _textField('Nama Ayah', onChanged: (v) => vm.namaAyah = v),
+        _textField('Nama Ibu', onChanged: (v) => vm.namaIbu = v),
       ].withSpacing(),
     );
   }
 
-  // ================= INPUT =================
-  Widget _textField(
-    String label, {
-    TextInputType keyboard = TextInputType.text,
-  }) {
+  Widget _dateField(
+    BuildContext context,
+    String label,
+    DateTime? value,
+    Function(DateTime) onPick,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label),
         const SizedBox(height: 6),
-        TextField(keyboardType: keyboard, decoration: _input()),
-      ],
-    );
-  }
 
-  Widget _dropdown(String label, List<String> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label),
-        const SizedBox(height: 6),
-        DropdownButtonFormField<String>(
-          items: items
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: (_) {},
-          decoration: _input(),
-          hint: Text('Pilih $label'),
-        ),
-      ],
-    );
-  }
+        GestureDetector(
+          onTap: () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: value ?? DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+            );
 
-  Widget _dateField(String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFDDE3ED)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: const [
-              Expanded(child: Text('Pilih tanggal')),
-              Icon(Icons.calendar_today_outlined, size: 16),
-            ],
+            if (picked != null) {
+              onPick(picked);
+            }
+          },
+
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFFDDE3ED)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value == null
+                        ? 'Pilih tanggal'
+                        : "${value.day}/${value.month}/${value.year}",
+                  ),
+                ),
+                const Icon(Icons.calendar_today_outlined, size: 16),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 
-  // ================= BUTTON =================
-  Widget _bottomBar() {
+  Widget _bottomBar(BuildContext context, AddWargaViewModel vm) {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -265,7 +317,22 @@ class AddWargaPage extends StatelessWidget {
           border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
         ),
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: vm.isSaving
+              ? null
+              : () async {
+                  await vm.saveWarga();
+
+                  if (vm.errorMessage != null) {
+                    NotificationUtils.showError(context, vm.errorMessage!);
+                  } else {
+                    NotificationUtils.showSuccess(
+                      context,
+                      "Warga berhasil disimpan",
+                    );
+
+                    Navigator.pop(context, true);
+                  }
+                },
           style: ElevatedButton.styleFrom(
             backgroundColor: ColorsUtils.b500,
             foregroundColor: ColorsUtils.white,
@@ -283,7 +350,6 @@ class AddWargaPage extends StatelessWidget {
     );
   }
 
-  // ================= DECORATION =================
   InputDecoration _input() {
     return InputDecoration(
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -301,6 +367,49 @@ class AddWargaPage extends StatelessWidget {
       ),
       filled: true,
       fillColor: ColorsUtils.white,
+    );
+  }
+
+  Widget _dropdown(
+    String label,
+    List<String> items, {
+    String? value,
+    Function(String?)? onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(
+          value: items.contains(value) ? value : null,
+          items: items
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
+          onChanged: onChanged,
+          decoration: _input(),
+          hint: Text('Pilih $label'),
+        ),
+      ],
+    );
+  }
+
+  Widget _textField(
+    String label, {
+    TextInputType keyboard = TextInputType.text,
+    Function(String)? onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 6),
+        TextField(
+          keyboardType: keyboard,
+          onChanged: onChanged,
+          decoration: _input(),
+        ),
+      ],
     );
   }
 }

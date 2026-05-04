@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
+import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/warga/add_warga_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_warga_page.dart';
 
 class DetailKKPage extends StatelessWidget {
@@ -220,7 +223,12 @@ class DetailKKPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AddWargaPage()),
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (_) => AddWargaViewModel(repo: context.read<WargaRepository>(), kkId: kk.id!),
+                      child: const AddWargaPage(),
+                    ),
+                  ),
                 );
               },
               icon: const Icon(Icons.add),

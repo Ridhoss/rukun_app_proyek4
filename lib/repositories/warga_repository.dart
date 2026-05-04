@@ -1,28 +1,125 @@
-// import 'package:rukun_app_proyek4/models/warga.dart';
-// import 'package:rukun_app_proyek4/services/warga_service.dart';
+import 'package:dio/dio.dart';
+import 'package:rukun_app_proyek4/models/warga_model.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
+import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 
-// class WargaRepository {
-//   final WargaService _localService;
-//   // Jika nanti ada CloudWargaService untuk API, tambahkan di sini
+class WargaRepository {
+  final CloudWargaService service;
+  final AuthLocalService local;
 
-//   WargaRepository({required WargaService localService})
-//       : _localService = localService;
+  WargaRepository(this.service, this.local);
 
-//   Future<bool> saveWarga(WargaModel warga) async {
-//     return await _localService.saveWarga(warga);
-//   }
+  Future<List<Warga>> getAllWarga() async {
+    final token = await _requireToken();
 
-//   Future<bool> updateWarga(String id, WargaModel warga) async {
-//     return await _localService.updateWarga(id, warga);
-//   }
+    final result = await _safeCall(() => service.getAllWarga(token));
 
-//   Future<List<WargaModel>> getWargaByKK(int kkId) async {
-//     return await _localService.getWargaByKK(kkId);
-//   }
+    _validateStatus(result);
 
-//   Future<bool> deleteWarga(String id) async {
-//     return await _localService.deleteWarga(id);
-//   }
+    final List data = result['data'] ?? [];
 
-//   String? get lastError => _localService.lastError;
-// }
+    return data.map((e) => Warga.fromJson(e)).toList();
+  }
+
+  Future<Warga?> getWargaById(int id) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.getWargaById(id, token),
+    );
+
+    _validateStatus(result);
+
+    final data = result['data'];
+
+    if (data == null) return null;
+
+    return Warga.fromJson(data);
+  }
+
+  Future<List<Warga>> getWargaByKeluarga(int keluargaId) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.getWargaByKeluarga(keluargaId, token),
+    );
+
+    _validateStatus(result);
+
+    final List data = result['data'] ?? [];
+
+    return data.map((e) => Warga.fromJson(e)).toList();
+  }
+
+  Future<Warga?> createWarga(Warga warga) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.createWarga(warga.toJson(), token),
+    );
+
+    _validateStatus(result);
+
+    final data = result['data'];
+
+    if (data == null) return null;
+
+    return Warga.fromJson(data);
+  }
+
+  Future<Warga?> updateWarga(int id, Warga warga) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.updateWarga(id, warga.toJson(), token),
+    );
+
+    _validateStatus(result);
+
+    final data = result['data'];
+
+    if (data == null) return null;
+
+    return Warga.fromJson(data);
+  }
+
+  Future<void> deleteWarga(int id) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.deleteWarga(id, token),
+    );
+
+    _validateStatus(result);
+  }
+
+  Future<String> _requireToken() async {
+    final token = await local.getToken();
+
+    if (token == null) {
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+    }
+
+    return token;
+  }
+
+  Future<Map<String, dynamic>> _safeCall(
+    Future<Map<String, dynamic>> Function() fn,
+  ) async {
+    try {
+      return await fn();
+    } on DioException catch (e) {
+      final message = e.response?.data?['message'] ?? "Terjadi kesalahan";
+
+      throw Exception(message);
+    } catch (e) {
+      throw Exception(e.toString().replaceAll("Exception: ", ""));
+    }
+  }
+
+  void _validateStatus(Map<String, dynamic> result) {
+    if (result['status'] != 'success') {
+      throw Exception(result['message'] ?? "Unknown error");
+    }
+  }
+}

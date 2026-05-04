@@ -6,8 +6,8 @@ import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/kartukeluarga/add_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_kk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/detail_kk_page.dart';
 
