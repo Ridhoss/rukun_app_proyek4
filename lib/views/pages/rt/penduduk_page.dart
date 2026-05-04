@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kartukeluarga/add_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_kk_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/penduduk/detail_kk_page.dart';
 
 class RtPendudukPage extends StatefulWidget {
   final User user;
@@ -117,6 +118,10 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
 
             const SizedBox(height: 12),
 
+            _buildAddButton(context, user),
+
+            const SizedBox(height: 12),
+
             Expanded(
               child: Consumer<KeluargaVM>(
                 builder: (context, vm, _) {
@@ -155,13 +160,69 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
           ],
         ),
       ),
+    );
+  }
 
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: ColorsUtils.b500,
-        child: const Icon(Icons.add, color: ColorsUtils.white),
+  Widget _buildKKCard(Keluarga kk) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => DetailKKPage(kk: kk)),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: ColorsUtils.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.credit_card, size: 28, color: ColorsUtils.gray),
+            const SizedBox(width: 16),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'No. KK: ${kk.noKK}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: ColorsUtils.black800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    kk.alamat ?? '-',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: ColorsUtils.gray,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Icon(Icons.chevron_right, color: ColorsUtils.gray),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddButton(BuildContext context, User user) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
         onPressed: () {
           if (user.rt == null) {
             NotificationUtils.showError(context, 'RT tidak ditemukan');
+            return;
           }
 
           Navigator.push(
@@ -176,88 +237,23 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
                 child: const AddKKPage(),
               ),
             ),
-          );
+          ).then((_) {
+            final rtId = user.rt?.id;
+            if (rtId != null) {
+              context.read<KeluargaVM>().init(rtId);
+            }
+          });
         },
-      ),
-    );
-  }
-
-  Widget _buildKKCard(Keluarga kk) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: ColorsUtils.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.credit_card, size: 28, color: ColorsUtils.gray),
-          const SizedBox(width: 16),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'No. KK: ${kk.noKK}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: ColorsUtils.black800,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  kk.alamat ?? '-',
-                  style: const TextStyle(fontSize: 12, color: ColorsUtils.gray),
-                ),
-              ],
-            ),
+        icon: const Icon(Icons.add),
+        label: const Text("Tambah Kartu Keluarga"),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: ColorsUtils.b500,
+          side: BorderSide(color: ColorsUtils.b500, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-
-          IconButton(
-            icon: const Icon(Icons.edit_outlined, color: ColorsUtils.b500),
-            onPressed: () {},
-          ),
-
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.red),
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Hapus KK"),
-                  content: const Text("Yakin ingin menghapus data ini?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text("Batal"),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text("Hapus"),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirm != true) return;
-
-              final id = kk.id;
-              if (id == null) return;
-
-              final vm = context.read<KeluargaVM>();
-              await vm.deleteKK(id);
-
-              if (vm.errorMessage != null) {
-                NotificationUtils.showError(context, vm.errorMessage!);
-              } else {
-                NotificationUtils.showSuccess(context, "KK berhasil dihapus");
-              }
-            },
-          ),
-        ],
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
       ),
     );
   }
