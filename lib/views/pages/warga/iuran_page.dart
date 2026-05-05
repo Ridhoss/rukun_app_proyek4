@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/models/iuran_model.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/home_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/warga_upload_iuran_page.dart';
 
 class WargaIuranPage extends StatelessWidget {
   const WargaIuranPage({super.key});
@@ -216,12 +217,12 @@ class WargaIuranPage extends StatelessWidget {
 
     return ListView.builder(
       itemCount: vm.data.length,
-      itemBuilder: (_, i) => _card(vm.data[i]),
+    itemBuilder: (context, i) => _card(context, vm.data[i]),
     );
   }
 
   // card item iuran dengan transaksi
-  Widget _card(IuranWithTransaksi item) {
+  Widget _card(BuildContext context, IuranWithTransaksi item) {
     final trx = item.transaksi;
     final status = trx?.status ?? StatusPembayaran.belumDibayar;
     final isBelum = status == StatusPembayaran.belumDibayar;
@@ -295,9 +296,16 @@ class WargaIuranPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        onPressed: () {},
-                        icon: Icon(isBelum ? Icons.upload : Icons.visibility),
-                        label: Text(isBelum ? "Upload Bukti" : "Lihat Bukti"),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => WargaUploadIuranPage(item: item),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.upload),
+                        label: const Text("Upload Bukti"),
                       ),
                     ),
                   ],
