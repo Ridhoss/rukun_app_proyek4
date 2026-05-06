@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
+import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/kartukeluarga/add_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/kartukeluarga/detail_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_kk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/detail_kk_page.dart';
@@ -169,7 +171,15 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => DetailKKPage(kk: kk)),
+          MaterialPageRoute(
+            builder: (_) => ChangeNotifierProvider(
+              create: (_) => DetailKKViewModel(
+                repo: context.read<WargaRepository>(),
+                kkId: kk.id!,
+              )..fetchAnggota(),
+              child: DetailKKPage(kk: kk),
+            ),
+          ),
         );
       },
       child: Container(
