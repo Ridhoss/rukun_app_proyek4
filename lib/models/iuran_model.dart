@@ -1,5 +1,5 @@
 enum IuranLevel { rt, rw }
-enum IuranType { wajib, sedekah }
+enum IuranType { reguler, insidentil }
 enum IuranScope { keluarga, warga }
 enum PeriodeType { bulanan, sekali }
 
@@ -10,7 +10,7 @@ class Iuran {
   final IuranLevel level;
   final int? rtId;
   final int? rwId;
-  final IuranType tipe;
+  final IuranType type;
   final IuranScope cakupan;
   final PeriodeType periode;
   final DateTime? waktuDibuat;
@@ -22,7 +22,7 @@ class Iuran {
     required this.level,
     this.rtId,
     this.rwId,
-    required this.tipe,
+    required this.type,
     required this.cakupan,
     required this.periode,
     this.waktuDibuat,
@@ -36,7 +36,7 @@ class Iuran {
       level: _level(json['level']),
       rtId: json['rt_id'],
       rwId: json['rw_id'],
-      tipe: _type(json['tipe']),
+      type: _type(json['type']),
       cakupan: _scope(json['cakupan']),
       periode: _periode(json['periode']),
       waktuDibuat: json['waktu_dibuat'] != null
@@ -53,7 +53,7 @@ class Iuran {
       'level': level.name,
       'rt_id': rtId,
       'rw_id': rwId,
-      'tipe': tipe.name,
+      'type': type.name,
       'cakupan': cakupan.name,
       'periode': periode.name,
       'waktu_dibuat': waktuDibuat?.toIso8601String(),
@@ -64,7 +64,7 @@ class Iuran {
       v == "RT" ? IuranLevel.rt : IuranLevel.rw;
 
   static IuranType _type(String v) =>
-      v == "wajib" ? IuranType.wajib : IuranType.sedekah;
+      v == "reguler" ? IuranType.reguler : IuranType.insidentil;
 
   static IuranScope _scope(String v) =>
       v == "keluarga" ? IuranScope.keluarga : IuranScope.warga;

@@ -12,6 +12,7 @@ import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/pengajuan_surat_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -66,6 +67,8 @@ void main() async {
           create: (context) =>
               KeluargaVM(kkRepository: context.read<KKRepository>()),
         ),
+
+        ChangeNotifierProvider(create: (_) => PengajuanSuratViewModel()),
       ],
       child: const MyApp(),
     ),

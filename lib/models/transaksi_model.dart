@@ -1,15 +1,20 @@
-enum ApprovalStatus { ditunda, disetujui, ditolak }
-
+enum StatusPembayaran {
+  belumDibayar,
+  diproses,
+  dibayar,
+  ditolak,
+}
 class Transaksi {
   final int id;
   final int iuranId;
   final int? keluargaId;
   final int? wargaId;
   final int jumlah;
-  final DateTime waktuBayar;
-  final ApprovalStatus status;
-  final int? disetujuiOleh;
-  final DateTime? waktuDisetujui;
+  final DateTime? waktuBayar;
+  final StatusPembayaran status;
+  final String? imgRef;
+  final int? diverifikasiOleh;
+  final DateTime? waktuVerifikasi;
 
   Transaksi({
     required this.id,
@@ -17,10 +22,11 @@ class Transaksi {
     this.keluargaId,
     this.wargaId,
     required this.jumlah,
-    required this.waktuBayar,
+    this.waktuBayar,
     required this.status,
-    this.disetujuiOleh,
-    this.waktuDisetujui,
+    this.imgRef,
+    this.diverifikasiOleh,
+    this.waktuVerifikasi,
   });
 
   factory Transaksi.fromJson(Map<String, dynamic> json) {
@@ -30,24 +36,29 @@ class Transaksi {
       keluargaId: json['keluarga_id'],
       wargaId: json['warga_id'],
       jumlah: json['jumlah'],
-      waktuBayar: DateTime.parse(json['waktu_bayar']),
+      waktuBayar: json['waktu_bayar'] != null
+          ? DateTime.parse(json['waktu_bayar'])
+          : null,
       status: _status(json['status']),
-      disetujuiOleh: json['disetujui_oleh'],
-      waktuDisetujui: json['waktu_disetujui'] != null
-          ? DateTime.parse(json['waktu_disetujui'])
+      imgRef: json['img_referensi'],
+
+      diverifikasiOleh: json['diverifikasi_oleh'],
+      waktuVerifikasi: json['waktu_verifikasi'] != null
+          ? DateTime.parse(json['waktu_verifikasi'])
           : null,
     );
   }
 
-  static ApprovalStatus _status(String v) {
+  static StatusPembayaran _status(String v) {
     switch (v) {
-      case "disetujui":
-        return ApprovalStatus.disetujui;
+      case "lunas":
+        return StatusPembayaran.dibayar;
+      case "belum_dibayar":
+        return StatusPembayaran.belumDibayar;
       case "ditolak":
-        return ApprovalStatus.ditolak;
+        return StatusPembayaran.ditolak;
       default:
-        return ApprovalStatus.ditunda;
+        return StatusPembayaran.belumDibayar;
     }
   }
 }
-

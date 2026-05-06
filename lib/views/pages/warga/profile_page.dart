@@ -8,7 +8,8 @@ import 'package:rukun_app_proyek4/views/pages/auth/login_page.dart';
 class WargaProfilePage extends StatelessWidget {
   const WargaProfilePage({super.key});
 
-  Widget build(BuildContext context) {
+// ignore: annotate_overrides
+Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
 
     final warga = authVM.currentUser;
