@@ -4,12 +4,13 @@ import 'package:rukun_app_proyek4/utils/avatar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/auth/login_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/kontak_pengurus_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/data_kk_page.dart';
 
 class WargaProfilePage extends StatelessWidget {
   const WargaProfilePage({super.key});
 
-// ignore: annotate_overrides
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
 
     final warga = authVM.currentUser;
@@ -53,23 +54,39 @@ Widget build(BuildContext context) {
 
           const SizedBox(height: 70),
           buildMenuCard(
-            icon: Icons.account_tree,
-            title: "Struktur Kepengurusan",
-            subtitle: "Posisi Pengurus",
+            icon: Icons.group,
+            title: "Data Kartu Keluarga",
+            subtitle: "Informasi Kartu Keluarga",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DataWargaPage(),
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 12),
           buildMenuCard(
             icon: Icons.file_download,
-            title: "Export Laporan",
+            title: "Info Akun Anda",
             subtitle: "Iuran Kependudukan, Surat",
           ),
 
           const SizedBox(height: 12),
           buildMenuCard(
             icon: Icons.person,
-            title: "Info Akun",
-            subtitle: "Data Profile & ganti password",
+            title: "Kontak Pengurus",
+            subtitle: "Informasi kontak pengurus RT/RW",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KontakPengurusPage(),
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 12),

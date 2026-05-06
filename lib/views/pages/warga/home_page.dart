@@ -5,7 +5,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/menucard_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/surat_page.dart';
-import 'package:rukun_app_proyek4/views/pages/warga/history_surat_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/kegiatan_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/iuran_page.dart';
 
 class WargaHomePage extends StatelessWidget {
@@ -24,16 +24,16 @@ class WargaHomePage extends StatelessWidget {
         "builder": (BuildContext context) => const WargaSuratPage(),
       },
       {
-        "title": "Riwayat Surat",
-        "subtitle": "Lihat status pengajuan",
-        "image": "assets/images/history_surat.png",
-        "builder": (BuildContext context) => const WargaHistorySurat(),
-      },
-      {
         "title": "Iuran Saya",
         "subtitle": "Status & bukti pembayaran",
         "image": "assets/images/fee.png",
         "builder": (BuildContext context) => const WargaIuranPage(),
+      },
+      {
+        "title": "Daftar Kegiatan",
+        "subtitle": "Lihat daftar kegiatan yang sedang dilaksanakan",
+        "image": "assets/images/history_surat.png",
+        "builder": (BuildContext context) => const KegiatanPage(),
       },
     ];
     return Scaffold(
