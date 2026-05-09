@@ -19,7 +19,7 @@ enum StatusHubungan {
 enum Kewarganegaraan { wni, wna }
 
 class Warga {
-  final int id;
+  final int? id;
   final String nama;
   final String nik;
 
@@ -37,6 +37,7 @@ class Warga {
 
   final StatusHubungan? statusHubungan;
   final Kewarganegaraan? kewarganegaraan;
+  final String? wnaNegara;
 
   final String? noPaspor;
   final String? noKitap;
@@ -47,7 +48,7 @@ class Warga {
   final int? keluargaId;
 
   Warga({
-    required this.id,
+    this.id,
     required this.nama,
     required this.nik,
     this.jk,
@@ -61,6 +62,7 @@ class Warga {
     this.tglPerkawinan,
     this.statusHubungan,
     this.kewarganegaraan,
+    this.wnaNegara,
     this.noPaspor,
     this.noKitap,
     this.namaAyah,
@@ -70,7 +72,7 @@ class Warga {
 
   factory Warga.fromJson(Map<String, dynamic> json) {
     return Warga(
-      id: json['id'],
+      id: json['id'] as int?,
       nama: json['nama'],
       nik: json['nik'],
 
@@ -79,6 +81,7 @@ class Warga {
       statusPerkawinan: _parseStatusKawin(json['status_perkawinan']),
       statusHubungan: _parseStatusHubungan(json['status_hubungan']),
       kewarganegaraan: _parseKwn(json['kewarganegaraan']),
+      wnaNegara: json['wna_negara'],
 
       tempatLahir: json['tempat_lahir'],
       tglLahir: json['tgl_lahir'] != null
@@ -100,6 +103,41 @@ class Warga {
 
       keluargaId: json['keluarga_id'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'nama': nama,
+      'nik': nik,
+
+      'jk': _jkToString(jk),
+      'tempat_lahir': tempatLahir,
+      'tgl_lahir': tglLahir != null
+          ? "${tglLahir!.year.toString().padLeft(4, '0')}-${tglLahir!.month.toString().padLeft(2, '0')}-${tglLahir!.day.toString().padLeft(2, '0')}"
+          : null,
+
+      'agama': _agamaToString(agama),
+      'pendidikan': pendidikan,
+      'jenis_pekerjaan': jenisPekerjaan,
+      'golongan_darah': golonganDarah,
+
+      'status_perkawinan': _statusKawinToString(statusPerkawinan),
+      'tgl_perkawinan': tglPerkawinan != null
+          ? "${tglPerkawinan!.year.toString().padLeft(4, '0')}-${tglPerkawinan!.month.toString().padLeft(2, '0')}-${tglPerkawinan!.day.toString().padLeft(2, '0')}"
+          : null,
+
+      'status_hubungan': _statusHubunganToString(statusHubungan),
+      'kewarganegaraan': _kwnToString(kewarganegaraan),
+      'wna_negara': wnaNegara,
+
+      'no_paspor': noPaspor,
+      'no_kitap': noKitap,
+      'nama_ayah': namaAyah,
+      'nama_ibu': namaIbu,
+
+      'keluarga_id': keluargaId,
+    };
   }
 
   static JenisKelamin? _parseJenisKelamin(String? value) {
@@ -183,34 +221,14 @@ class Warga {
     }
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nama': nama,
-      'nik': nik,
+  String? _formatDate(DateTime? date) {
+    if (date == null) return null;
 
-      'jk': _jkToString(jk),
-      'tempat_lahir': tempatLahir,
-      'tgl_lahir': tglLahir?.toIso8601String(),
+    final y = date.year.toString().padLeft(4, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    final d = date.day.toString().padLeft(2, '0');
 
-      'agama': _agamaToString(agama),
-      'pendidikan': pendidikan,
-      'jenis_pekerjaan': jenisPekerjaan,
-      'golongan_darah': golonganDarah,
-
-      'status_perkawinan': _statusKawinToString(statusPerkawinan),
-      'tgl_perkawinan': tglPerkawinan?.toIso8601String(),
-
-      'status_hubungan': _statusHubunganToString(statusHubungan),
-      'kewarganegaraan': _kwnToString(kewarganegaraan),
-
-      'no_paspor': noPaspor,
-      'no_kitap': noKitap,
-      'nama_ayah': namaAyah,
-      'nama_ibu': namaIbu,
-
-      'keluarga_id': keluargaId,
-    };
+    return "$y-$m-$d";
   }
 
   static String? _jkToString(JenisKelamin? value) {
@@ -261,7 +279,7 @@ class Warga {
   static String? _statusHubunganToString(StatusHubungan? value) {
     switch (value) {
       case StatusHubungan.kepalaKeluarga:
-        return "Kepala Keluarga"; // 🔥 fix dari sebelumnya
+        return "Kepala Keluarga";
       case StatusHubungan.suami:
         return "Suami";
       case StatusHubungan.istri:

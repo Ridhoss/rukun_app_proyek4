@@ -1,61 +1,58 @@
 import 'package:dio/dio.dart';
-import 'package:rukun_app_proyek4/models/warga_model.dart';
-import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
+import 'package:rukun_app_proyek4/models/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 
-class WargaRepository {
-  final CloudWargaService service;
+class IuranRepository {
+  final CloudIuranService service;
   final AuthLocalService local;
 
-  WargaRepository(this.service, this.local);
+  IuranRepository(this.service, this.local);
 
-  Future<List<Warga>> getAllWarga() async {
+  Future<List<Iuran>> getAllIuran() async {
     final token = await _requireToken();
 
-    final result = await _safeCall(() => service.getAllWarga(token));
+    final result = await _safeCall(() => service.getAllIuran(token));
 
     _validateStatus(result);
 
     final List data = result['data'] ?? [];
 
-    return data.map((e) => Warga.fromJson(e)).toList();
+    return data.map((e) => Iuran.fromJson(e)).toList();
   }
 
-  Future<Warga?> getWargaById(int id) async {
+  Future<List<IuranSaya>> getIuranSaya() async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getWargaById(id, token),
-    );
-
-    _validateStatus(result);
-
-    final data = result['data'];
-
-    if (data == null) return null;
-
-    return Warga.fromJson(data);
-  }
-
-  Future<List<Warga>> getWargaByKeluarga(int keluargaId) async {
-    final token = await _requireToken();
-
-    final result = await _safeCall(
-      () => service.getWargaByKeluarga(keluargaId, token),
-    );
+    final result = await _safeCall(() => service.getIuranSaya(token));
 
     _validateStatus(result);
 
     final List data = result['data'] ?? [];
 
-    return data.map((e) => Warga.fromJson(e)).toList();
+    return data.map((e) => IuranSaya.fromJson(e)).toList();
   }
 
-  Future<Warga?> createWarga(Warga warga) async {
+  Future<Iuran?> getIuranById(int id) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(() => service.getIuranById(id, token));
+
+    _validateStatus(result);
+
+    final data = result['data'];
+
+    if (data == null) return null;
+
+    return Iuran.fromJson(data);
+  }
+
+  Future<Iuran?> createIuran(Iuran iuran) async {
     final token = await _requireToken();
 
     final result = await _safeCall(
-      () => service.createWarga(warga.toJson(), token),
+      () => service.createIuran(iuran.toJson(), token),
     );
 
     _validateStatus(result);
@@ -64,14 +61,14 @@ class WargaRepository {
 
     if (data == null) return null;
 
-    return Warga.fromJson(data);
+    return Iuran.fromJson(data);
   }
 
-  Future<Warga?> updateWarga(int id, Warga warga) async {
+  Future<Iuran?> updateIuran(int id, Iuran iuran) async {
     final token = await _requireToken();
 
     final result = await _safeCall(
-      () => service.updateWarga(id, warga.toJson(), token),
+      () => service.updateIuran(id, iuran.toJson(), token),
     );
 
     _validateStatus(result);
@@ -80,15 +77,13 @@ class WargaRepository {
 
     if (data == null) return null;
 
-    return Warga.fromJson(data);
+    return Iuran.fromJson(data);
   }
 
-  Future<void> deleteWarga(int id) async {
+  Future<void> deleteIuran(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.deleteWarga(id, token),
-    );
+    final result = await _safeCall(() => service.deleteIuran(id, token));
 
     _validateStatus(result);
   }

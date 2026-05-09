@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
+import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/kartukeluarga/detail_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/warga/add_warga_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_warga_page.dart';
 
 class DetailKKPage extends StatelessWidget {
@@ -171,71 +175,85 @@ class DetailKKPage extends StatelessWidget {
   }
 
   Widget _buildAnggotaCard(BuildContext context) {
-    final anggota = ["Budi", "Siti", "Andi"];
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ColorsUtils.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Anggota Keluarga",
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+    return Consumer<DetailKKViewModel>(
+      builder: (context, vm, _) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: ColorsUtils.white,
+            borderRadius: BorderRadius.circular(12),
           ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Anggota Keluarga",
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
 
-          const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-          if (anggota.isEmpty)
-            const Text("Belum ada anggota")
-          else
-            Column(
-              children: anggota.map((e) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF9FAFB),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: ListTile(
-                    leading: const CircleAvatar(
-                      backgroundColor: ColorsUtils.b50,
-                      child: Icon(Icons.person, color: ColorsUtils.b500),
-                    ),
-                    title: Text(e),
-                    trailing: const Icon(Icons.chevron_right),
-                  ),
-                );
-              }).toList(),
-            ),
+              if (vm.isLoadingAnggota)
+                const Center(child: CircularProgressIndicator())
+              else if (vm.anggotaError != null)
+                Text(vm.anggotaError!)
+              else if (vm.anggota.isEmpty)
+                _buildEmptyState(context, vm)
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: vm.anggota.length,
+                  itemBuilder: (context, i) {
+                    final warga = vm.anggota[i];
 
-          const SizedBox(height: 12),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: ListTile(
+                        leading: const CircleAvatar(
+                          backgroundColor: ColorsUtils.b50,
+                          child: Icon(Icons.person, color: ColorsUtils.b500),
+                        ),
+                        title: Text(warga.nama ?? '-'),
+                        trailing: const Icon(Icons.chevron_right),
+                      ),
+                    );
+                  },
+                ),
 
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AddWargaPage()),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text("Tambah Anggota"),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: ColorsUtils.b500,
-                side: BorderSide(color: ColorsUtils.b500),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 12),
+
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChangeNotifierProvider(
+                          create: (_) => AddWargaViewModel(
+                            repo: context.read<WargaRepository>(),
+                            kkId: vm.kkId,
+                          ),
+                          child: const AddWargaPage(),
+                        ),
+                      ),
+                    );
+
+                    vm.fetchAnggota();
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text("Tambah Anggota"),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -249,6 +267,82 @@ class DetailKKPage extends StatelessWidget {
             child: Image.network(url, fit: BoxFit.contain),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, DetailKKViewModel vm) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ColorsUtils.b50),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: ColorsUtils.b50,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.group_outlined,
+              size: 32,
+              color: ColorsUtils.b500,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          const Text(
+            "Belum Ada Anggota",
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+
+          const SizedBox(height: 4),
+
+          const Text(
+            "Tambahkan anggota keluarga untuk mulai mengelola data penduduk.",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
+          ),
+
+          const SizedBox(height: 16),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (_) => AddWargaViewModel(
+                        repo: context.read<WargaRepository>(),
+                        kkId: vm.kkId,
+                      ),
+                      child: const AddWargaPage(),
+                    ),
+                  ),
+                );
+
+                vm.fetchAnggota();
+              },
+              icon: const Icon(Icons.add),
+              label: const Text("Tambah Anggota"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorsUtils.b500,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

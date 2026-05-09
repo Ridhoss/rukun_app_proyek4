@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:rukun_app_proyek4/utils/colors_utils.dart'; // Tambahkan ini jika ingin menggunakan warna dari utils
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
