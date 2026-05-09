@@ -60,7 +60,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
             jumlah: 25000,
             waktuBayar: DateTime.now(),
             status: StatusPembayaran.diproses,
-            imgRef: "https://via.placeholder.com/400",
+            imgRef: "https://picsum.photos/seed/surat/400",
           ),
         ]);
 
@@ -107,10 +107,22 @@ class IuranwargaViewmodel extends ChangeNotifier {
         .toList();
   }
 
-  int get totalDibayar =>
-      data.where((e) => e.transaksi?.status == StatusPembayaran.dibayar).length;
+  List<IuranWithTransaksi> get allData {
+    return _iuranList.map((iuran) {
+      final trx = _transaksiList
+          .where((t) => t.iuranId == iuran.id)
+          .cast<Transaksi?>()
+          .firstWhere((e) => true, orElse: () => null);
 
-  int get totalBelum => data
+      return IuranWithTransaksi(iuran: iuran, transaksi: trx);
+    }).toList();
+  }
+
+  int get totalDibayar => allData
+      .where((e) => e.transaksi?.status == StatusPembayaran.dibayar)
+      .length;
+
+  int get totalBelum => allData
       .where(
         (e) =>
             e.transaksi == null ||
@@ -118,7 +130,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
       )
       .length;
 
-  int get totalKeseluruhan => data.fold(0, (sum, e) => sum + e.iuran.jumlah);
+  int get totalKeseluruhan => allData.fold(0, (sum, e) => sum + e.iuran.jumlah);
 
   void setStatus(FilterStatus status) {
     selectedStatus = status;

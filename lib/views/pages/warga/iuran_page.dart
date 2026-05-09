@@ -170,6 +170,7 @@ class WargaIuranPage extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
+            _chip(vm, "Semua", FilterStatus.semua),
             _chip(vm, "Tagihan", FilterStatus.belumDibayar),
             _chip(vm, "Diproses", FilterStatus.diproses),
             _chip(vm, "Dibayar", FilterStatus.dibayar),
@@ -217,7 +218,7 @@ class WargaIuranPage extends StatelessWidget {
 
     return ListView.builder(
       itemCount: vm.data.length,
-    itemBuilder: (context, i) => _card(context, vm.data[i]),
+      itemBuilder: (context, i) => _card(context, vm.data[i]),
     );
   }
 

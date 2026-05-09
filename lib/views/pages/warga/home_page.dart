@@ -4,7 +4,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/menucard_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/warga/surat_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/pengajuan_surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/kegiatan_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/iuran_page.dart';
 
@@ -21,7 +21,7 @@ class WargaHomePage extends StatelessWidget {
         "title": "Ajukan Surat",
         "subtitle": "Buat pengajuan surat",
         "image": "assets/images/add_surat.png",
-        "builder": (BuildContext context) => const WargaSuratPage(),
+        "builder": (BuildContext context) => const PengajuanSuratPage(),
       },
       {
         "title": "Iuran Saya",
