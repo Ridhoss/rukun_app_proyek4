@@ -64,7 +64,6 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
         },
       ),
 
-      // ✅ PINDAH KE SINI (bukan di dalam Column)
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           await Navigator.push(
@@ -184,21 +183,6 @@ Widget _chip(PengajuanSuratViewModel vm, String text, FilterSurat filter) {
   );
 }
 
-String _labelFilter(FilterSurat f) {
-  switch (f) {
-    case FilterSurat.tertunda:
-      return "Tertunda";
-    case FilterSurat.disetujui:
-      return "Disetujui";
-    case FilterSurat.ditolak:
-      return "Ditolak";
-    case FilterSurat.selesai:
-      return "Selesai";
-    default:
-      return "Semua";
-  }
-}
-
 Widget _list(PengajuanSuratViewModel vm) {
   if (vm.list.isEmpty) {
     return const Center(child: Text("Belum ada pengajuan surat"));
@@ -212,6 +196,36 @@ Widget _list(PengajuanSuratViewModel vm) {
       return _card(item);
     },
   );
+}
+
+bool _isActionable(SuratStatus status) {
+  return status == SuratStatus.disetujui || status == SuratStatus.selesai;
+}
+
+Color _statusColor(SuratStatus status) {
+  switch (status) {
+    case SuratStatus.disetujui:
+      return Colors.green;
+    case SuratStatus.ditolak:
+      return Colors.red;
+    case SuratStatus.selesai:
+      return Colors.blue;
+    default:
+      return Colors.orange;
+  }
+}
+
+String _statusLabel(SuratStatus status) {
+  switch (status) {
+    case SuratStatus.tertunda:
+      return "Tertunda";
+    case SuratStatus.disetujui:
+      return "Disetujui";
+    case SuratStatus.ditolak:
+      return "Ditolak";
+    case SuratStatus.selesai:
+      return "Selesai";
+  }
 }
 
 Widget _card(PengajuanSurat item) {
@@ -231,7 +245,6 @@ Widget _card(PengajuanSurat item) {
     child: IntrinsicHeight(
       child: Row(
         children: [
-          // strip kiri
           Container(
             width: 5,
             decoration: BoxDecoration(
@@ -249,7 +262,6 @@ Widget _card(PengajuanSurat item) {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // title + badge
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -267,14 +279,19 @@ Widget _card(PengajuanSurat item) {
                   ),
 
                   const SizedBox(height: 8),
-
                   Text(
                     item.subjectKeperluan,
                     style: TextStyle(color: Colors.grey[700]),
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
 
+                  Text(
+                    item.keterangan ?? "-",
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+
+                  const SizedBox(height: 6),
                   Text(
                     item.waktuDibuat != null
                         ? _formatDate(item.waktuDibuat!)
@@ -282,9 +299,12 @@ Widget _card(PengajuanSurat item) {
                     style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
 
-                  const SizedBox(height: 14),
-
-                  _actionButton(item),
+                  const SizedBox(height: 12),
+                  if (_isActionable(item.status))
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: _actionIcon(item),
+                    ),
                 ],
               ),
             ),
@@ -295,17 +315,35 @@ Widget _card(PengajuanSurat item) {
   );
 }
 
-Color _statusColor(SuratStatus status) {
-  switch (status) {
-    case SuratStatus.disetujui:
-      return Colors.green;
-    case SuratStatus.ditolak:
-      return Colors.red;
-    case SuratStatus.selesai:
-      return Colors.blue;
-    default:
-      return Colors.orange;
-  }
+Widget _actionIcon(PengajuanSurat item) {
+  final isDownload = item.status == SuratStatus.selesai;
+
+  return InkWell(
+    onTap: () {},
+    borderRadius: BorderRadius.circular(8),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isDownload ? Icons.download : Icons.visibility,
+            size: 18,
+            color: Colors.blue,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            isDownload ? "Download" : "Lihat",
+            style: const TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 Widget _badge(SuratStatus status) {
@@ -320,49 +358,6 @@ Widget _badge(SuratStatus status) {
       style: const TextStyle(color: Colors.white, fontSize: 12),
     ),
   );
-}
-
-Widget _actionButton(PengajuanSurat item) {
-  switch (item.status) {
-    case SuratStatus.tertunda:
-      return _btn("Menunggu", Colors.orange, null);
-
-    case SuratStatus.disetujui:
-      return _btn("Lihat Surat", Colors.blue, () {});
-
-    case SuratStatus.selesai:
-      return _btn("Download", Colors.green, () {});
-
-    case SuratStatus.ditolak:
-      return _btn("Ditolak", Colors.red, null);
-  }
-}
-
-Widget _btn(String text, Color color, VoidCallback? onTap) {
-  return SizedBox(
-    width: double.infinity,
-    child: ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      child: Text(text),
-    ),
-  );
-}
-
-String _statusLabel(SuratStatus status) {
-  switch (status) {
-    case SuratStatus.tertunda:
-      return "Tertunda";
-    case SuratStatus.disetujui:
-      return "Disetujui";
-    case SuratStatus.ditolak:
-      return "Ditolak";
-    case SuratStatus.selesai:
-      return "Selesai";
-  }
 }
 
 String _formatDate(DateTime d) => "${d.day}-${d.month}-${d.year}";
