@@ -18,67 +18,72 @@ class AppBarUtils {
       backgroundColor: ColorsUtils.b500,
       elevation: 0,
       toolbarHeight: 90,
+      leadingWidth: 60,
       leading: leading,
 
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              // ignore: unnecessary_null_comparison
-              if (showAvatar && name != null)
-                CircleAvatar(radius: 23, child: buildAvatar(name)),
-              const SizedBox(width: 12),
+      title: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                if (showAvatar)
+                  CircleAvatar(radius: 23, child: buildAvatar(name)),
 
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (showGreeting)
-                      Text(
-                        _getGreeting(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                const SizedBox(width: 12),
 
-                    // ignore: unnecessary_null_comparison
-                    if (showName && name != null)
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: ColorsUtils.white,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (showGreeting)
+                        Text(
+                          _getGreeting(),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                  ],
+
+                      if (showName)
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: ColorsUtils.white,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                if (trailing != null) trailing,
+              ],
+            ),
+
+            const SizedBox(height: 6),
+
+            if (title.isNotEmpty)
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
 
-              // ignore: use_null_aware_elements
-              if (trailing != null) trailing,
-            ],
-          ),
-
-          const SizedBox(height: 6),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-
-          if (subtitle != null)
-            Text(
-              subtitle,
-              style: const TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-        ],
+            if (subtitle != null)
+              Text(
+                subtitle,
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
+              ),
+          ],
+        ),
       ),
     );
   }

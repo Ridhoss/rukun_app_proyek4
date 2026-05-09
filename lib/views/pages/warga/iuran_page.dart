@@ -79,7 +79,6 @@ class WargaIuranPage extends StatelessWidget {
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
-            // ignore: deprecated_member_use
             color: ColorsUtils.b300.withOpacity(0.09),
           ),
         ],
@@ -96,7 +95,7 @@ class WargaIuranPage extends StatelessWidget {
     );
   }
 
-  //Text color summary
+  //text color summary
   Widget _item(int value, String title) {
     return Expanded(
       child: Column(
@@ -114,10 +113,14 @@ class WargaIuranPage extends StatelessWidget {
 
   // pembatas antar item summary
   Widget _divider() {
-    return Container(width: 1, height: 30, color: Colors.grey.shade300);
+    return Container(
+      width: 1,
+      height: 30,
+      color: const Color.fromARGB(255, 78, 59, 59),
+    );
   }
 
-  // type toggle
+  // toggle type iuran
   Widget _typeToggle(IuranwargaViewmodel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -183,6 +186,7 @@ class WargaIuranPage extends StatelessWidget {
     );
   }
 
+  // chip status filter
   Widget _chip(IuranwargaViewmodel vm, String text, FilterStatus status) {
     final selected = vm.selectedStatus == status;
 
@@ -212,10 +216,9 @@ class WargaIuranPage extends StatelessWidget {
     );
   }
 
-  // list iuran dengan transaksi
   Widget _list(IuranwargaViewmodel vm) {
     if (vm.data.isEmpty) {
-      return const Center(child: Text("Tidak Terdapat data iuran"));
+      return const Center(child: Text("Tidak ada data iuran"));
     }
 
     return ListView.builder(
@@ -228,13 +231,20 @@ class WargaIuranPage extends StatelessWidget {
   Widget _card(BuildContext context, IuranWithTransaksi item) {
     final trx = item.transaksi;
     final status = trx?.status ?? StatusPembayaran.belumDibayar;
-    final isBelum = status == StatusPembayaran.belumDibayar;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         color: ColorsUtils.white,
+        boxShadow: [
+          BoxShadow(
+            color: ColorsUtils.b200.withOpacity(0.20),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -242,7 +252,7 @@ class WargaIuranPage extends StatelessWidget {
             Container(
               width: 5,
               decoration: BoxDecoration(
-                color: status.color, //strip warna sesuai status
+                color: status.color,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(14),
                   bottomLeft: Radius.circular(14),
@@ -270,7 +280,6 @@ class WargaIuranPage extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 6),
-
                     Text(
                       "Rp ${item.iuran.jumlah}",
                       style: const TextStyle(
@@ -279,38 +288,95 @@ class WargaIuranPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 4),
-                    Text(
-                      trx?.waktuBayar != null
-                          ? _formatDate(trx!.waktuBayar!)
-                          : "Belum ada pembayaran",
-                      style: TextStyle(color: Colors.grey[600]),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        _infoItem(
+                          Icons.holiday_village,
+                          _levelLabel(item.iuran.level),
+                          Colors.blue,
+                        ),
+                        const SizedBox(width: 12),
+
+                        _infoItem(
+                          Icons.groups,
+                          _scopeLabel(item.iuran.cakupan),
+                          Colors.green,
+                        ),
+                        const SizedBox(width: 12),
+
+                        _infoItem(
+                          Icons.calendar_month,
+                          _periodeLabel(item.iuran.periode),
+                          Colors.orange,
+                        ),
+                      ],
                     ),
 
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isBelum
-                              ? Colors.orange
-                              : Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    if (item.isRejected &&
+                        item.iuran.catatan != null &&
+                        item.iuran.catatan!.isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.red.withOpacity(0.3),
                           ),
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => WargaUploadIuranPage(item: item),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: Colors.red,
                             ),
-                          );
-                        },
-                        icon: Icon(Icons.upload),
-                        label: const Text("Upload Bukti"),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                item.iuran.catatan!,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+
+                    const SizedBox(height: 12),
+                    if (item.canUpload)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: item.isRejected
+                                ? Colors.red
+                                : Colors.orange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    WargaUploadIuranPage(item: item),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.upload),
+                          label: Text(
+                            item.isRejected ? "Upload Ulang" : "Upload Bukti",
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -319,6 +385,50 @@ class WargaIuranPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _infoItem(IconData icon, String text, Color color) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[700],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _levelLabel(IuranLevel level) {
+    switch (level) {
+      case IuranLevel.rt:
+        return "RT";
+      case IuranLevel.rw:
+        return "RW";
+    }
+  }
+
+  String _scopeLabel(IuranScope scope) {
+    switch (scope) {
+      case IuranScope.keluarga:
+        return "Keluarga";
+      case IuranScope.warga:
+        return "Per Warga";
+    }
+  }
+
+  String _periodeLabel(PeriodeType periode) {
+    switch (periode) {
+      case PeriodeType.bulanan:
+        return "Bulanan";
+      case PeriodeType.sekali:
+        return "Sekali";
+    }
   }
 
   // badge status pembayaran
@@ -335,6 +445,4 @@ class WargaIuranPage extends StatelessWidget {
       ),
     );
   }
-
-  String _formatDate(DateTime d) => "${d.day}-${d.month}-${d.year}";
 }

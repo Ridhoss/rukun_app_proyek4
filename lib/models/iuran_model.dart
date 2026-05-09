@@ -16,6 +16,7 @@ class Iuran {
   final IuranType tipe;
   final IuranScope cakupan;
   final PeriodeType periode;
+  final String? catatan;
   final DateTime? waktuDibuat;
 
   Iuran({
@@ -28,6 +29,7 @@ class Iuran {
     required this.tipe,
     required this.cakupan,
     required this.periode,
+    this.catatan,
     this.waktuDibuat,
   });
 
@@ -42,6 +44,7 @@ class Iuran {
       tipe: _type(json['tipe']),
       cakupan: _scope(json['cakupan']),
       periode: _periode(json['periode']),
+      catatan: json['catatan'],
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
@@ -58,6 +61,7 @@ class Iuran {
       'tipe': tipe.name,
       'cakupan': cakupan.name,
       'periode': periode.name,
+      'catatan': catatan,
       'waktu_dibuat': waktuDibuat?.toIso8601String(),
     };
 
