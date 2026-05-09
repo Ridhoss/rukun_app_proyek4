@@ -2,10 +2,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rukun_app_proyek4/core/network/dio_client.dart';
 import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
+import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
@@ -44,6 +46,15 @@ void main() async {
         Provider<CloudinaryService>(create: (_) => CloudinaryService()),
 
         Provider(create: (_) => CloudWargaService()),
+
+        Provider(create: (_) => CloudIuranService()),
+
+        Provider(
+          create: (context) => IuranRepository(
+            context.read<CloudIuranService>(),
+            context.read<AuthLocalService>(),
+          ),
+        ),
 
         Provider(
           create: (context) => KKRepository(

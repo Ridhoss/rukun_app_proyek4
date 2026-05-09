@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
@@ -19,7 +20,8 @@ class WargaIuranPage extends StatelessWidget {
     final nama = context.watch<AuthViewModel>().currentUser?.warga?.nama ?? "-";
 
     return ChangeNotifierProvider(
-      create: (_) => IuranwargaViewmodel()..loadDummy(),
+      create: (_) =>
+          IuranwargaViewmodel(context.read<IuranRepository>())..loadIuranSaya(),
       child: Scaffold(
         appBar: AppBarUtils.buildAppBar(
           name: nama,
@@ -127,8 +129,8 @@ class WargaIuranPage extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _typeItem(vm, "Reguler", IuranType.reguler),
-            _typeItem(vm, "Insidentil", IuranType.insidentil),
+            _typeItem(vm, "Reguler", IuranType.wajib),
+            _typeItem(vm, "Insidentil", IuranType.sedekah),
           ],
         ),
       ),
@@ -217,7 +219,7 @@ class WargaIuranPage extends StatelessWidget {
 
     return ListView.builder(
       itemCount: vm.data.length,
-    itemBuilder: (context, i) => _card(context, vm.data[i]),
+      itemBuilder: (context, i) => _card(context, vm.data[i]),
     );
   }
 
