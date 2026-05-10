@@ -4,11 +4,13 @@ import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
+import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_surat_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
@@ -49,6 +51,8 @@ void main() async {
 
         Provider(create: (_) => CloudIuranService()),
 
+        Provider(create: (_) => CloudSuratService()),
+
         Provider(
           create: (context) => IuranRepository(
             context.read<CloudIuranService>(),
@@ -70,6 +74,13 @@ void main() async {
           ),
         ),
 
+        Provider(
+          create: (context) => SuratRepository(
+            context.read<CloudSuratService>(),
+            context.read<AuthLocalService>(),
+          ),
+        ),
+
         ChangeNotifierProvider(
           create: (context) => AuthViewModel(context.read()),
         ),
@@ -79,8 +90,10 @@ void main() async {
               KeluargaVM(kkRepository: context.read<KKRepository>()),
         ),
 
-        ChangeNotifierProvider(create: (_) => PengajuanSuratViewModel()),
-
+        ChangeNotifierProvider(
+          create: (context) =>
+              PengajuanSuratViewModel(context.read<SuratRepository>()),
+        ),
       ],
       child: const MyApp(),
     ),

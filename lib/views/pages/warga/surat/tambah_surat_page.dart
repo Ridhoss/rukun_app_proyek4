@@ -246,7 +246,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
     final data = PengajuanSurat(
       wargaId: 1,
       jenisSurat: selectedJenis!,
-      subjectKeperluan: keperluanController.text.trim(),
+      keperluan: keperluanController.text.trim(),
       keterangan: keteranganController.text.trim(),
     );
 
