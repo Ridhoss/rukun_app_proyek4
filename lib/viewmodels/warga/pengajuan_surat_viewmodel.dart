@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
 
-enum FilterSurat { semua, diajukan, tertunda, disetujui, ditolak, selesai }
+enum FilterSurat { semua, diajukan, disetujui, ditolak, selesai }
 
 class PengajuanSuratViewModel extends ChangeNotifier {
   final SuratRepository repository;
@@ -49,8 +49,6 @@ class PengajuanSuratViewModel extends ChangeNotifier {
       switch (selectedFilter) {
         case FilterSurat.diajukan:
           return e.status == SuratStatus.diajukan;
-        case FilterSurat.tertunda:
-          return e.status == SuratStatus.tertunda;
         case FilterSurat.disetujui:
           return e.status == SuratStatus.disetujui;
         case FilterSurat.ditolak:
@@ -66,9 +64,6 @@ class PengajuanSuratViewModel extends ChangeNotifier {
   // total per status
   int get totalDiajukan =>
       _list.where((e) => e.status == SuratStatus.diajukan).length;
-
-  int get totalTertunda =>
-      _list.where((e) => e.status == SuratStatus.tertunda).length;
 
   int get totalDisetujui =>
       _list.where((e) => e.status == SuratStatus.disetujui).length;

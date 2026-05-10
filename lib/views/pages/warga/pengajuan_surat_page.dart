@@ -116,11 +116,13 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
       ),
       child: Row(
         children: [
-          _item(vm.totalTertunda, "Tertunda"),
+          _item(vm.totalDiajukan, "Tertunda"),
           _divider(),
           _item(vm.totalDisetujui, "Disetujui"),
           _divider(),
           _item(vm.totalDitolak, "Ditolak"),
+          _divider(),
+          _item(vm.totalSelesai, "Selesai"),
         ],
       ),
     );
@@ -153,7 +155,6 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
           children: [
             _chip(vm, "Semua", FilterSurat.semua),
             _chip(vm, "Diajukan", FilterSurat.diajukan),
-            _chip(vm, "Tertunda", FilterSurat.tertunda),
             _chip(vm, "Disetujui", FilterSurat.disetujui),
             _chip(vm, "Ditolak", FilterSurat.ditolak),
             _chip(vm, "Selesai", FilterSurat.selesai),
