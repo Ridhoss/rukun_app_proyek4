@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/iuranwarga_viewmodel.dart';
-import 'package:rukun_app_proyek4/models/iuran_with_transaksi.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/models/iuran_model.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
@@ -228,9 +228,16 @@ class WargaIuranPage extends StatelessWidget {
   }
 
   // card item iuran dengan transaksi
-  Widget _card(BuildContext context, IuranWithTransaksi item) {
-    final trx = item.transaksi;
+  Widget _card(BuildContext context, IuranSaya item) {
+    final trx = item.transaksiTerbaru;
     final status = trx?.status ?? StatusPembayaran.belumDibayar;
+
+    final isRejected = trx?.status == StatusPembayaran.ditolak;
+
+    final canUpload =
+        trx == null ||
+        trx.status == StatusPembayaran.belumDibayar ||
+        trx.status == StatusPembayaran.ditolak;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -266,6 +273,7 @@ class WargaIuranPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // HEADER
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -280,15 +288,19 @@ class WargaIuranPage extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 6),
-                    Text(
-                      "Rp ${item.iuran.jumlah}",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+
+                    if (item.iuran.jumlah != null)
+                      Text(
+                        "Rp ${item.iuran.jumlah!.toString()}",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
 
                     const SizedBox(height: 6),
+
+                    // INFO
                     Row(
                       children: [
                         _infoItem(
@@ -297,14 +309,12 @@ class WargaIuranPage extends StatelessWidget {
                           Colors.blue,
                         ),
                         const SizedBox(width: 12),
-
                         _infoItem(
                           Icons.groups,
                           _scopeLabel(item.iuran.cakupan),
                           Colors.green,
                         ),
                         const SizedBox(width: 12),
-
                         _infoItem(
                           Icons.calendar_month,
                           _periodeLabel(item.iuran.periode),
@@ -313,7 +323,8 @@ class WargaIuranPage extends StatelessWidget {
                       ],
                     ),
 
-                    if (item.isRejected &&
+                    // REJECT NOTE
+                    if (isRejected &&
                         item.iuran.catatan != null &&
                         item.iuran.catatan!.isNotEmpty)
                       Container(
@@ -350,12 +361,14 @@ class WargaIuranPage extends StatelessWidget {
                       ),
 
                     const SizedBox(height: 12),
-                    if (item.canUpload)
+
+                    // BUTTON
+                    if (canUpload)
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: item.isRejected
+                            backgroundColor: isRejected
                                 ? Colors.red
                                 : Colors.orange,
                             shape: RoundedRectangleBorder(
@@ -363,17 +376,17 @@ class WargaIuranPage extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    WargaUploadIuranPage(item: item),
-                              ),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (_) =>
+                            //         WargaUploadIuranPage(item: item),
+                            //   ),
+                            // );
                           },
                           icon: const Icon(Icons.upload),
                           label: Text(
-                            item.isRejected ? "Upload Ulang" : "Upload Bukti",
+                            isRejected ? "Upload Ulang" : "Upload Bukti",
                           ),
                         ),
                       ),

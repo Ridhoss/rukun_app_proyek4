@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/iuran_model.dart';
-import 'package:rukun_app_proyek4/models/iuran_with_transaksi.dart';
+import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 
@@ -11,7 +11,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
 
   IuranwargaViewmodel(this.repository);
 
-  final List<IuranWithTransaksi> _items = [];
+  final List<IuranSaya> _items = [];
 
   FilterStatus selectedStatus = FilterStatus.semua;
 
@@ -24,7 +24,6 @@ class IuranwargaViewmodel extends ChangeNotifier {
   Future<void> loadIuranSaya() async {
     isLoading = true;
     errorMessage = null;
-
     notifyListeners();
 
     try {
@@ -32,11 +31,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
 
       _items
         ..clear()
-        ..addAll(
-          result.map(
-            (e) => IuranWithTransaksi(iuran: e.iuran, transaksi: e.transaksi),
-          ),
-        );
+        ..addAll(result);
     } catch (e) {
       errorMessage = e.toString().replaceAll("Exception: ", "");
     }
@@ -45,17 +40,15 @@ class IuranwargaViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<IuranWithTransaksi> get data {
+  List<IuranSaya> get data {
     return _items.where((item) {
       final iuran = item.iuran;
-      final trx = item.transaksi;
+      final trx = item.transaksiTerbaru;
 
-      // filter tipe
       if (iuran.tipe != selectedType) {
         return false;
       }
 
-      // filter status
       switch (selectedStatus) {
         case FilterStatus.semua:
           return true;
@@ -75,18 +68,20 @@ class IuranwargaViewmodel extends ChangeNotifier {
     }).toList();
   }
 
-  int get totalDibayar =>
-      data.where((e) => e.transaksi?.status == StatusPembayaran.dibayar).length;
+  int get totalDibayar => data
+      .where((e) => e.transaksiTerbaru?.status == StatusPembayaran.dibayar)
+      .length;
 
   int get totalBelum => data
       .where(
         (e) =>
-            e.transaksi == null ||
-            e.transaksi!.status == StatusPembayaran.belumDibayar,
+            e.transaksiTerbaru == null ||
+            e.transaksiTerbaru!.status == StatusPembayaran.belumDibayar,
       )
       .length;
 
-  int get totalKeseluruhan => data.fold(0, (sum, e) => sum + e.iuran.jumlah);
+  int get totalKeseluruhan =>
+      data.fold<int>(0, (sum, e) => sum + (e.transaksiTerbaru?.jumlah ?? 0));
 
   void setStatus(FilterStatus status) {
     selectedStatus = status;

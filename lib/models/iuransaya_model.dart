@@ -3,55 +3,36 @@ import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 
 class IuranSaya {
   final Iuran iuran;
-  final Transaksi? transaksi;
 
-  IuranSaya({
-    required this.iuran,
-    this.transaksi,
-  });
+  final List<Transaksi> transaksi;
 
-  factory IuranSaya.fromJson(
-    Map<String, dynamic> json,
-  ) {
-    final transaksiId = json['transaksi_id'];
+  IuranSaya({required this.iuran, required this.transaksi});
+
+  factory IuranSaya.fromJson(Map<String, dynamic> json) {
+    final transaksiJson = json['transaksi'] as List? ?? [];
 
     return IuranSaya(
       iuran: Iuran.fromJson(json),
-      transaksi: transaksiId != null
-          ? Transaksi(
-              id: transaksiId,
-              iuranId: json['id'],
-              jumlah: json['jumlah'],
-              waktuBayar:
-                  json['waktu_bayar'] != null
-                  ? DateTime.parse(
-                      json['waktu_bayar'],
-                    )
-                  : null,
-              status: _parseStatus(
-                json['status'],
-              ),
-            )
-          : null,
+
+      transaksi: (transaksiJson as List)
+          .map((e) => Transaksi.fromJson(e))
+          .toList(),
     );
   }
 
-  static StatusPembayaran _parseStatus(
-    String? status,
-  ) {
-    switch (status) {
-      case "Diproses":
-        return StatusPembayaran.diproses;
-
-      case "Dibayar":
-        return StatusPembayaran.dibayar;
-
-      case "Ditolak":
-        return StatusPembayaran.ditolak;
-
-      case "Belum Dibayar":
-      default:
-        return StatusPembayaran.belumDibayar;
+  Transaksi? get transaksiTerbaru {
+    if (transaksi.isEmpty) {
+      return null;
     }
+    transaksi.sort((a, b) => b.waktuBayar!.compareTo(a.waktuBayar!));
+    return transaksi.first;
+  }
+
+  bool get pernahBayar {
+    return transaksi.isNotEmpty;
+  }
+
+  StatusPembayaran get statusTerbaru {
+    return transaksiTerbaru?.status ?? StatusPembayaran.belumDibayar;
   }
 }

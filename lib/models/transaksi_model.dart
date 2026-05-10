@@ -1,9 +1,4 @@
-enum StatusPembayaran {
-  belumDibayar,
-  diproses,
-  dibayar,
-  ditolak,
-}
+enum StatusPembayaran { belumDibayar, diproses, dibayar, ditolak }
 
 class Transaksi {
   final int? id;
@@ -14,7 +9,7 @@ class Transaksi {
 
   final int? wargaId;
 
-  final int jumlah;
+  final int? jumlah;
 
   final DateTime? waktuBayar;
 
@@ -33,7 +28,7 @@ class Transaksi {
     required this.iuranId,
     this.keluargaId,
     this.wargaId,
-    required this.jumlah,
+    this.jumlah,
     this.waktuBayar,
     required this.status,
     this.imgRef,
@@ -42,9 +37,7 @@ class Transaksi {
     this.waktuDibuat,
   });
 
-  factory Transaksi.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory Transaksi.fromJson(Map<String, dynamic> json) {
     return Transaksi(
       id: json['id'],
       iuranId: json['iuran_id'],
@@ -57,17 +50,11 @@ class Transaksi {
       status: _status(json['status']),
       imgRef: json['img_referensi'],
       disetujuiOleh: json['disetujui_oleh'],
-      waktuDisetujui:
-          json['waktu_disetujui'] != null
-          ? DateTime.parse(
-              json['waktu_disetujui'],
-            )
+      waktuDisetujui: json['waktu_disetujui'] != null
+          ? DateTime.parse(json['waktu_disetujui'])
           : null,
-      waktuDibuat:
-          json['waktu_dibuat'] != null
-          ? DateTime.parse(
-              json['waktu_dibuat'],
-            )
+      waktuDibuat: json['waktu_dibuat'] != null
+          ? DateTime.parse(json['waktu_dibuat'])
           : null,
     );
   }
@@ -79,21 +66,16 @@ class Transaksi {
       'keluarga_id': keluargaId,
       'warga_id': wargaId,
       'jumlah': jumlah,
-      'waktu_bayar':
-          waktuBayar?.toIso8601String(),
+      'waktu_bayar': waktuBayar?.toIso8601String(),
       'status': _statusToString(status),
       'img_referensi': imgRef,
       'disetujui_oleh': disetujuiOleh,
-      'waktu_disetujui':
-          waktuDisetujui?.toIso8601String(),
-      'waktu_dibuat':
-          waktuDibuat?.toIso8601String(),
+      'waktu_disetujui': waktuDisetujui?.toIso8601String(),
+      'waktu_dibuat': waktuDibuat?.toIso8601String(),
     };
   }
 
-  static StatusPembayaran _status(
-    String? v,
-  ) {
+  static StatusPembayaran _status(String? v) {
     switch (v) {
       case "Diproses":
         return StatusPembayaran.diproses;
@@ -110,9 +92,7 @@ class Transaksi {
     }
   }
 
-  static String _statusToString(
-    StatusPembayaran status,
-  ) {
+  static String _statusToString(StatusPembayaran status) {
     switch (status) {
       case StatusPembayaran.diproses:
         return "Diproses";

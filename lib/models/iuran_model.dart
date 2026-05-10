@@ -9,7 +9,7 @@ enum PeriodeType { bulanan, sekali }
 class Iuran {
   final int? id;
   final String nama;
-  final int jumlah;
+  final int? jumlah;
   final IuranLevel level;
   final int? rtId;
   final int? rwId;
@@ -22,7 +22,7 @@ class Iuran {
   Iuran({
     this.id,
     required this.nama,
-    required this.jumlah,
+    this.jumlah,
     required this.level,
     this.rtId,
     this.rwId,
