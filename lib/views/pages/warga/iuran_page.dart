@@ -376,13 +376,13 @@ class WargaIuranPage extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (_) =>
-                            //         WargaUploadIuranPage(item: item),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    WargaUploadIuranPage(item: item),
+                              ),
+                            );
                           },
                           icon: const Icon(Icons.upload),
                           label: Text(
