@@ -116,7 +116,7 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
       ),
       child: Row(
         children: [
-          _item(vm.totalDiajukan, "Tertunda"),
+          _item(vm.totalDiajukan, "Diajukan"),
           _divider(),
           _item(vm.totalDisetujui, "Disetujui"),
           _divider(),
