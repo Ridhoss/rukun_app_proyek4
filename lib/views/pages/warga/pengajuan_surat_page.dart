@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
@@ -18,7 +19,7 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<PengajuanSuratViewModel>().fetchDummy();
+      context.read<PengajuanSuratViewModel>().fetchSuratSaya();
     });
   }
 
@@ -66,21 +67,29 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
 
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          await Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const TambahSuratPage()),
           );
 
-          context.read<PengajuanSuratViewModel>().fetchDummy();
+          if (result == true && context.mounted) {
+            await context.read<PengajuanSuratViewModel>().fetchSuratSaya();
+
+            NotificationUtils.showSuccess(context, "Pengajuan surat berhasil");
+          }
         },
+
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         elevation: 4,
+
         icon: const Icon(Icons.add),
+
         label: const Text(
           "Ajukan Surat",
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
+
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
 
@@ -143,6 +152,7 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
         child: Row(
           children: [
             _chip(vm, "Semua", FilterSurat.semua),
+            _chip(vm, "Diajukan", FilterSurat.diajukan),
             _chip(vm, "Tertunda", FilterSurat.tertunda),
             _chip(vm, "Disetujui", FilterSurat.disetujui),
             _chip(vm, "Ditolak", FilterSurat.ditolak),
@@ -217,12 +227,18 @@ Color _statusColor(SuratStatus status) {
 
 String _statusLabel(SuratStatus status) {
   switch (status) {
+    case SuratStatus.diajukan:
+      return "Diajukan";
+
     case SuratStatus.tertunda:
       return "Tertunda";
+
     case SuratStatus.disetujui:
       return "Disetujui";
+
     case SuratStatus.ditolak:
       return "Ditolak";
+
     case SuratStatus.selesai:
       return "Selesai";
   }
@@ -280,14 +296,14 @@ Widget _card(PengajuanSurat item) {
 
                   const SizedBox(height: 8),
                   Text(
-                    item.subjectKeperluan,
+                    item.keperluan,
                     style: TextStyle(color: Colors.grey[700]),
                   ),
 
                   const SizedBox(height: 4),
 
                   Text(
-                    item.keterangan ?? "-",
+                    item.keterangan,
                     style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
 

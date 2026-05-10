@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/pengajuan_surat_page.dart';
@@ -49,7 +50,9 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context);
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
           },
         ),
       ),
@@ -190,12 +193,9 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PengajuanSuratPage(),
-                                ),
-                              );
+                              if (Navigator.canPop(context)) {
+                                Navigator.pop(context);
+                              }
                             },
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -237,16 +237,22 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Harap lengkapi semua field")),
-      );
+      NotificationUtils.showError(context, "Harap lengkapi semua field");
+      return;
+    }
+
+    final authVM = context.read<AuthViewModel>();
+
+    final wargaId = authVM.currentUser?.warga?.id;
+
+    if (wargaId == null) {
+      NotificationUtils.showError(context, "Data warga tidak ditemukan");
       return;
     }
 
     final data = PengajuanSurat(
-      wargaId: 1,
       jenisSurat: selectedJenis!,
-      subjectKeperluan: keperluanController.text.trim(),
+      keperluan: keperluanController.text.trim(),
       keterangan: keteranganController.text.trim(),
     );
 
@@ -256,10 +262,6 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
 
     if (success) {
       Navigator.pop(context, true);
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Pengajuan berhasil")));
     }
   }
 

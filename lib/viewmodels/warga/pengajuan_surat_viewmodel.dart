@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
+import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
 
-enum FilterSurat { semua, tertunda, disetujui, ditolak, selesai }
+enum FilterSurat { semua, diajukan, tertunda, disetujui, ditolak, selesai }
 
 class PengajuanSuratViewModel extends ChangeNotifier {
+  final SuratRepository repository;
+
+  PengajuanSuratViewModel(this.repository);
+
   bool isLoading = false;
   String? errorMessage;
 
@@ -12,49 +17,26 @@ class PengajuanSuratViewModel extends ChangeNotifier {
 
   FilterSurat selectedFilter = FilterSurat.semua;
 
-// dummy data
-  Future<void> fetchDummy() async {
+  Future<void> fetchSuratSaya() async {
     isLoading = true;
+    errorMessage = null;
+
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final result = await repository.getSuratSaya();
 
-    _list.clear();
-    _list.addAll([
-      PengajuanSurat(
-        id: 1,
-        wargaId: 1,
-        jenisSurat: "Surat Domisili",
-        subjectKeperluan: "Keperluan kerja",
-        keterangan: "Melamar pekerjaan",
-        status: SuratStatus.tertunda,
-        waktuDibuat: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      PengajuanSurat(
-        id: 2,
-        wargaId: 1,
-        jenisSurat: "Surat Pengantar KTP",
-        subjectKeperluan: "Pembuatan KTP",
-        keterangan: "KTP hilang",
-        status: SuratStatus.disetujui,
-        waktuDibuat: DateTime.now().subtract(const Duration(days: 3)),
-      ),
-      PengajuanSurat(
-        id: 3,
-        wargaId: 1,
-        jenisSurat: "SKTM",
-        subjectKeperluan: "Beasiswa",
-        keterangan: "Pengajuan bantuan",
-        status: SuratStatus.ditolak,
-        waktuDibuat: DateTime.now().subtract(const Duration(days: 5)),
-      ),
-    ]);
+      _list
+        ..clear()
+        ..addAll(result);
+    } catch (e) {
+      errorMessage = e.toString().replaceAll("Exception: ", "");
+    }
 
     isLoading = false;
     notifyListeners();
   }
 
-// filter surat
   void setFilter(FilterSurat f) {
     selectedFilter = f;
     notifyListeners();
@@ -65,6 +47,8 @@ class PengajuanSuratViewModel extends ChangeNotifier {
 
     return _list.where((e) {
       switch (selectedFilter) {
+        case FilterSurat.diajukan:
+          return e.status == SuratStatus.diajukan;
         case FilterSurat.tertunda:
           return e.status == SuratStatus.tertunda;
         case FilterSurat.disetujui:
@@ -79,7 +63,10 @@ class PengajuanSuratViewModel extends ChangeNotifier {
     }).toList();
   }
 
-// total per status
+  // total per status
+  int get totalDiajukan =>
+      _list.where((e) => e.status == SuratStatus.diajukan).length;
+
   int get totalTertunda =>
       _list.where((e) => e.status == SuratStatus.tertunda).length;
 
@@ -92,24 +79,27 @@ class PengajuanSuratViewModel extends ChangeNotifier {
   int get totalSelesai =>
       _list.where((e) => e.status == SuratStatus.selesai).length;
 
-// simpan surat
+  // simpan surat
   Future<bool> submit(PengajuanSurat data) async {
     isLoading = true;
+    errorMessage = null;
+
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final success = await repository.createSurat(data);
 
-    _list.insert(
-      0,
-      data.copyWith(
-        id: _list.length + 1,
-        waktuDibuat: DateTime.now(),
-        status: SuratStatus.tertunda,
-      ),
-    );
+      isLoading = false;
+      notifyListeners();
 
-    isLoading = false;
-    notifyListeners();
-    return true;
+      return success;
+    } catch (e) {
+      errorMessage = e.toString().replaceAll("Exception: ", "");
+
+      isLoading = false;
+      notifyListeners();
+
+      return false;
+    }
   }
 }

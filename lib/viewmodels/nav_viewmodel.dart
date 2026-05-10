@@ -18,6 +18,7 @@ import 'package:rukun_app_proyek4/views/pages/rt/profile_page.dart';
 // pages Warga
 import 'package:rukun_app_proyek4/views/pages/warga/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/pengajuan_surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/tambah_surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/profile_page.dart';
 
@@ -62,7 +63,7 @@ if (user.pengurus?.level == "RT") {
         label: "Upload",
         page: WargaIuranPage(),
       ),
-      NavItem(icon: Icons.description, label: "Surat", page: TambahSuratPage()),
+      NavItem(icon: Icons.description, label: "Surat", page: PengajuanSuratPage()),
       NavItem(icon: Icons.person, label: "Profile", page: WargaProfilePage()),
     ];
   }
