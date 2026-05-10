@@ -57,7 +57,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
           return true;
 
         case FilterStatus.belumDibayar:
-          return trx == null;
+          return trx == null || trx.status == StatusPembayaran.belumDibayar;
 
         case FilterStatus.diproses:
           return trx?.status == StatusPembayaran.diproses;
@@ -102,6 +102,19 @@ class IuranwargaViewmodel extends ChangeNotifier {
   }
 
   List<IuranItem> generateHistory(IuranSaya item) {
+    if (item.iuran.periode == PeriodeType.sekali) {
+      return [
+        IuranItem(
+          bulan:
+              item.transaksiTerbaru?.waktuBayar ??
+              item.transaksiTerbaru?.waktuDibuat ??
+              DateTime.now(),
+
+          transaksi: item.transaksiTerbaru,
+        ),
+      ];
+    }
+
     final start = item.iuran.waktuDibuat ?? DateTime.now();
     final now = DateTime.now();
 
@@ -122,20 +135,26 @@ class IuranwargaViewmodel extends ChangeNotifier {
 
   Transaksi? _findTransactionByMonth(List<Transaksi> list, DateTime month) {
     for (final t in list) {
-      if (t.waktuBayar == null) continue;
+      final tanggal = t.waktuBayar ?? t.waktuDibuat;
 
-      if (t.waktuBayar!.year == month.year &&
-          t.waktuBayar!.month == month.month) {
+      if (tanggal == null) continue;
+
+      if (tanggal.year == month.year && tanggal.month == month.month) {
         return t;
       }
     }
+
     return null;
   }
 
   bool cekTunggakan(IuranSaya item) {
     final history = generateHistory(item);
 
-    return history.any((e) => e.transaksi == null);
+    return history.any((e) {
+      final status = e.status;
+      return status == StatusPembayaran.belumDibayar ||
+          status == StatusPembayaran.ditolak;
+    });
   }
 
   StatusPembayaran getStatusSummary(IuranSaya item) {

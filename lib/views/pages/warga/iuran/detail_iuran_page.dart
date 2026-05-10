@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/models/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
@@ -77,6 +78,8 @@ class _IuranHeader extends StatelessWidget {
 
   const _IuranHeader({required this.item});
 
+  bool get _isWajib => item.iuran.tipe == IuranType.wajib;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -92,65 +95,57 @@ class _IuranHeader extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
-            color: ColorsUtils.b75..withOpacity(0.20),
+            color: ColorsUtils.b75.withOpacity(0.20),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
         ],
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              // ignore: deprecated_member_use
-              color: ColorsUtils.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              Icons.account_balance_wallet_rounded,
-              color: ColorsUtils.white,
-              size: 28,
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
           Text(
             item.iuran.nama,
             style: const TextStyle(
               color: ColorsUtils.white,
-              fontSize: 21,
+              fontSize: 28,
               fontWeight: FontWeight.bold,
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
 
-          Row(
-            children: [
-              const Icon(
-                Icons.payments_rounded,
-                color: ColorsUtils.white,
-                size: 18,
-              ),
-
-              const SizedBox(width: 6),
-
-              Text(
-                item.iuran.jumlah != null
-                    ? "Rp ${item.iuran.jumlah}"
-                    : "Sukarela",
-                style: const TextStyle(
+          if (_isWajib && (item.iuran.jumlah ?? 0) > 0)
+            Row(
+              children: [
+                const Icon(
+                  Icons.payments_rounded,
                   color: ColorsUtils.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  size: 18,
                 ),
+
+                const SizedBox(width: 6),
+
+                Text(
+                  "Rp ${item.iuran.jumlah}",
+                  style: const TextStyle(
+                    color: ColorsUtils.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            )
+          else
+            const Text(
+              "Sukarela",
+              style: TextStyle(
+                color: ColorsUtils.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
-            ],
-          ),
+            ),
         ],
       ),
     );
@@ -192,10 +187,13 @@ class _MonthlyIuranCard extends StatelessWidget {
 
   const _MonthlyIuranCard({required this.item, required this.data});
 
+  bool _canUpload(StatusPembayaran status) {
+    return status == StatusPembayaran.belumDibayar ||
+        status == StatusPembayaran.ditolak;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final canUpload = _canUpload(data.status);
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -227,8 +225,21 @@ class _MonthlyIuranCard extends StatelessWidget {
               _StatusBadge(status: data.status),
             ],
           ),
+          if (_isProcessed(data.status))
+            const Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Text(
+                "Menunggu verifikasi RT/RW",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.orange,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
 
-          if (canUpload) ...[
+          const SizedBox(height: 10),
+          if (_canUpload(data.status)) ...[
             const SizedBox(height: 16),
 
             const Divider(height: 1),
@@ -269,17 +280,16 @@ class _MonthlyIuranCard extends StatelessWidget {
     );
   }
 
-  bool _canUpload(StatusPembayaran status) {
-    return status == StatusPembayaran.belumDibayar ||
-        status == StatusPembayaran.ditolak;
-  }
-
   void _goToUpload(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => WargaUploadIuranPage(item: item)),
     );
   }
+}
+
+bool _isProcessed(StatusPembayaran status) {
+  return status == StatusPembayaran.diproses;
 }
 
 class _MonthIndicator extends StatelessWidget {

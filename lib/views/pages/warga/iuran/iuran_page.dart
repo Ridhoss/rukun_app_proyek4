@@ -95,7 +95,6 @@ class WargaIuranPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           const SizedBox(height: 5),
           Row(
             children: [
@@ -164,7 +163,7 @@ class WargaIuranPage extends StatelessWidget {
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: selected   ? ColorsUtils.b400 : Colors.transparent,
+            color: selected ? ColorsUtils.b400 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Center(
@@ -309,22 +308,32 @@ class WargaIuranPage extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.payments_rounded,
-                        size: 16,
+                  if (item.iuran.tipe == IuranType.wajib &&
+                      (item.iuran.jumlah ?? 0) > 0)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.payments_rounded,
+                          size: 16,
+                          color: Colors.grey.shade600,
+                        ),
+
+                        const SizedBox(width: 6),
+
+                        Text(
+                          "Rp ${item.iuran.jumlah}",
+                          style: TextStyle(color: Colors.grey.shade700),
+                        ),
+                      ],
+                    )
+                  else
+                    Text(
+                      "Sukarela",
+                      style: TextStyle(
                         color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
                       ),
-
-                      const SizedBox(width: 6),
-
-                      Text(
-                        "Rp ${item.iuran.jumlah ?? 0}",
-                        style: TextStyle(color: Colors.grey.shade700),
-                      ),
-                    ],
-                  ),
+                    ),
                 ],
               ),
             ),
