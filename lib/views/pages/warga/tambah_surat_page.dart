@@ -4,7 +4,7 @@ import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/warga/pengajuan_surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/pengajuan_surat_page.dart';
 
 class TambahSuratPage extends StatefulWidget {

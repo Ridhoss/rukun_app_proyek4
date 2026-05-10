@@ -14,6 +14,7 @@ class IuranSaya {
     return IuranSaya(
       iuran: Iuran.fromJson(json),
 
+      // ignore: unnecessary_cast
       transaksi: (transaksiJson as List)
           .map((e) => Transaksi.fromJson(e))
           .toList(),

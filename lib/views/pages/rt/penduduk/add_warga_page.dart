@@ -382,7 +382,7 @@ class AddWargaPage extends StatelessWidget {
         Text(label),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: items.contains(value) ? value : null,
+          initialValue: items.contains(value) ? value : null,
           items: items
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),

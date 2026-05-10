@@ -61,6 +61,7 @@ class AppBarUtils {
                   ),
                 ),
 
+                // ignore: use_null_aware_elements
                 if (trailing != null) trailing,
               ],
             ),

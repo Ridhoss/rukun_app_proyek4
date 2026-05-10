@@ -17,6 +17,8 @@ class Transaksi {
 
   final String? imgRef;
 
+  final String? catatan;
+
   final int? disetujuiOleh;
 
   final DateTime? waktuDisetujui;
@@ -32,6 +34,7 @@ class Transaksi {
     this.waktuBayar,
     required this.status,
     this.imgRef,
+    this.catatan,
     this.disetujuiOleh,
     this.waktuDisetujui,
     this.waktuDibuat,
@@ -49,6 +52,7 @@ class Transaksi {
           : null,
       status: _status(json['status']),
       imgRef: json['img_referensi'],
+      catatan: json['catatan'],
       disetujuiOleh: json['disetujui_oleh'],
       waktuDisetujui: json['waktu_disetujui'] != null
           ? DateTime.parse(json['waktu_disetujui'])
@@ -69,6 +73,7 @@ class Transaksi {
       'waktu_bayar': waktuBayar?.toIso8601String(),
       'status': _statusToString(status),
       'img_referensi': imgRef,
+      'catatan': catatan,
       'disetujui_oleh': disetujuiOleh,
       'waktu_disetujui': waktuDisetujui?.toIso8601String(),
       'waktu_dibuat': waktuDibuat?.toIso8601String(),

@@ -17,7 +17,7 @@ import 'package:rukun_app_proyek4/views/pages/rt/profile_page.dart';
 
 // pages Warga
 import 'package:rukun_app_proyek4/views/pages/warga/home_page.dart';
-import 'package:rukun_app_proyek4/views/pages/warga/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/tambah_surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/profile_page.dart';
 

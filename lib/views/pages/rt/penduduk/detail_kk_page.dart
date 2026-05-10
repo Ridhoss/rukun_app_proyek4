@@ -74,7 +74,8 @@ class DetailKKPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  kk.noKK ?? "-",
+                  // kk.noKK ?? "-",
+                  kk.noKK,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -218,7 +219,9 @@ class DetailKKPage extends StatelessWidget {
                           backgroundColor: ColorsUtils.b50,
                           child: Icon(Icons.person, color: ColorsUtils.b500),
                         ),
-                        title: Text(warga.nama ?? '-'),
+                        // title: Text(warga.nama ?? '-'),
+                        title: Text(warga.nama),
+
                         trailing: const Icon(Icons.chevron_right),
                       ),
                     );

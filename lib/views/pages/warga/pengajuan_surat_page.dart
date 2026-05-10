@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/warga/pengajuan_surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/tambah_surat_page.dart';
 
@@ -101,6 +101,7 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
+            // ignore: deprecated_member_use
             color: Colors.blue.withOpacity(0.06),
           ),
         ],
@@ -238,6 +239,7 @@ Widget _card(PengajuanSurat item) {
         BoxShadow(
           blurRadius: 8,
           offset: const Offset(0, 3),
+          // ignore: deprecated_member_use
           color: Colors.grey.withOpacity(0.08),
         ),
       ],
@@ -287,7 +289,7 @@ Widget _card(PengajuanSurat item) {
                   const SizedBox(height: 4),
 
                   Text(
-                    item.keterangan ?? "-",
+                    item.keterangan,
                     style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
 

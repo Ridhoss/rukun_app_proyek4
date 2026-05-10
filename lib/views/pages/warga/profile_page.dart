@@ -10,6 +10,7 @@ import 'package:rukun_app_proyek4/views/pages/warga/data_kk_page.dart';
 class WargaProfilePage extends StatelessWidget {
   const WargaProfilePage({super.key});
 
+  @override
   Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
 
