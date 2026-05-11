@@ -170,7 +170,14 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => DetailKKPage(kkId: kk.id!)),
-        );
+        ).then((result) {
+          if (result == true) {
+            final rtId = widget.user.rt?.id;
+            if (rtId != null) {
+              context.read<PendudukViewmodel>().init(rtId);
+            }
+          }
+        });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
