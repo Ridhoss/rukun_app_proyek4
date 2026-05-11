@@ -55,7 +55,7 @@ class AddKKViewModel extends ChangeNotifier {
       String? fotoUrl;
 
       if (fotoKK != null) {
-        fotoUrl = await cloudinaryService.uploadFile(fotoKK!);
+        fotoUrl = await cloudinaryService.uploadFile(fotoKK!, folder: 'kartukeluarga');
 
         if (fotoUrl == null) {
           throw Exception("Gagal upload foto KK");

@@ -7,7 +7,7 @@ class User {
   final int id;
   final int wargaId;
   final bool? isAdmin;
-  final DateTime? createdAt;
+  final DateTime? waktuDibuat;
   final Warga? warga;
   final Pengurus? pengurus;
   final RtModel? rt;
@@ -17,7 +17,7 @@ class User {
     required this.id,
     required this.wargaId,
     this.isAdmin,
-    this.createdAt,
+    this.waktuDibuat,
     this.warga,
     this.pengurus,
     this.rt,
@@ -29,7 +29,7 @@ class User {
       id: json['id'],
       wargaId: json['warga_id'],
       isAdmin: json['is_admin'],
-      createdAt: json['waktu_dibuat'] != null
+      waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
 
@@ -46,7 +46,7 @@ class User {
       'id': id,
       'warga_id': wargaId,
       'is_admin': isAdmin,
-      'waktu_dibuat': createdAt?.toIso8601String(),
+      'waktu_dibuat': waktuDibuat?.toIso8601String(),
       'warga': warga?.toJson(),
       'pengurus': pengurus?.toJson(),
       'rt': rt?.toJson(),

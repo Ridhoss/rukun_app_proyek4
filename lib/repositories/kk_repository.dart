@@ -24,9 +24,7 @@ class KKRepository {
   Future<List<Keluarga>> getKKByRT(int rtId) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getKKByRT(rtId, token),
-    );
+    final result = await _safeCall(() => service.getKKByRT(rtId, token));
 
     _validateStatus(result);
 
@@ -38,9 +36,7 @@ class KKRepository {
   Future<Keluarga?> getKKById(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getKKById(id, token),
-    );
+    final result = await _safeCall(() => service.getKKById(id, token));
 
     _validateStatus(result);
 
@@ -54,9 +50,7 @@ class KKRepository {
   Future<Keluarga?> createKK(Keluarga kk) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.createKK(kk.toJson(), token),
-    );
+    final result = await _safeCall(() => service.createKK(kk.toJson(), token));
 
     _validateStatus(result);
 
@@ -67,28 +61,18 @@ class KKRepository {
     return Keluarga.fromJson(data);
   }
 
-  Future<Keluarga?> updateKK(int id, Keluarga kk) async {
+  Future<void> updateKK(int id, Map<String, dynamic> data) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.updateKK(id, kk.toJson(), token),
-    );
+    final result = await _safeCall(() => service.updateKK(id, data, token));
 
     _validateStatus(result);
-
-    final data = result['data'];
-
-    if (data == null) return null;
-
-    return Keluarga.fromJson(data);
   }
 
   Future<void> deleteKK(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.deleteKK(id, token),
-    );
+    final result = await _safeCall(() => service.deleteKK(id, token));
 
     _validateStatus(result);
   }

@@ -34,7 +34,7 @@ class _CloudinaryTestPageState extends State<CloudinaryTestPage> {
 
     try {
       if (_imageFile != null) {
-        final url = await _cloudinary.uploadFile(_imageFile!);
+        final url = await _cloudinary.uploadFile(_imageFile!, folder: 'kartukeluarga');
         _imageUrl = url;
       }
 

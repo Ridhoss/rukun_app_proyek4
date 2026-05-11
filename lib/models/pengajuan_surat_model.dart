@@ -1,22 +1,14 @@
-enum SuratStatus { diajukan, tertunda, disetujui, ditolak, selesai }
+enum SuratStatus { diajukan, disetujui, ditolak, selesai }
 
 class PengajuanSurat {
   final int? id;
-
   final int? wargaId;
-
   final String jenisSurat;
-
   final String keperluan;
-
   final String keterangan;
-
   final SuratStatus status;
-
   final int? disetujuiOleh;
-
   final DateTime? waktuDisetujui;
-
   final DateTime? waktuDibuat;
 
   const PengajuanSurat({
@@ -82,8 +74,6 @@ class PengajuanSurat {
       'keterangan': keterangan,
       'status': _statusToString(status),
       'disetujui_oleh': disetujuiOleh,
-      'waktu_disetujui': waktuDisetujui?.toIso8601String(),
-      'waktu_dibuat': waktuDibuat?.toIso8601String(),
     };
   }
 
@@ -98,9 +88,6 @@ class PengajuanSurat {
       case "Selesai":
         return SuratStatus.selesai;
 
-      case "Tertunda":
-        return SuratStatus.tertunda;
-
       default:
         return SuratStatus.diajukan;
     }
@@ -110,9 +97,6 @@ class PengajuanSurat {
     switch (status) {
       case SuratStatus.diajukan:
         return "Diajukan";
-
-      case SuratStatus.tertunda:
-        return "Tertunda";
 
       case SuratStatus.disetujui:
         return "Disetujui";

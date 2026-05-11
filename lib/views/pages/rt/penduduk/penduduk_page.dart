@@ -3,14 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
-import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/kartukeluarga/add_kk_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/kartukeluarga/detail_kk_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/kk_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_kk_page.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/kartukeluarga/add_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/penduduk_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/penduduk/crudkk/add_kk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/detail_kk_page.dart';
 
 class RtPendudukPage extends StatefulWidget {
@@ -35,7 +33,7 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
     final rtId = widget.user.rt?.id;
     if (rtId == null) return;
 
-    context.read<KeluargaVM>().init(rtId);
+    context.read<PendudukViewmodel>().init(rtId);
   }
 
   @override
@@ -125,7 +123,7 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
             const SizedBox(height: 12),
 
             Expanded(
-              child: Consumer<KeluargaVM>(
+              child: Consumer<PendudukViewmodel>(
                 builder: (context, vm, _) {
                   if (vm.isLoading) {
                     return const Center(child: CircularProgressIndicator());
@@ -171,15 +169,7 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => ChangeNotifierProvider(
-              create: (_) => DetailKKViewModel(
-                repo: context.read<WargaRepository>(),
-                kkId: kk.id!,
-              )..fetchAnggota(),
-              child: DetailKKPage(kk: kk),
-            ),
-          ),
+          MaterialPageRoute(builder: (_) => DetailKKPage(kkId: kk.id!)),
         );
       },
       child: Container(
@@ -250,7 +240,7 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
           ).then((_) {
             final rtId = user.rt?.id;
             if (rtId != null) {
-              context.read<KeluargaVM>().init(rtId);
+              context.read<PendudukViewmodel>().init(rtId);
             }
           });
         },

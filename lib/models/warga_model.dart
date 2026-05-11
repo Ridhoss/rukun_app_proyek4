@@ -47,6 +47,8 @@ class Warga {
 
   final int? keluargaId;
 
+  final DateTime? waktuDibuat;
+
   Warga({
     this.id,
     required this.nama,
@@ -68,6 +70,7 @@ class Warga {
     this.namaAyah,
     this.namaIbu,
     this.keluargaId,
+    this.waktuDibuat,
   });
 
   factory Warga.fromJson(Map<String, dynamic> json) {
@@ -102,6 +105,10 @@ class Warga {
       namaIbu: json['nama_ibu'],
 
       keluargaId: json['keluarga_id'],
+
+      waktuDibuat: json['waktu_dibuat'] != null
+          ? DateTime.parse(json['waktu_dibuat'])
+          : null,
     );
   }
 
@@ -187,7 +194,7 @@ class Warga {
 
   static StatusHubungan? _parseStatusHubungan(String? value) {
     switch (value) {
-      case "Kepala_Keluarga":
+      case "Kepala Keluarga":
         return StatusHubungan.kepalaKeluarga;
       case "Suami":
         return StatusHubungan.suami;

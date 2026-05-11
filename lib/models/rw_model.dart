@@ -5,7 +5,7 @@ class RwModel {
   final String kecamatan;
   final String kabupatenKota;
   final String provinsi;
-  final DateTime waktuDibuat;
+  final DateTime? waktuDibuat;
 
   RwModel({
     required this.id,
@@ -14,7 +14,7 @@ class RwModel {
     required this.kecamatan,
     required this.kabupatenKota,
     required this.provinsi,
-    required this.waktuDibuat,
+    this.waktuDibuat,
   });
 
   factory RwModel.fromJson(Map<String, dynamic> json) {
@@ -25,7 +25,9 @@ class RwModel {
       kecamatan: json['kecamatan'],
       kabupatenKota: json['kabupaten_kota'],
       provinsi: json['provinsi'],
-      waktuDibuat: DateTime.parse(json['waktu_dibuat']),
+      waktuDibuat: json['waktu_dibuat'] != null
+          ? DateTime.tryParse(json['waktu_dibuat'])
+          : null,
     );
   }
 
@@ -37,7 +39,6 @@ class RwModel {
       'kecamatan': kecamatan,
       'kabupaten_kota': kabupatenKota,
       'provinsi': provinsi,
-      'waktu_dibuat': waktuDibuat.toIso8601String(),
     };
   }
 }

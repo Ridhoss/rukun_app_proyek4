@@ -56,15 +56,14 @@ class Kegiatan {
     final data = {
       'nama': nama,
       'deskripsi': deskripsi,
-      'tanggal_mulai': tanggalMulai.toIso8601String(),
-      'tanggal_selesai': tanggalSelesai?.toIso8601String(),
+      'tanggal_mulai': tanggalMulai.toUtc().toIso8601String(),
+      'tanggal_selesai': tanggalSelesai?.toUtc().toIso8601String(),
       'level': level == KegiatanLevel.rt ? 'RT' : 'RW',
       'rt_id': rtId,
       'rw_id': rwId,
       'status': _statusToString(status),
       'img_referensi': imgReferensi,
       'doc_referensi': docReferensi,
-      'waktu_dibuat': waktuDibuat?.toIso8601String(),
     };
 
     if (id != null) {

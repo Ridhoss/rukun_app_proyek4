@@ -58,7 +58,6 @@ class Iuran {
       'tipe': tipe.name,
       'cakupan': cakupan.name,
       'periode': periode.name,
-      'waktu_dibuat': waktuDibuat?.toIso8601String(),
     };
 
     if (id != null) {
