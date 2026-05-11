@@ -6,7 +6,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/kartukeluarga/detail_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/warga/add_warga_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/penduduk/add_warga_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/penduduk/crudwarga/add_warga_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/crudkk/edit_kk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/detail_warga.dart';
 
