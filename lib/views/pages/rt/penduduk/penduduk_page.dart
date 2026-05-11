@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/core/navigation/route_observer.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
@@ -20,20 +21,37 @@ class RtPendudukPage extends StatefulWidget {
   State<RtPendudukPage> createState() => _RtPendudukPageState();
 }
 
-class _RtPendudukPageState extends State<RtPendudukPage> {
+class _RtPendudukPageState extends State<RtPendudukPage> with RouteAware {
   bool _isInitialized = false;
+
+  @override
+  void didPopNext() {
+    final rtId = widget.user.rt?.id;
+    if (rtId != null) {
+      context.read<PendudukViewmodel>().loadKK(rtId);
+    }
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (_isInitialized) return;
-    _isInitialized = true;
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
 
-    final rtId = widget.user.rt?.id;
-    if (rtId == null) return;
+    if (!_isInitialized) {
+      _isInitialized = true;
 
-    context.read<PendudukViewmodel>().init(rtId);
+      final rtId = widget.user.rt?.id;
+      if (rtId != null) {
+        context.read<PendudukViewmodel>().init(rtId);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
   }
 
   @override
@@ -170,14 +188,7 @@ class _RtPendudukPageState extends State<RtPendudukPage> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => DetailKKPage(kkId: kk.id!)),
-        ).then((result) {
-          if (result == true) {
-            final rtId = widget.user.rt?.id;
-            if (rtId != null) {
-              context.read<PendudukViewmodel>().init(rtId);
-            }
-          }
-        });
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

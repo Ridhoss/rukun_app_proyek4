@@ -1,5 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:rukun_app_proyek4/core/navigation/route_observer.dart';
 import 'package:rukun_app_proyek4/core/network/dio_client.dart';
 import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
@@ -111,6 +112,7 @@ class MyApp extends StatelessWidget {
     return ShadcnApp(
       title: 'RukunApp',
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [routeObserver],
       home: const AuthGate(),
     );
   }
