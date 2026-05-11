@@ -17,6 +17,8 @@ class Iuran {
   final IuranScope cakupan;
   final PeriodeType periode;
   final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   Iuran({
     this.id,
@@ -29,6 +31,8 @@ class Iuran {
     required this.cakupan,
     required this.periode,
     this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   factory Iuran.fromJson(Map<String, dynamic> json) {
@@ -44,6 +48,12 @@ class Iuran {
       periode: _periode(json['periode']),
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
+          : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
           : null,
     );
   }

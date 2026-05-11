@@ -7,21 +7,25 @@ class User {
   final int id;
   final int wargaId;
   final bool? isAdmin;
-  final DateTime? waktuDibuat;
   final Warga? warga;
   final Pengurus? pengurus;
   final RtModel? rt;
   final RwModel? rw;
+  final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   User({
     required this.id,
     required this.wargaId,
     this.isAdmin,
-    this.waktuDibuat,
     this.warga,
     this.pengurus,
     this.rt,
     this.rw,
+    this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -29,15 +33,23 @@ class User {
       id: json['id'],
       wargaId: json['warga_id'],
       isAdmin: json['is_admin'],
+      warga: json['warga'] != null ? Warga.fromJson(json['warga']) : null,
+
+      pengurus: json['pengurus'] != null
+          ? Pengurus.fromJson(json['pengurus'])
+          : null,
+      rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
+      rw: json['rw'] != null ? RwModel.fromJson(json['rw']) : null,
+
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
-
-      warga: json['warga'] != null ? Warga.fromJson(json['warga']) : null,
-
-      pengurus: json['pengurus'] != null ? Pengurus.fromJson(json['pengurus']) : null,
-      rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
-      rw: json['rw'] != null ? RwModel.fromJson(json['rw']) : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
+          : null,
     );
   }
 
@@ -46,7 +58,6 @@ class User {
       'id': id,
       'warga_id': wargaId,
       'is_admin': isAdmin,
-      'waktu_dibuat': waktuDibuat?.toIso8601String(),
       'warga': warga?.toJson(),
       'pengurus': pengurus?.toJson(),
       'rt': rt?.toJson(),

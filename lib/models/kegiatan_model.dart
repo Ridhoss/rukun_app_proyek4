@@ -15,6 +15,8 @@ class Kegiatan {
   final String? imgReferensi;
   final String? docReferensi;
   final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   Kegiatan({
     this.id,
@@ -29,6 +31,8 @@ class Kegiatan {
     this.imgReferensi,
     this.docReferensi,
     this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   factory Kegiatan.fromJson(Map<String, dynamic> json) {
@@ -48,6 +52,12 @@ class Kegiatan {
       docReferensi: json['doc_referensi'],
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
+          : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
           : null,
     );
   }

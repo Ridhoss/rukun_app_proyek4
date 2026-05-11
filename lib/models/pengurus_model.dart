@@ -6,6 +6,8 @@ class Pengurus {
   final int? rwId;
   final String? posisi;
   final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   Pengurus({
     this.id,
@@ -15,6 +17,8 @@ class Pengurus {
     this.rwId,
     this.posisi,
     this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   factory Pengurus.fromJson(Map<String, dynamic> json) {
@@ -27,6 +31,12 @@ class Pengurus {
       posisi: json['posisi'],
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.tryParse(json['waktu_dibuat'])
+          : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
           : null,
     );
   }

@@ -48,6 +48,8 @@ class Warga {
   final int? keluargaId;
 
   final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   Warga({
     this.id,
@@ -71,6 +73,8 @@ class Warga {
     this.namaIbu,
     this.keluargaId,
     this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   factory Warga.fromJson(Map<String, dynamic> json) {
@@ -108,6 +112,12 @@ class Warga {
 
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
+          : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
           : null,
     );
   }

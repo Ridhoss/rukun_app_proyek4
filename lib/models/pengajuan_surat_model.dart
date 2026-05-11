@@ -10,6 +10,8 @@ class PengajuanSurat {
   final int? disetujuiOleh;
   final DateTime? waktuDisetujui;
   final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   const PengajuanSurat({
     this.id,
@@ -21,6 +23,8 @@ class PengajuanSurat {
     this.disetujuiOleh,
     this.waktuDisetujui,
     this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   PengajuanSurat copyWith({
@@ -31,8 +35,6 @@ class PengajuanSurat {
     String? keterangan,
     SuratStatus? status,
     int? disetujuiOleh,
-    DateTime? waktuDisetujui,
-    DateTime? waktuDibuat,
   }) {
     return PengajuanSurat(
       id: id ?? this.id,
@@ -42,8 +44,6 @@ class PengajuanSurat {
       keterangan: keterangan ?? this.keterangan,
       status: status ?? this.status,
       disetujuiOleh: disetujuiOleh ?? this.disetujuiOleh,
-      waktuDisetujui: waktuDisetujui ?? this.waktuDisetujui,
-      waktuDibuat: waktuDibuat ?? this.waktuDibuat,
     );
   }
 
@@ -61,6 +61,12 @@ class PengajuanSurat {
           : null,
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
+          : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
           : null,
     );
   }
