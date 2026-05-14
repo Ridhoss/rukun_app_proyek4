@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/warga_model.dart';
+import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
@@ -24,9 +25,16 @@ class DetailWargaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) =>
-          DetailWargaViewModel(repo: context.read<WargaRepository>())
-            ..getDetailWarga(wargaId),
-      child: _DetailWargaView(wargaId: wargaId, currentUserWargaId: currentUserWargaId,),
+          DetailWargaViewModel(
+              repo: context.read<WargaRepository>(),
+              authRepository: context.read<AuthRepository>(),
+            )
+            ..getDetailWarga(wargaId)
+            ..checkAccountStatus(wargaId),
+      child: _DetailWargaView(
+        wargaId: wargaId,
+        currentUserWargaId: currentUserWargaId,
+      ),
     );
   }
 }
@@ -212,10 +220,221 @@ class _DetailWargaView extends StatelessWidget {
               ),
             ],
           ),
+
+          const SizedBox(height: 12),
+
+          SizedBox(
+            width: double.infinity,
+            child: vm.isChecking
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(12),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : vm.hasAccount
+                ? OutlinedButton.icon(
+                    onPressed: () {
+                      _showChangePasswordDialog(context, warga.id!);
+                    },
+                    icon: const Icon(Icons.lock_reset),
+                    label: const Text("Ganti Password"),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: ColorsUtils.b500,
+                      side: const BorderSide(color: ColorsUtils.b500),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  )
+                : ElevatedButton.icon(
+                    onPressed: () {
+                      _showCreateAccountDialog(context, warga.nik);
+                    },
+                    icon: const Icon(Icons.person_add_alt_1),
+                    label: const Text("Buat Akun"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorsUtils.b500,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+          ),
         ],
       ),
     );
   }
+
+  void _showCreateAccountDialog(BuildContext context, String nik) {
+    final passwordController = TextEditingController();
+    final confirmController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text("Buat Akun"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: "Password"),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: confirmController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "Konfirmasi Password",
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text("Batal"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final pass = passwordController.text;
+                final confirm = confirmController.text;
+
+                if (pass.isEmpty || confirm.isEmpty) return;
+
+                if (pass != confirm) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Password tidak sama")),
+                  );
+                  return;
+                }
+
+                Navigator.pop(dialogContext);
+
+                final vm = context.read<DetailWargaViewModel>();
+                final success = await vm.createAccount(
+                  nik: nik,
+                  password: pass,
+                  confirmPassword: confirm,
+                );
+
+                if (!context.mounted) return;
+
+                if (success) {
+                  await vm.checkAccountStatus(wargaId);
+
+                  NotificationUtils.showSuccess(
+                    context,
+                    "Akun berhasil dibuat",
+                  );
+                } else {
+                  NotificationUtils.showError(
+                    context,
+                    vm.error ?? "Gagal membuat akun",
+                  );
+                }
+              },
+              child: const Text("Buat"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+void _showChangePasswordDialog(BuildContext context, int wargaId) {
+  final passwordController = TextEditingController();
+  final confirmController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: const Text("Ganti Password"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: "Password Baru"),
+            ),
+
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: confirmController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: "Konfirmasi Password",
+              ),
+            ),
+          ],
+        ),
+
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+            },
+            child: const Text("Batal"),
+          ),
+
+          ElevatedButton(
+            onPressed: () async {
+              final pass = passwordController.text.trim();
+              final confirm = confirmController.text.trim();
+
+              if (pass.isEmpty || confirm.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Password wajib diisi")),
+                );
+                return;
+              }
+
+              if (pass != confirm) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Password tidak sama")),
+                );
+                return;
+              }
+
+              Navigator.pop(dialogContext);
+
+              final vm = context.read<DetailWargaViewModel>();
+
+              final success = await vm.adminChangePassword(
+                userId: vm.accountUser!.id,
+                password: pass,
+              );
+
+              if (!context.mounted) return;
+
+              if (success) {
+                NotificationUtils.showSuccess(
+                  context,
+                  "Password berhasil diubah",
+                );
+              } else {
+                NotificationUtils.showError(
+                  context,
+                  vm.error ?? "Gagal mengubah password",
+                );
+              }
+            },
+            child: const Text("Simpan"),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 Widget _buildHeaderCard(Warga warga) {
