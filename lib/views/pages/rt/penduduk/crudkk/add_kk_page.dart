@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/kartukeluarga/add_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/kartukeluarga/add_kk_viewmodel.dart';
 
 class AddKKPage extends StatelessWidget {
   const AddKKPage({super.key});
@@ -14,15 +15,13 @@ class AddKKPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
 
-      appBar: AppBar(
-        backgroundColor: ColorsUtils.b500,
-        foregroundColor: ColorsUtils.white,
-        elevation: 0,
-        title: const Text(
-          'Tambah Kartu Keluarga',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        centerTitle: true,
+      appBar: AppBarUtils.buildAppBar(
+        name: "",
+        title: "Tambah Kartu Keluarga",
+        subtitle: "Halaman tambah kartu keluarga baru",
+        showName: false,
+        showAvatar: false,
+        showGreeting: false,
       ),
 
       body: ListView(

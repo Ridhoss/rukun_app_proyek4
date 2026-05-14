@@ -1,23 +1,17 @@
-enum SuratStatus { diajukan, tertunda, disetujui, ditolak, selesai }
+enum SuratStatus { diajukan, disetujui, ditolak, selesai }
 
 class PengajuanSurat {
   final int? id;
-
   final int? wargaId;
-
   final String jenisSurat;
-
   final String keperluan;
-
   final String keterangan;
-
   final SuratStatus status;
-
   final int? disetujuiOleh;
-
   final DateTime? waktuDisetujui;
-
   final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   const PengajuanSurat({
     this.id,
@@ -29,6 +23,8 @@ class PengajuanSurat {
     this.disetujuiOleh,
     this.waktuDisetujui,
     this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   PengajuanSurat copyWith({
@@ -39,8 +35,6 @@ class PengajuanSurat {
     String? keterangan,
     SuratStatus? status,
     int? disetujuiOleh,
-    DateTime? waktuDisetujui,
-    DateTime? waktuDibuat,
   }) {
     return PengajuanSurat(
       id: id ?? this.id,
@@ -50,8 +44,6 @@ class PengajuanSurat {
       keterangan: keterangan ?? this.keterangan,
       status: status ?? this.status,
       disetujuiOleh: disetujuiOleh ?? this.disetujuiOleh,
-      waktuDisetujui: waktuDisetujui ?? this.waktuDisetujui,
-      waktuDibuat: waktuDibuat ?? this.waktuDibuat,
     );
   }
 
@@ -70,6 +62,12 @@ class PengajuanSurat {
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
+          : null,
     );
   }
 
@@ -82,8 +80,6 @@ class PengajuanSurat {
       'keterangan': keterangan,
       'status': _statusToString(status),
       'disetujui_oleh': disetujuiOleh,
-      'waktu_disetujui': waktuDisetujui?.toIso8601String(),
-      'waktu_dibuat': waktuDibuat?.toIso8601String(),
     };
   }
 
@@ -98,9 +94,6 @@ class PengajuanSurat {
       case "Selesai":
         return SuratStatus.selesai;
 
-      case "Tertunda":
-        return SuratStatus.tertunda;
-
       default:
         return SuratStatus.diajukan;
     }
@@ -110,9 +103,6 @@ class PengajuanSurat {
     switch (status) {
       case SuratStatus.diajukan:
         return "Diajukan";
-
-      case SuratStatus.tertunda:
-        return "Tertunda";
 
       case SuratStatus.disetujui:
         return "Disetujui";

@@ -15,6 +15,8 @@ class Kegiatan {
   final String? imgReferensi;
   final String? docReferensi;
   final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   Kegiatan({
     this.id,
@@ -29,6 +31,8 @@ class Kegiatan {
     this.imgReferensi,
     this.docReferensi,
     this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   factory Kegiatan.fromJson(Map<String, dynamic> json) {
@@ -49,6 +53,12 @@ class Kegiatan {
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
+          : null,
     );
   }
 
@@ -56,15 +66,14 @@ class Kegiatan {
     final data = {
       'nama': nama,
       'deskripsi': deskripsi,
-      'tanggal_mulai': tanggalMulai.toIso8601String(),
-      'tanggal_selesai': tanggalSelesai?.toIso8601String(),
+      'tanggal_mulai': tanggalMulai.toUtc().toIso8601String(),
+      'tanggal_selesai': tanggalSelesai?.toUtc().toIso8601String(),
       'level': level == KegiatanLevel.rt ? 'RT' : 'RW',
       'rt_id': rtId,
       'rw_id': rwId,
       'status': _statusToString(status),
       'img_referensi': imgReferensi,
       'doc_referensi': docReferensi,
-      'waktu_dibuat': waktuDibuat?.toIso8601String(),
     };
 
     if (id != null) {

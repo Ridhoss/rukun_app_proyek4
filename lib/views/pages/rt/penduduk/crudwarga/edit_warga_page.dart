@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/warga/add_warga_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/warga/edit_warga_viewmodel.dart';
 
-class AddWargaPage extends StatelessWidget {
-  const AddWargaPage({super.key});
+class EditWargaPage extends StatelessWidget {
+  const EditWargaPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<AddWargaViewModel>();
+    final vm = context.watch<EditWargaViewModel>();
+
+    if (vm.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
 
-      appBar: AppBar(
-        backgroundColor: ColorsUtils.b500,
-        foregroundColor: ColorsUtils.white,
-        elevation: 0,
-        title: const Text(
-          'Tambah Data Warga',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        centerTitle: true,
+      appBar: AppBarUtils.buildAppBar(
+        name: "",
+        title: "Ubah Data Warga",
+        subtitle: "Halaman ubah data warga",
+        showName: false,
+        showAvatar: false,
+        showGreeting: false,
       ),
 
       body: ListView(
@@ -125,11 +128,21 @@ class AddWargaPage extends StatelessWidget {
     );
   }
 
-  Widget _dataPribadi(BuildContext context, AddWargaViewModel vm) {
+  Widget _dataPribadi(BuildContext context, EditWargaViewModel vm) {
     return Column(
       children: [
-        _textField('Nama Lengkap', onChanged: vm.setNama),
-        _textField('NIK', keyboard: TextInputType.number, onChanged: vm.setNik),
+        _textField(
+          'Nama Lengkap',
+          initialValue: vm.nama,
+          onChanged: vm.setNama,
+        ),
+
+        _textField(
+          'NIK',
+          initialValue: vm.nik,
+          keyboard: TextInputType.number,
+          onChanged: vm.setNik,
+        ),
 
         _dropdown(
           'Jenis Kelamin',
@@ -141,14 +154,18 @@ class AddWargaPage extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _textField('Tempat Lahir', onChanged: vm.setTempatLahir),
+              child: _textField(
+                'Tempat Lahir',
+                initialValue: vm.tempatLahir,
+                onChanged: vm.setTempatLahir,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _dateField(
                 context,
                 'Tanggal Lahir',
-                vm.tanggalLahir,
+                vm.tglLahir,
                 vm.setTanggalLahir,
               ),
             ),
@@ -158,7 +175,7 @@ class AddWargaPage extends StatelessWidget {
     );
   }
 
-  Widget _dataIdentitas(AddWargaViewModel vm) {
+  Widget _dataIdentitas(EditWargaViewModel vm) {
     return Column(
       children: [
         _dropdown(
@@ -175,10 +192,9 @@ class AddWargaPage extends StatelessWidget {
           onChanged: vm.setPendidikan,
         ),
 
-        _dropdown(
+        _textField(
           'Pekerjaan',
-          ['Belum Bekerja', 'Pelajar', 'Karyawan', 'Wiraswasta'],
-          value: vm.pekerjaan,
+          initialValue: vm.pekerjaan,
           onChanged: vm.setPekerjaan,
         ),
 
@@ -192,7 +208,7 @@ class AddWargaPage extends StatelessWidget {
     );
   }
 
-  Widget _dataPerkawinan(BuildContext context, AddWargaViewModel vm) {
+  Widget _dataPerkawinan(BuildContext context, EditWargaViewModel vm) {
     return Column(
       children: [
         _dropdown(
@@ -205,14 +221,14 @@ class AddWargaPage extends StatelessWidget {
         _dateField(
           context,
           'Tanggal Perkawinan',
-          vm.tanggalPerkawinan,
+          vm.tglPerkawinan,
           vm.setTanggalPerkawinan,
         ),
       ].withSpacing(),
     );
   }
 
-  Widget _dataKewarganegaraan(AddWargaViewModel vm) {
+  Widget _dataKewarganegaraan(EditWargaViewModel vm) {
     return Column(
       children: [
         _dropdown(
@@ -223,15 +239,27 @@ class AddWargaPage extends StatelessWidget {
         ),
 
         if (vm.kewarganegaraan == 'WNA')
-          _textField('Negara Asal', onChanged: vm.setNegara),
+          _textField(
+            'Negara Asal',
+            initialValue: vm.negaraWNA,
+            onChanged: vm.setNegara,
+          ),
 
-        _textField('No. Paspor'),
-        _textField('No. KITAP'),
+        _textField(
+          'No. Paspor',
+          initialValue: vm.noPaspor,
+          onChanged: vm.setPaspor,
+        ),
+        _textField(
+          'No. KITAP',
+          initialValue: vm.noKITAP,
+          onChanged: vm.setKITAP,
+        ),
       ].withSpacing(),
     );
   }
 
-  Widget _dataKeluarga(AddWargaViewModel vm) {
+  Widget _dataKeluarga(EditWargaViewModel vm) {
     return Column(
       children: [
         _dropdown(
@@ -252,8 +280,12 @@ class AddWargaPage extends StatelessWidget {
           onChanged: vm.setStatusHubungan,
         ),
 
-        _textField('Nama Ayah', onChanged: (v) => vm.namaAyah = v),
-        _textField('Nama Ibu', onChanged: (v) => vm.namaIbu = v),
+        _textField(
+          'Nama Ayah',
+          initialValue: vm.namaAyah,
+          onChanged: vm.setAyah,
+        ),
+        _textField('Nama Ibu', initialValue: vm.namaIbu, onChanged: vm.setIbu),
       ].withSpacing(),
     );
   }
@@ -308,7 +340,7 @@ class AddWargaPage extends StatelessWidget {
     );
   }
 
-  Widget _bottomBar(BuildContext context, AddWargaViewModel vm) {
+  Widget _bottomBar(BuildContext context, EditWargaViewModel vm) {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -320,7 +352,7 @@ class AddWargaPage extends StatelessWidget {
           onPressed: vm.isSaving
               ? null
               : () async {
-                  await vm.saveWarga();
+                  await vm.updateWarga();
 
                   if (vm.errorMessage != null) {
                     NotificationUtils.showError(context, vm.errorMessage!);
@@ -396,6 +428,7 @@ class AddWargaPage extends StatelessWidget {
 
   Widget _textField(
     String label, {
+    String? initialValue,
     TextInputType keyboard = TextInputType.text,
     Function(String)? onChanged,
   }) {
@@ -404,7 +437,9 @@ class AddWargaPage extends StatelessWidget {
       children: [
         Text(label),
         const SizedBox(height: 6),
-        TextField(
+
+        TextFormField(
+          initialValue: initialValue,
           keyboardType: keyboard,
           onChanged: onChanged,
           decoration: _input(),

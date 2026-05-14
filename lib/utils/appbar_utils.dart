@@ -14,12 +14,27 @@ class AppBarUtils {
     Widget? trailing,
   }) {
     return AppBar(
-      automaticallyImplyLeading: false,
+      // automaticallyImplyLeading: false,
       backgroundColor: ColorsUtils.b500,
       elevation: 0,
       toolbarHeight: 90,
       leadingWidth: 60,
-      leading: leading,
+      leading:
+          leading ??
+          Builder(
+            builder: (context) {
+              if (!Navigator.canPop(context)) return const SizedBox.shrink();
+
+              return IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                onPressed: () => Navigator.pop(context),
+              );
+            },
+          ),
 
       title: Align(
         alignment: Alignment.centerLeft,

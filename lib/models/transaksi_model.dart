@@ -2,28 +2,19 @@ enum StatusPembayaran { belumDibayar, diproses, dibayar, ditolak }
 
 class Transaksi {
   final int? id;
-
   final int iuranId;
-
   final int? keluargaId;
-
   final int? wargaId;
-
   final int? jumlah;
-
   final DateTime? waktuBayar;
-
   final StatusPembayaran status;
-
   final String? imgRef;
-
   final String? catatan;
-
   final int? disetujuiOleh;
-
   final DateTime? waktuDisetujui;
-
   final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   Transaksi({
     this.id,
@@ -38,6 +29,8 @@ class Transaksi {
     this.disetujuiOleh,
     this.waktuDisetujui,
     this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   factory Transaksi.fromJson(Map<String, dynamic> json) {
@@ -60,6 +53,12 @@ class Transaksi {
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
+          : null,
     );
   }
 
@@ -70,13 +69,10 @@ class Transaksi {
       'keluarga_id': keluargaId,
       'warga_id': wargaId,
       'jumlah': jumlah,
-      'waktu_bayar': waktuBayar?.toIso8601String(),
       'status': _statusToString(status),
       'img_referensi': imgRef,
       'catatan': catatan,
       'disetujui_oleh': disetujuiOleh,
-      'waktu_disetujui': waktuDisetujui?.toIso8601String(),
-      'waktu_dibuat': waktuDibuat?.toIso8601String(),
     };
   }
 

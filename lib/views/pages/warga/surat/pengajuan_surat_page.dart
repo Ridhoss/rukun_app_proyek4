@@ -117,6 +117,8 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
           _item(vm.totalDisetujui, "Disetujui"),
           _divider(),
           _item(vm.totalDitolak, "Ditolak"),
+          _divider(),
+          _item(vm.totalSelesai, "Selesai"),
         ],
       ),
     );
@@ -148,7 +150,7 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
         child: Row(
           children: [
             _chip(vm, "Semua", FilterSurat.semua),
-            _chip(vm, "Tertunda", FilterSurat.diajukan),
+            _chip(vm, "Diajukan", FilterSurat.diajukan),
             _chip(vm, "Disetujui", FilterSurat.disetujui),
             _chip(vm, "Ditolak", FilterSurat.ditolak),
             _chip(vm, "Selesai", FilterSurat.selesai),
@@ -230,9 +232,6 @@ String _statusLabel(SuratStatus status) {
       return "Ditolak";
     case SuratStatus.selesai:
       return "Selesai";
-    case SuratStatus.tertunda:
-      // TODO: Handle this case.
-      throw UnimplementedError();
   }
 }
 

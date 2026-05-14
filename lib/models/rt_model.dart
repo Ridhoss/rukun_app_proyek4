@@ -2,13 +2,17 @@ class RtModel {
   final int id;
   final String noRt;
   final int rwId;
-  final DateTime waktuDibuat;
+  final DateTime? waktuDibuat;
+  final DateTime? waktuDiubah;
+  final DateTime? waktuDihapus;
 
   RtModel({
     required this.id,
     required this.noRt,
     required this.rwId,
-    required this.waktuDibuat,
+    this.waktuDibuat,
+    this.waktuDiubah,
+    this.waktuDihapus,
   });
 
   factory RtModel.fromJson(Map<String, dynamic> json) {
@@ -16,16 +20,19 @@ class RtModel {
       id: json['id'],
       noRt: json['no_rt'],
       rwId: json['rw_id'],
-      waktuDibuat: DateTime.parse(json['waktu_dibuat']),
+      waktuDibuat: json['waktu_dibuat'] != null
+          ? DateTime.tryParse(json['waktu_dibuat'])
+          : null,
+      waktuDiubah: json['waktu_diubah'] != null
+          ? DateTime.parse(json['waktu_diubah'])
+          : null,
+      waktuDihapus: json['waktu_dihapus'] != null
+          ? DateTime.parse(json['waktu_dihapus'])
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'no_rt': noRt,
-      'rw_id': rwId,
-      'waktu_dibuat': waktuDibuat.toIso8601String(),
-    };
+    return {'id': id, 'no_rt': noRt, 'rw_id': rwId};
   }
 }

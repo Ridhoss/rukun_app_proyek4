@@ -10,7 +10,7 @@ import 'package:rukun_app_proyek4/views/pages/rw/profile_page.dart';
 
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/penduduk_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/penduduk/penduduk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/profile_page.dart';
