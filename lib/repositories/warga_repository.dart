@@ -24,9 +24,7 @@ class WargaRepository {
   Future<Warga?> getWargaById(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getWargaById(id, token),
-    );
+    final result = await _safeCall(() => service.getWargaById(id, token));
 
     _validateStatus(result);
 
@@ -67,7 +65,7 @@ class WargaRepository {
     return Warga.fromJson(data);
   }
 
-  Future<Warga?> updateWarga(int id, Warga warga) async {
+  Future<void> updateWarga(int id, Warga warga) async {
     final token = await _requireToken();
 
     final result = await _safeCall(
@@ -75,20 +73,12 @@ class WargaRepository {
     );
 
     _validateStatus(result);
-
-    final data = result['data'];
-
-    if (data == null) return null;
-
-    return Warga.fromJson(data);
   }
 
   Future<void> deleteWarga(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.deleteWarga(id, token),
-    );
+    final result = await _safeCall(() => service.deleteWarga(id, token));
 
     _validateStatus(result);
   }

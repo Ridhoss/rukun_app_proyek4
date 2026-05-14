@@ -1,8 +1,119 @@
-enum JenisKelamin { lakiLaki, perempuan }
+enum JenisKelamin {
+  lakiLaki,
+  perempuan;
 
-enum Agama { islam, kristen, katolik, hindu, buddha, konghucu }
+  String get display {
+    switch (this) {
+      case JenisKelamin.lakiLaki:
+        return 'Laki-Laki';
+      case JenisKelamin.perempuan:
+        return 'Perempuan';
+    }
+  }
 
-enum StatusPerkawinan { belumKawin, kawin, ceraiHidup, ceraiMati }
+  static JenisKelamin? from(String? value) {
+    switch (value) {
+      case 'lakiLaki':
+      case 'Laki-Laki':
+        return JenisKelamin.lakiLaki;
+      case 'perempuan':
+      case 'Perempuan':
+        return JenisKelamin.perempuan;
+      default:
+        return null;
+    }
+  }
+}
+
+enum Agama {
+  islam,
+  kristen,
+  katolik,
+  hindu,
+  buddha,
+  konghucu;
+
+  String get display {
+    switch (this) {
+      case Agama.islam:
+        return 'Islam';
+      case Agama.kristen:
+        return 'Kristen';
+      case Agama.katolik:
+        return 'Katolik';
+      case Agama.hindu:
+        return 'Hindu';
+      case Agama.buddha:
+        return 'Buddha';
+      case Agama.konghucu:
+        return 'Konghucu';
+    }
+  }
+
+  static Agama? from(String? value) {
+    switch (value) {
+      case 'islam':
+      case 'Islam':
+        return Agama.islam;
+      case 'kristen':
+      case 'Kristen':
+        return Agama.kristen;
+      case 'katolik':
+      case 'Katolik':
+        return Agama.katolik;
+      case 'hindu':
+      case 'Hindu':
+        return Agama.hindu;
+      case 'buddha':
+      case 'Buddha':
+        return Agama.buddha;
+      case 'konghucu':
+      case 'Konghucu':
+        return Agama.konghucu;
+      default:
+        return null;
+    }
+  }
+}
+
+enum StatusPerkawinan {
+  belumKawin,
+  kawin,
+  ceraiHidup,
+  ceraiMati;
+
+  String get display {
+    switch (this) {
+      case StatusPerkawinan.belumKawin:
+        return 'Belum Kawin';
+      case StatusPerkawinan.kawin:
+        return 'Kawin';
+      case StatusPerkawinan.ceraiHidup:
+        return 'Cerai Hidup';
+      case StatusPerkawinan.ceraiMati:
+        return 'Cerai Mati';
+    }
+  }
+
+  static StatusPerkawinan? from(String? value) {
+    switch (value) {
+      case 'belumKawin':
+      case 'Belum Kawin':
+        return StatusPerkawinan.belumKawin;
+      case 'kawin':
+      case 'Kawin':
+        return StatusPerkawinan.kawin;
+      case 'ceraiHidup':
+      case 'Cerai Hidup':
+        return StatusPerkawinan.ceraiHidup;
+      case 'ceraiMati':
+      case 'Cerai Mati':
+        return StatusPerkawinan.ceraiMati;
+      default:
+        return null;
+    }
+  }
+}
 
 enum StatusHubungan {
   kepalaKeluarga,
@@ -13,10 +124,92 @@ enum StatusHubungan {
   cucu,
   orangTua,
   mertua,
-  familiLain,
+  familiLain;
+
+  String get display {
+    switch (this) {
+      case StatusHubungan.kepalaKeluarga:
+        return 'Kepala Keluarga';
+      case StatusHubungan.suami:
+        return 'Suami';
+      case StatusHubungan.istri:
+        return 'Istri';
+      case StatusHubungan.anak:
+        return 'Anak';
+      case StatusHubungan.menantu:
+        return 'Menantu';
+      case StatusHubungan.cucu:
+        return 'Cucu';
+      case StatusHubungan.orangTua:
+        return 'Orang Tua';
+      case StatusHubungan.mertua:
+        return 'Mertua';
+      case StatusHubungan.familiLain:
+        return 'Famili Lain';
+    }
+  }
+
+  static StatusHubungan? from(String? value) {
+    switch (value) {
+      case 'kepalaKeluarga':
+      case 'Kepala Keluarga':
+        return StatusHubungan.kepalaKeluarga;
+      case 'suami':
+      case 'Suami':
+        return StatusHubungan.suami;
+      case 'istri':
+      case 'Istri':
+        return StatusHubungan.istri;
+      case 'anak':
+      case 'Anak':
+        return StatusHubungan.anak;
+      case 'menantu':
+      case 'Menantu':
+        return StatusHubungan.menantu;
+      case 'cucu':
+      case 'Cucu':
+        return StatusHubungan.cucu;
+      case 'orangTua':
+      case 'Orang Tua':
+        return StatusHubungan.orangTua;
+      case 'mertua':
+      case 'Mertua':
+        return StatusHubungan.mertua;
+      case 'familiLain':
+      case 'Famili Lain':
+        return StatusHubungan.familiLain;
+      default:
+        return null;
+    }
+  }
 }
 
-enum Kewarganegaraan { wni, wna }
+enum Kewarganegaraan {
+  wni,
+  wna;
+
+  String get display {
+    switch (this) {
+      case Kewarganegaraan.wni:
+        return 'WNI';
+      case Kewarganegaraan.wna:
+        return 'WNA';
+    }
+  }
+
+  static Kewarganegaraan? from(String? value) {
+    switch (value) {
+      case 'wni':
+      case 'WNI':
+        return Kewarganegaraan.wni;
+      case 'wna':
+      case 'WNA':
+        return Kewarganegaraan.wna;
+      default:
+        return null;
+    }
+  }
+}
 
 class Warga {
   final int? id;

@@ -7,23 +7,16 @@ class CloudWargaService {
   Future<Map<String, dynamic>> getAllWarga(String token) async {
     final response = await _dio.get(
       '/warga',
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getWargaById(
-    int id,
-    String token,
-  ) async {
+  Future<Map<String, dynamic>> getWargaById(int id, String token) async {
     final response = await _dio.get(
       '/warga/$id',
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     return response.data;
@@ -35,9 +28,7 @@ class CloudWargaService {
   ) async {
     final response = await _dio.get(
       '/warga/keluarga/$keluargaId',
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     return response.data;
@@ -50,9 +41,7 @@ class CloudWargaService {
     final response = await _dio.post(
       '/warga',
       data: data,
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     return response.data;
@@ -66,23 +55,16 @@ class CloudWargaService {
     final response = await _dio.put(
       '/warga/$id',
       data: data,
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     return response.data;
   }
 
-  Future<Map<String, dynamic>> deleteWarga(
-    int id,
-    String token,
-  ) async {
+  Future<Map<String, dynamic>> deleteWarga(int id, String token) async {
     final response = await _dio.delete(
       '/warga/$id',
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     return response.data;

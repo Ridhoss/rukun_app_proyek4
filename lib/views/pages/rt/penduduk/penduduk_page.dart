@@ -5,6 +5,7 @@ import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
+import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/kartukeluarga/add_kk_viewmodel.dart';
@@ -64,15 +65,13 @@ class _RtPendudukPageState extends State<RtPendudukPage> with RouteAware {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
 
-      appBar: AppBar(
-        backgroundColor: ColorsUtils.b500,
-        foregroundColor: ColorsUtils.white,
-        elevation: 0,
-        title: const Text(
-          'Dashboard Kependudukan',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        centerTitle: true,
+      appBar: AppBarUtils.buildAppBar(
+        name: "",
+        title: "Dashboard Kependudukan",
+        subtitle: "Ringkasan data kependudukan",
+        showName: false,
+        showAvatar: false,
+        showGreeting: false,
       ),
 
       body: Padding(
@@ -187,7 +186,13 @@ class _RtPendudukPageState extends State<RtPendudukPage> with RouteAware {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => DetailKKPage(kkId: kk.id!)),
+          MaterialPageRoute(
+            builder: (_) => DetailKKPage(
+              kkId: kk.id!,
+              currentUserKKId: widget.user.warga?.keluargaId,
+              currentUserWargaId: widget.user.wargaId,
+            ),
+          ),
         );
       },
       child: Container(

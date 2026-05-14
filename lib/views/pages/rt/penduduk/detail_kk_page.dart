@@ -2,18 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
+import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/kartukeluarga/detail_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/warga/add_warga_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/crudwarga/add_warga_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/crudkk/edit_kk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/penduduk/detail_warga.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/penduduk/detail_warga_page.dart';
 
 class DetailKKPage extends StatelessWidget {
   final int kkId;
+  final int? currentUserKKId;
+  final int? currentUserWargaId;
 
-  const DetailKKPage({super.key, required this.kkId});
+  const DetailKKPage({
+    super.key,
+    required this.kkId,
+    this.currentUserKKId,
+    this.currentUserWargaId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +31,34 @@ class DetailKKPage extends StatelessWidget {
         wargaRepo: context.read(),
         kkId: kkId,
       )..fetchDetail(),
-      child: _DetailKKView(),
+      child: _DetailKKView(
+        currentUserKKId: currentUserKKId,
+        currentUserWargaId: currentUserWargaId,
+      ),
     );
   }
 }
 
 class _DetailKKView extends StatelessWidget {
+  final int? currentUserKKId;
+  final int? currentUserWargaId;
+
+  const _DetailKKView({this.currentUserKKId, this.currentUserWargaId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
 
-      appBar: AppBar(
-        backgroundColor: ColorsUtils.b500,
-        foregroundColor: ColorsUtils.white,
-        elevation: 0,
-        title: const Text(
-          'Detail Kartu Keluarga',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        centerTitle: true,
+      appBar: AppBarUtils.buildAppBar(
+        name: "",
+        title: "Detail Kartu Keluarga",
+        subtitle: "Ringkasan data detail kartu keluarga",
+        showName: false,
+        showAvatar: false,
+        showGreeting: false,
       ),
-
+      
       body: Consumer<DetailKKViewModel>(
         builder: (context, vm, _) {
           if (vm.isLoading) {
@@ -117,7 +131,13 @@ class _DetailKKView extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, Keluarga kk, DetailKKViewModel vm) {
+  Widget _buildInfoCard(
+    BuildContext context,
+    Keluarga kk,
+    DetailKKViewModel vm,
+  ) {
+    final isOwnKK = kk.id == currentUserKKId;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -213,7 +233,7 @@ class _DetailKKView extends StatelessWidget {
 
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: vm.isDeleting
+                  onPressed: isOwnKK || vm.isDeleting
                       ? null
                       : () async {
                           final confirm = await showDialog<bool>(
@@ -275,7 +295,13 @@ class _DetailKKView extends StatelessWidget {
                           ),
                         )
                       : const Icon(Icons.delete_outline),
-                  label: Text(vm.isDeleting ? "Menghapus..." : "Hapus"),
+                  label: Text(
+                    isOwnKK
+                        ? "KK Sendiri"
+                        : vm.isDeleting
+                        ? "Menghapus..."
+                        : "Hapus",
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
@@ -363,13 +389,20 @@ class _DetailKKView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: ListTile(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => DetailWargaPage(warga: warga),
+                          builder: (_) => DetailWargaPage(
+                            wargaId: warga.id!,
+                            currentUserWargaId: currentUserWargaId,
+                          ),
                         ),
                       );
+
+                      if (result == true && context.mounted) {
+                        await vm.fetchAnggota();
+                      }
                     },
                     leading: const CircleAvatar(
                       backgroundColor: ColorsUtils.b50,
