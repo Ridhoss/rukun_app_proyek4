@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/iuran/upload_iuran_viewmodel.dart';
 
 class WargaUploadIuranPage extends StatelessWidget {
@@ -35,7 +36,15 @@ class _UploadViewState extends State<_UploadView> {
     final isSedekah = item.iuran.tipe == IuranType.sedekah;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Upload Iuran")),
+      appBar: AppBarUtils.buildAppBar(
+        context: context,
+        name: "",
+        title: "Upload Iuran",
+        subtitle: "Upload bukti pembayaran",
+        showName: false,
+        showAvatar: false,
+        showGreeting: false,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(

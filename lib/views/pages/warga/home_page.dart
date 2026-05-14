@@ -4,7 +4,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/menucard_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/warga/kegiatan_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/kegiatan/kegiatan_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/surat/pengajuan_surat_page.dart';
 
@@ -38,6 +38,7 @@ class WargaHomePage extends StatelessWidget {
     ];
     return Scaffold(
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: nama,
         title: "",
         showName: true,

@@ -26,7 +26,10 @@ class DetailWargaPage extends StatelessWidget {
       create: (_) =>
           DetailWargaViewModel(repo: context.read<WargaRepository>())
             ..getDetailWarga(wargaId),
-      child: _DetailWargaView(wargaId: wargaId, currentUserWargaId: currentUserWargaId,),
+      child: _DetailWargaView(
+        wargaId: wargaId,
+        currentUserWargaId: currentUserWargaId,
+      ),
     );
   }
 }
@@ -55,6 +58,7 @@ class _DetailWargaView extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Detail Warga",
         subtitle: "Ringkasan data detail warga",

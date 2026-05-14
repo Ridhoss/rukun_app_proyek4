@@ -20,6 +20,7 @@ class EditWargaPage extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Ubah Data Warga",
         subtitle: "Halaman ubah data warga",

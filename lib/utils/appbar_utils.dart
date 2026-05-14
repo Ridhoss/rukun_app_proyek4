@@ -4,6 +4,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 
 class AppBarUtils {
   static PreferredSizeWidget buildAppBar({
+    required BuildContext context,
     required String name,
     required String title,
     String? subtitle,
@@ -13,93 +14,116 @@ class AppBarUtils {
     Widget? leading,
     Widget? trailing,
   }) {
-    return AppBar(
-      // automaticallyImplyLeading: false,
-      backgroundColor: ColorsUtils.b500,
-      elevation: 0,
-      toolbarHeight: 90,
-      leadingWidth: 60,
-      leading:
-          leading ??
-          Builder(
-            builder: (context) {
-              if (!Navigator.canPop(context)) return const SizedBox.shrink();
+    final canPop = Navigator.canPop(context);
 
-              return IconButton(
+    final Widget? finalLeading =
+        leading ??
+        (canPop
+            ? IconButton(
                 icon: const Icon(
                   Icons.arrow_back_ios_new_rounded,
                   color: Colors.white,
                   size: 22,
                 ),
                 onPressed: () => Navigator.pop(context),
-              );
-            },
-          ),
+              )
+            : null);
 
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                if (showAvatar)
-                  CircleAvatar(radius: 23, child: buildAvatar(name)),
+    return AppBar(
+      backgroundColor: ColorsUtils.b500,
+      elevation: 0,
+      toolbarHeight: 90,
+      // automaticallyImplyLeading: false,
+
+      leading: finalLeading,
+
+      leadingWidth: finalLeading != null ? 60 : 0,
+
+      titleSpacing: finalLeading != null ? 0 : 16,
+
+      title: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              if (showAvatar) ...[
+                CircleAvatar(
+                  radius: 23,
+                  child: buildAvatar(name),
+                ),
 
                 const SizedBox(width: 12),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (showGreeting)
-                        Text(
-                          _getGreeting(),
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-
-                      if (showName)
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: ColorsUtils.white,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-
-                // ignore: use_null_aware_elements
-                if (trailing != null) trailing,
               ],
-            ),
 
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showGreeting)
+                      Text(
+                        _getGreeting(),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                    if (showName)
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: ColorsUtils.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
+              ),
+
+              if (trailing != null) ...[
+                const SizedBox(width: 8),
+                trailing,
+              ],
+            ],
+          ),
+
+          if (title.isNotEmpty) ...[
             const SizedBox(height: 6),
 
-            if (title.isNotEmpty)
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
-
-            if (subtitle != null)
-              Text(
-                subtitle,
-                style: const TextStyle(fontSize: 14, color: Colors.white70),
-              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
-        ),
+
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white70,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -110,6 +134,7 @@ class AppBarUtils {
     if (hour < 12) return "Selamat Pagi";
     if (hour < 16) return "Selamat Siang";
     if (hour < 18) return "Selamat Sore";
+
     return "Selamat Malam";
   }
 }

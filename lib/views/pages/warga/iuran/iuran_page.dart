@@ -8,7 +8,6 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/iuran/iuranwarga_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/warga/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/iuran/detail_iuran_page.dart';
 
 class WargaIuranPage extends StatelessWidget {
@@ -25,19 +24,13 @@ class WargaIuranPage extends StatelessWidget {
         backgroundColor: ColorsUtils.white,
 
         appBar: AppBarUtils.buildAppBar(
+          context: context,
           name: nama,
           title: "Iuran Saya",
           subtitle: "Kelola & lihat pembayaran",
           showName: false,
           showAvatar: false,
           showGreeting: false,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const WargaHomePage()),
-            ),
-          ),
         ),
 
         body: Consumer<IuranwargaViewmodel>(

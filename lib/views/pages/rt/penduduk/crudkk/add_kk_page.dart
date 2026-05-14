@@ -16,6 +16,7 @@ class AddKKPage extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Tambah Kartu Keluarga",
         subtitle: "Halaman tambah kartu keluarga baru",

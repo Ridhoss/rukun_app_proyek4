@@ -30,18 +30,13 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
 
     return Scaffold(
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: nama,
         title: "Pengajuan Surat",
         subtitle: "Ajukan surat anda",
         showName: false,
         showAvatar: false,
         showGreeting: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
       ),
 
       body: Consumer<PengajuanSuratViewModel>(

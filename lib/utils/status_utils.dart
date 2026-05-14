@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
-
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 
 extension StatusPembayaranUI on StatusPembayaran {
   String get label {
@@ -31,13 +31,7 @@ extension StatusPembayaranUI on StatusPembayaran {
   }
 }
 
-
-enum SuratStatus {
-  tertunda,
-  disetujui,
-  ditolak,
-  selesai,
-}
+enum SuratStatus { tertunda, disetujui, ditolak, selesai }
 
 extension SuratStatusUI on SuratStatus {
   String get label {
@@ -67,35 +61,11 @@ extension SuratStatusUI on SuratStatus {
   }
 }
 
+class KegiatanUiStatus {
+  final String label;
+  final Color color;
 
-extension KegiatanStatusUI on Kegiatan {
-  String get statusLabel {
-    if (isBerlangsung) return "Berlangsung";
-
-    switch (status) {
-      case KegiatanStatus.dibuat:
-        return "Dibuat";
-      case KegiatanStatus.ditunda:
-        return "Ditunda";
-      case KegiatanStatus.dibatalkan:
-        return "Dibatalkan";
-      case KegiatanStatus.selesai:
-        return "Selesai";
-    }
-  }
-
-  Color get statusColor {
-    if (isBerlangsung) return Colors.blue;
-
-    switch (status) {
-      case KegiatanStatus.dibuat:
-        return Colors.orange;
-      case KegiatanStatus.ditunda:
-        return Colors.grey;
-      case KegiatanStatus.dibatalkan:
-        return Colors.red;
-      case KegiatanStatus.selesai:
-        return Colors.green;
-    }
-  }
+  const KegiatanUiStatus({required this.label, required this.color});
 }
+
+enum FilterKegiatanStatus { semua, berlangsung, segera, selesai, dibatalkan }

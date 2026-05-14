@@ -39,19 +39,13 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
 
     return Scaffold(
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: nama,
         title: "Pengajuan Surat",
         subtitle: "Ajukan surat anda",
         showName: false,
         showAvatar: false,
         showGreeting: false,
-
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
       ),
 
       body: SingleChildScrollView(
@@ -190,12 +184,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PengajuanSuratPage(),
-                                ),
-                              );
+                              Navigator.pop(context);
                             },
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -208,7 +197,6 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
                         ),
 
                         const SizedBox(width: 12),
-
                         Expanded(
                           child: ElevatedButton(
                             onPressed: _submit,
