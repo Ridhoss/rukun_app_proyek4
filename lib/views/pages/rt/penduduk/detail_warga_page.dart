@@ -26,7 +26,7 @@ class DetailWargaPage extends StatelessWidget {
       create: (_) =>
           DetailWargaViewModel(repo: context.read<WargaRepository>())
             ..getDetailWarga(wargaId),
-      child: _DetailWargaView(wargaId: wargaId),
+      child: _DetailWargaView(wargaId: wargaId, currentUserWargaId: currentUserWargaId,),
     );
   }
 }
@@ -46,7 +46,10 @@ class _DetailWargaView extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final isSelf = warga.id == currentUserWargaId;
+    final isSelf =
+        currentUserWargaId != null &&
+        warga.id != null &&
+        warga.id == currentUserWargaId;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),

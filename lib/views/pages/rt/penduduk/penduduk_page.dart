@@ -79,7 +79,6 @@ class _RtPendudukPageState extends State<RtPendudukPage> with RouteAware {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // HEADER DUMMY
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
