@@ -47,18 +47,12 @@ class KKRepository {
     return Keluarga.fromJson(data);
   }
 
-  Future<Keluarga?> createKK(Keluarga kk) async {
+  Future<void> createKK(Keluarga kk) async {
     final token = await _requireToken();
 
     final result = await _safeCall(() => service.createKK(kk.toJson(), token));
 
     _validateStatus(result);
-
-    final data = result['data'];
-
-    if (data == null) return null;
-
-    return Keluarga.fromJson(data);
   }
 
   Future<void> updateKK(int id, Map<String, dynamic> data) async {

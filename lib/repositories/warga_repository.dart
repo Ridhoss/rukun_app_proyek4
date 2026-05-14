@@ -49,7 +49,7 @@ class WargaRepository {
     return data.map((e) => Warga.fromJson(e)).toList();
   }
 
-  Future<Warga?> createWarga(Warga warga) async {
+  Future<void> createWarga(Warga warga) async {
     final token = await _requireToken();
 
     final result = await _safeCall(
@@ -57,12 +57,6 @@ class WargaRepository {
     );
 
     _validateStatus(result);
-
-    final data = result['data'];
-
-    if (data == null) return null;
-
-    return Warga.fromJson(data);
   }
 
   Future<void> updateWarga(int id, Warga warga) async {

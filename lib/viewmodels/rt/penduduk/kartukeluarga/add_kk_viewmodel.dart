@@ -55,7 +55,10 @@ class AddKKViewModel extends ChangeNotifier {
       String? fotoUrl;
 
       if (fotoKK != null) {
-        fotoUrl = await cloudinaryService.uploadFile(fotoKK!, folder: 'kartukeluarga');
+        fotoUrl = await cloudinaryService.uploadFile(
+          fotoKK!,
+          folder: 'kartukeluarga',
+        );
 
         if (fotoUrl == null) {
           throw Exception("Gagal upload foto KK");
@@ -70,11 +73,8 @@ class AddKKViewModel extends ChangeNotifier {
         imgRef: fotoUrl,
       );
 
-      final result = await kkRepository.createKK(data);
+      await kkRepository.createKK(data);
 
-      if (result == null) throw Exception("Gagal membuat KK");
-
-      kk = result;
       isKKSaved = true;
     } catch (e) {
       errorMessage = e.toString().replaceAll("Exception: ", "");
