@@ -39,4 +39,27 @@ class CloudAuthService {
 
     return response.data;
   }
+
+  Future<Map<String, dynamic>> getUserByWargaId(int id, String token) async {
+    final response = await _dio.get(
+      '/api/v1/user/warga/$id',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> adminChangePassword(
+    int userId,
+    String password,
+    String token,
+  ) async {
+    final response = await _dio.put(
+      '/api/v1/user/admin/change-password/$userId',
+      data: {"new_password": password},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+
+    return response.data;
+  }
 }

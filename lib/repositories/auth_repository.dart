@@ -56,6 +56,40 @@ class AuthRepository {
     return User.fromJson(result['data']);
   }
 
+  Future<User?> getUserByWargaId(int wargaId) async {
+    final token = await local.getToken();
+
+    if (token == null) {
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+    }
+
+    final result = await _safeCall(
+      () => service.getUserByWargaId(wargaId, token),
+    );
+
+    _validateStatus(result);
+
+    final data = result['data'];
+
+    if (data == null) return null;
+
+    return User.fromJson(data);
+  }
+
+  Future<void> adminChangePassword(int userId, String password) async {
+    final token = await local.getToken();
+
+    if (token == null) {
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+    }
+
+    final result = await _safeCall(
+      () => service.adminChangePassword(userId, password, token),
+    );
+
+    _validateStatus(result);
+  }
+
   Future<Map<String, dynamic>> _safeCall(
     Future<Map<String, dynamic>> Function() fn,
   ) async {
