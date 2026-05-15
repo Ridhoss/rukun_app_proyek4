@@ -20,6 +20,7 @@ import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/penduduk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/profile/kelola_profile_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -106,6 +107,8 @@ void main() async {
             wargaRepository: context.read<WargaRepository>(),
           ),
         ),
+
+        ChangeNotifierProvider(create: (_) => KelolaProfileViewModel()),
       ],
       child: const MyApp(),
     ),
