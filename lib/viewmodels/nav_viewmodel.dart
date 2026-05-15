@@ -3,8 +3,8 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 
 // pages RW
 import 'package:rukun_app_proyek4/views/pages/rw/dashboard/dashboard_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/penduduk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/kegiatan_page.dart';
 
@@ -31,38 +31,69 @@ class NavItem {
 
 class NavViewModel {
   List<NavItem> getNavItems(User user) {
+    // RW
+    if (user.pengurus?.level == "RW") {
+      return [
+        NavItem(icon: Icons.home, label: "Home", page: const RwDashboard()),
+        NavItem(
+          icon: Icons.groups,
+          label: "Penduduk",
+          page: RWPendudukPage(user: user),
+        ),
+        NavItem(
+          icon: Icons.account_balance_wallet,
+          label: "Iuran",
+          page: const RwIuranPage(),
+        ),
+        NavItem(
+          icon: Icons.description,
+          label: "Surat",
+          page: const RwSuratPage(),
+        ),
+        NavItem(
+          icon: Icons.event_available,
+          label: "Kegiatan",
+          page: const RwKegiatanPage(),
+        ),
+      ];
+    }
 
-// RW
-if (user.pengurus?.level == "RW") {
-  return [
-    NavItem(icon: Icons.home, label: "Home", page: const RwDashboard()),
-    NavItem(icon: Icons.groups, label: "Penduduk", page: const RwPendudukPage()),
-    NavItem(icon: Icons.account_balance_wallet, label: "Iuran", page: const RwIuranPage()),
-    NavItem(icon: Icons.description, label: "Surat", page: const RwSuratPage()),
-    NavItem(icon: Icons.event_available, label: "Kegiatan", page: const RwKegiatanPage()),
-  ];
-}
-
-// RT
-if (user.pengurus?.level == "RT") {
-  return [
-    NavItem(icon: Icons.home, label: "Home", page: const RtHomePage()),
-    NavItem(icon: Icons.groups, label: "Penduduk", page: RtPendudukPage(user: user)),
-    NavItem(icon: Icons.payments, label: "Iuran", page: const RtIuranPage()),
-    NavItem(icon: Icons.description, label: "Surat", page: const RtSuratPage()),
-    NavItem(icon: Icons.person, label: "Profile", page: const RtProfilePage()),
-  ];
-}
+    // RT
+    if (user.pengurus?.level == "RT") {
+      return [
+        NavItem(icon: Icons.home, label: "Home", page: const RtHomePage()),
+        NavItem(
+          icon: Icons.groups,
+          label: "Penduduk",
+          page: RtPendudukPage(user: user),
+        ),
+        NavItem(
+          icon: Icons.payments,
+          label: "Iuran",
+          page: const RtIuranPage(),
+        ),
+        NavItem(
+          icon: Icons.description,
+          label: "Surat",
+          page: const RtSuratPage(),
+        ),
+        NavItem(
+          icon: Icons.person,
+          label: "Profile",
+          page: const RtProfilePage(),
+        ),
+      ];
+    }
 
     // Warga
     return [
       NavItem(icon: Icons.home, label: "Home", page: WargaHomePage()),
+      NavItem(icon: Icons.upload_file, label: "Upload", page: WargaIuranPage()),
       NavItem(
-        icon: Icons.upload_file,
-        label: "Upload",
-        page: WargaIuranPage(),
+        icon: Icons.description,
+        label: "Surat",
+        page: PengajuanSuratPage(),
       ),
-      NavItem(icon: Icons.description, label: "Surat", page: PengajuanSuratPage()),
       NavItem(icon: Icons.person, label: "Profile", page: WargaProfilePage()),
     ];
   }

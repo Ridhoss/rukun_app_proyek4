@@ -1,5 +1,5 @@
 class RtModel {
-  final int id;
+  final int? id;
   final String noRt;
   final int rwId;
   final DateTime? waktuDibuat;
@@ -7,7 +7,7 @@ class RtModel {
   final DateTime? waktuDihapus;
 
   RtModel({
-    required this.id,
+    this.id,
     required this.noRt,
     required this.rwId,
     this.waktuDibuat,
@@ -17,7 +17,7 @@ class RtModel {
 
   factory RtModel.fromJson(Map<String, dynamic> json) {
     return RtModel(
-      id: json['id'],
+      id: json['id'] as int?,
       noRt: json['no_rt'],
       rwId: json['rw_id'],
       waktuDibuat: json['waktu_dibuat'] != null

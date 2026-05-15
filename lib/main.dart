@@ -6,21 +6,22 @@ import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
+import 'package:rukun_app_proyek4/repositories/rtrw_repository.dart';
 import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_rtrw_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_surat_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/penduduk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/detail_rt_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rw/penduduk_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
-// import 'package:rukun_app_proyek4/viewmodels/warga/profile/kelola_profile_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -59,6 +60,8 @@ void main() async {
 
         Provider(create: (_) => CloudSuratService()),
 
+        Provider(create: (_) => CloudRtRwService()),
+
         Provider(
           create: (context) => IuranRepository(
             context.read<CloudIuranService>(),
@@ -87,13 +90,20 @@ void main() async {
           ),
         ),
 
+        Provider(
+          create: (context) => RTRWRepository(
+            context.read<CloudRtRwService>(),
+            context.read<AuthLocalService>(),
+          ),
+        ),
+
         ChangeNotifierProvider(
           create: (context) => AuthViewModel(context.read()),
         ),
 
         ChangeNotifierProvider(
           create: (context) =>
-              PendudukViewmodel(kkRepository: context.read<KKRepository>()),
+              DetailRTViewmodel(kkRepository: context.read<KKRepository>()),
         ),
 
         ChangeNotifierProvider(
@@ -102,13 +112,9 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) => DataKKViewModel(
-            kkRepository: context.read<KKRepository>(),
-            wargaRepository: context.read<WargaRepository>(),
-          ),
+          create: (context) =>
+              RWPendudukViewmodel(repository: context.read<RTRWRepository>()),
         ),
-
-        // ChangeNotifierProvider(create: (_) => KelolaProfileViewModel()),
       ],
       child: const MyApp(),
     ),

@@ -1,5 +1,7 @@
+import 'package:rukun_app_proyek4/models/rt_model.dart';
+
 class RwModel {
-  final int id;
+  final int? id;
   final String noRw;
   final String kelurahanDesa;
   final String kecamatan;
@@ -8,9 +10,10 @@ class RwModel {
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
+  final List<RtModel>? rtList;
 
   RwModel({
-    required this.id,
+    this.id,
     required this.noRw,
     required this.kelurahanDesa,
     required this.kecamatan,
@@ -19,11 +22,12 @@ class RwModel {
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
+    this.rtList
   });
 
   factory RwModel.fromJson(Map<String, dynamic> json) {
     return RwModel(
-      id: json['id'],
+      id: json['id'] as int?,
       noRw: json['no_rw'],
       kelurahanDesa: json['kelurahan_desa'],
       kecamatan: json['kecamatan'],
@@ -38,6 +42,11 @@ class RwModel {
       waktuDihapus: json['waktu_dihapus'] != null
           ? DateTime.parse(json['waktu_dihapus'])
           : null,
+      rtList:
+          (json['rt_list'] as List<dynamic>?)
+              ?.map((e) => RtModel.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 
