@@ -49,7 +49,7 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
       _isInitialized = true;
 
       final rtId = widget.rt.id;
-      context.read<DetailRTViewmodel>().init(rtId);
+      context.read<DetailRTViewmodel>().init(rtId!);
     }
   }
 
@@ -253,14 +253,14 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
                 create: (_) => AddKKViewModel(
                   kkRepository: context.read<KKRepository>(),
                   cloudinaryService: context.read<CloudinaryService>(),
-                  rtId: widget.rt.id,
+                  rtId: widget.rt.id!,
                 ),
                 child: const AddKKPage(),
               ),
             ),
           ).then((_) {
             final rtId = widget.rt.id;
-            context.read<DetailRTViewmodel>().init(rtId);
+            context.read<DetailRTViewmodel>().init(rtId!);
           });
         },
         icon: const Icon(Icons.add),

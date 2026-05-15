@@ -3,7 +3,7 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 
 // pages RW
 import 'package:rukun_app_proyek4/views/pages/rw/home_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/penduduk_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/profile_page.dart';
@@ -36,7 +36,7 @@ class NavViewModel {
 if (user.pengurus?.level == "RW") {
   return [
     NavItem(icon: Icons.home, label: "Home", page: const RwHomePage()),
-    NavItem(icon: Icons.groups, label: "Penduduk", page: const RwPendudukPage()),
+    NavItem(icon: Icons.groups, label: "Penduduk", page: RWPendudukPage(user: user,)),
     NavItem(icon: Icons.payments, label: "Iuran", page: const RwIuranPage()),
     NavItem(icon: Icons.description, label: "Surat", page: const RwSuratPage()),
     NavItem(icon: Icons.person, label: "Profile", page: const RwProfilePage()),
