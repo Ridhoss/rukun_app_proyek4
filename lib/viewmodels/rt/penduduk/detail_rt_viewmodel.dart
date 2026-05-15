@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
 
-class PendudukViewmodel extends ChangeNotifier {
+class DetailRTViewmodel extends ChangeNotifier {
   final KKRepository kkRepository;
 
-  PendudukViewmodel({required this.kkRepository});
+  DetailRTViewmodel({required this.kkRepository});
 
   bool isLoading = false;
   String? errorMessage;

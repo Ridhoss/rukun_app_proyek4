@@ -9,7 +9,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/warga/detail_warga_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/warga/edit_warga_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/penduduk/crudwarga/edit_warga_page.dart';
+import 'package:rukun_app_proyek4/views/pages/penduduk/crudwarga/edit_warga_page.dart';
 
 class DetailWargaPage extends StatelessWidget {
   final int wargaId;

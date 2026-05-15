@@ -17,7 +17,7 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/penduduk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/detail_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
@@ -91,7 +91,7 @@ void main() async {
 
         ChangeNotifierProvider(
           create: (context) =>
-              PendudukViewmodel(kkRepository: context.read<KKRepository>()),
+              DetailRTViewmodel(kkRepository: context.read<KKRepository>()),
         ),
 
         ChangeNotifierProvider(
