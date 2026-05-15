@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 
 // pages RW
-import 'package:rukun_app_proyek4/views/pages/rw/home_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/dashboard/dashboard_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/iuran_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/surat_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/profile_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/kegiatan_page.dart';
 
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
@@ -35,11 +35,11 @@ class NavViewModel {
 // RW
 if (user.pengurus?.level == "RW") {
   return [
-    NavItem(icon: Icons.home, label: "Home", page: const RwHomePage()),
+    NavItem(icon: Icons.home, label: "Home", page: const RwDashboard()),
     NavItem(icon: Icons.groups, label: "Penduduk", page: const RwPendudukPage()),
-    NavItem(icon: Icons.payments, label: "Iuran", page: const RwIuranPage()),
+    NavItem(icon: Icons.account_balance_wallet, label: "Iuran", page: const RwIuranPage()),
     NavItem(icon: Icons.description, label: "Surat", page: const RwSuratPage()),
-    NavItem(icon: Icons.person, label: "Profile", page: const RwProfilePage()),
+    NavItem(icon: Icons.event_available, label: "Kegiatan", page: const RwKegiatanPage()),
   ];
 }
 

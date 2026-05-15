@@ -13,6 +13,7 @@ class AppBarUtils {
     bool showGreeting = true,
     Widget? leading,
     Widget? trailing,
+    Widget? settingsWidget,
   }) {
     final canPop = Navigator.canPop(context);
 
@@ -33,8 +34,8 @@ class AppBarUtils {
       backgroundColor: ColorsUtils.b500,
       elevation: 0,
       toolbarHeight: 90,
-      // automaticallyImplyLeading: false,
 
+      // automaticallyImplyLeading: false,
       leading: finalLeading,
 
       leadingWidth: finalLeading != null ? 60 : 0,
@@ -49,10 +50,7 @@ class AppBarUtils {
           Row(
             children: [
               if (showAvatar) ...[
-                CircleAvatar(
-                  radius: 23,
-                  child: buildAvatar(name),
-                ),
+                CircleAvatar(radius: 23, child: buildAvatar(name)),
 
                 const SizedBox(width: 12),
               ],
@@ -88,7 +86,10 @@ class AppBarUtils {
                 ),
               ),
 
-              if (trailing != null) ...[
+              if (settingsWidget != null) ...[
+                const SizedBox(width: 8),
+                settingsWidget,
+              ] else if (trailing != null) ...[
                 const SizedBox(width: 8),
                 trailing,
               ],
@@ -115,10 +116,7 @@ class AppBarUtils {
 
             Text(
               subtitle,
-              style: const TextStyle(
-                fontSize: 14,
-                color: ColorsUtils.white,
-              ),
+              style: const TextStyle(fontSize: 14, color: ColorsUtils.white),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

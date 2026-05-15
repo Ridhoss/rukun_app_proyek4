@@ -5,9 +5,8 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/logout_dialog_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/profile/kelola_profile_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/auth/login_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/profile/data_kk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/warga/profile/kelola_profile_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/profile/warga_profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/profile/kontak_pengurus_page.dart';
 import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
