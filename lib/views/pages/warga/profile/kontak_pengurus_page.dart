@@ -18,7 +18,7 @@ class KontakPengurusPage extends StatelessWidget {
         context: context,
         name: nama,
         title: "Kontak pengurus",
-        subtitle: "Informasi Kontak Pengurus yang dapat dihubungi",
+        subtitle: "Informasi Kontak Pengurus",
         showName: false,
         showAvatar: false,
         showGreeting: false,

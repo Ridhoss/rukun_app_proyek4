@@ -22,7 +22,7 @@ class _BottomNavState extends State<BottomNav> {
 
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.transparent,
-        buttonBackgroundColor: Colors.blue,
+        buttonBackgroundColor: ColorsUtils.b200,
         color: ColorsUtils.b500,
         animationDuration: const Duration(milliseconds: 300),
 

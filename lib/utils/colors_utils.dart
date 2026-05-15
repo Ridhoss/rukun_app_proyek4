@@ -14,6 +14,7 @@ class ColorsUtils {
   static const b300 = Color(0xFF0065FF);
   static const b400 = Color(0xFF0047B3);
   static const b500 = Color(0xFF003E9C);
+  static const skyblue = Color(0xFF0096FF);
   static const g100 = Color(0xFF007F73);
   static const g30 = Color(0x4D007F73);
   static const o100 = Color(0xFFF57D1F);
