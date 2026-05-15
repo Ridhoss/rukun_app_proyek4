@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/avatar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/logout_dialog_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/auth/login_page.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/profile/kelola_profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/profile/kontak_pengurus_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/profile/data_kk_page.dart';
 
@@ -57,22 +59,28 @@ class WargaProfilePage extends StatelessWidget {
           buildMenuCard(
             icon: Icons.group,
             title: "Data Kartu Keluarga",
-            subtitle: "Informasi Kartu Keluarga",
+            subtitle: "Informasi identitas dan anggota keluarga",
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const DataWargaPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const DataWargaPage()),
               );
             },
           ),
 
           const SizedBox(height: 12),
           buildMenuCard(
-            icon: Icons.file_download,
-            title: "Info Akun Anda",
-            subtitle: "Iuran Kependudukan, Surat",
+            icon: Icons.manage_accounts,
+            title: "Akun Saya",
+            subtitle: "Kelola profile dan ubah kata sandi",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KelolaProfilePage(),
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 12),
@@ -91,33 +99,15 @@ class WargaProfilePage extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
+
           buildMenuCard(
-            icon: Icons.logout,
+            icon: Icons.logout_rounded,
             title: "Keluar",
             subtitle: "Logout dari aplikasi",
             iconColor: Colors.red,
             iconBg: Colors.red.shade50,
             onTap: () async {
-              final confirm = await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text("Konfirmasi"),
-                  content: Text("Apakah kamu yakin ingin keluar?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text("Batal"),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(
-                        "Keluar",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              final confirm = await LogoutDialogUtils.showLogoutDialog(context);
 
               if (confirm == true) {
                 await authVM.logout();

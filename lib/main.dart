@@ -19,6 +19,7 @@ import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/penduduk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -97,6 +98,13 @@ void main() async {
         ChangeNotifierProvider(
           create: (context) =>
               PengajuanSuratViewModel(context.read<SuratRepository>()),
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) => DataKKViewModel(
+            kkRepository: context.read<KKRepository>(),
+            wargaRepository: context.read<WargaRepository>(),
+          ),
         ),
       ],
       child: const MyApp(),

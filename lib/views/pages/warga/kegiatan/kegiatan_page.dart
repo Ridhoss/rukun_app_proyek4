@@ -17,7 +17,7 @@ class KegiatanPage extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => KegiatanViewmodel()..loadDummy(),
       child: Scaffold(
-        backgroundColor: ColorsUtils.white,
+        backgroundColor: ColorsUtils.lightgray,
 
         appBar: AppBarUtils.buildAppBar(
           context: context,

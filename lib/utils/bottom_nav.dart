@@ -27,7 +27,7 @@ class _BottomNavState extends State<BottomNav> {
         animationDuration: const Duration(milliseconds: 300),
 
         items: widget.items
-            .map((e) => Icon(e.icon, size: 26, color: Colors.white))
+            .map((e) => Icon(e.icon, size: 26, color: ColorsUtils.white))
             .toList(),
 
         onTap: (index) {

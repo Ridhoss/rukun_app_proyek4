@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+
 
 class NotificationUtils {
   static void showSuccess(BuildContext context, String message) {
-    _show(context, message, Colors.green, Icons.check_circle_outline);
+    _show(context, message, ColorsUtils.g100, Icons.check_circle_outline);
   }
 
   static void showError(BuildContext context, String message) {
-    _show(context, message, Colors.red, Icons.error_outline);
+    _show(context, message, ColorsUtils.red, Icons.error_outline);
   }
 
   static void _show(
@@ -53,7 +55,7 @@ class _NotificationCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: ColorsUtils.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color, width: 1.5),
         ),

@@ -22,7 +22,7 @@ class AppBarUtils {
             ? IconButton(
                 icon: const Icon(
                   Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white,
+                  color: ColorsUtils.white,
                   size: 22,
                 ),
                 onPressed: () => Navigator.pop(context),
@@ -68,7 +68,7 @@ class AppBarUtils {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: ColorsUtils.white,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -103,7 +103,7 @@ class AppBarUtils {
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: ColorsUtils.white,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -117,7 +117,7 @@ class AppBarUtils {
               subtitle,
               style: const TextStyle(
                 fontSize: 14,
-                color: Colors.white70,
+                color: ColorsUtils.white,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
