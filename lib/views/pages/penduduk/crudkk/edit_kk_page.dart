@@ -36,6 +36,7 @@ class _EditKKView extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Edit Kartu Keluarga",
         subtitle: "Halaman ubah kartu keluarga",

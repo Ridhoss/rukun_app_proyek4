@@ -6,7 +6,7 @@ enum FilterSurat { semua, diajukan, disetujui, ditolak, selesai }
 
 class PengajuanSuratViewModel extends ChangeNotifier {
   final SuratRepository repository;
-
+  List<PengajuanSurat> get filteredList => _filteredList;
   PengajuanSuratViewModel(this.repository);
 
   bool isLoading = false;

@@ -16,6 +16,7 @@ class AddWargaPage extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Tambah Data Warga",
         subtitle: "Halaman tambah data warga baru",
@@ -174,10 +175,7 @@ class AddWargaPage extends StatelessWidget {
           onChanged: vm.setPendidikan,
         ),
 
-        _textField(
-          'Pekerjaan',
-          onChanged: vm.setPekerjaan,
-        ),
+        _textField('Pekerjaan', onChanged: vm.setPekerjaan),
 
         _dropdown(
           'Golongan Darah',

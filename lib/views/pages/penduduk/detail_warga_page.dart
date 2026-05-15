@@ -63,6 +63,7 @@ class _DetailWargaView extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Detail Warga",
         subtitle: "Ringkasan data detail warga",

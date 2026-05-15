@@ -47,7 +47,10 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               IconButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  if (!Navigator.canPop(context)) return;
+                  Navigator.pop(context);
+                },
                 icon: const Icon(Icons.arrow_back),
               ),
 

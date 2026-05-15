@@ -7,7 +7,7 @@ Widget buildAvatar(String name) {
 
   return CircleAvatar(
     radius: 50,
-    backgroundColor: ColorsUtils.b200,
+    backgroundColor: ColorsUtils.skyblue,
     child: Text(
       initials,
       style: const TextStyle(

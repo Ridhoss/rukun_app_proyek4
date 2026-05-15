@@ -8,7 +8,6 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/iuran/iuranwarga_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/warga/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/iuran/detail_iuran_page.dart';
 
 class WargaIuranPage extends StatelessWidget {
@@ -25,19 +24,13 @@ class WargaIuranPage extends StatelessWidget {
         backgroundColor: ColorsUtils.white,
 
         appBar: AppBarUtils.buildAppBar(
+          context: context,
           name: nama,
           title: "Iuran Saya",
           subtitle: "Kelola & lihat pembayaran",
           showName: false,
           showAvatar: false,
           showGreeting: false,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const WargaHomePage()),
-            ),
-          ),
         ),
 
         body: Consumer<IuranwargaViewmodel>(
@@ -140,7 +133,7 @@ class WargaIuranPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
+          color: ColorsUtils.lightgray,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -208,7 +201,7 @@ class WargaIuranPage extends StatelessWidget {
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF4A90E2) : Colors.white,
+          color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
             color: selected ? Colors.transparent : Colors.grey.shade300,

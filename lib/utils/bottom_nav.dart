@@ -22,12 +22,12 @@ class _BottomNavState extends State<BottomNav> {
 
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.transparent,
-        buttonBackgroundColor: Colors.blue,
+        buttonBackgroundColor: ColorsUtils.b200,
         color: ColorsUtils.b500,
         animationDuration: const Duration(milliseconds: 300),
 
         items: widget.items
-            .map((e) => Icon(e.icon, size: 26, color: Colors.white))
+            .map((e) => Icon(e.icon, size: 26, color: ColorsUtils.white))
             .toList(),
 
         onTap: (index) {

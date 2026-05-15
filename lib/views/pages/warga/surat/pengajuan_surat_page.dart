@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
+import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/surat/tambah_surat_page.dart';
+import 'package:rukun_app_proyek4/widgets/warga/detail_pengajuan_surat_modal.dart';
 
 class PengajuanSuratPage extends StatefulWidget {
   const PengajuanSuratPage({super.key});
@@ -30,18 +33,13 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
 
     return Scaffold(
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: nama,
         title: "Pengajuan Surat",
         subtitle: "Ajukan surat anda",
         showName: false,
         showAvatar: false,
         showGreeting: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
       ),
 
       body: Consumer<PengajuanSuratViewModel>(
@@ -78,8 +76,8 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
             NotificationUtils.showSuccess(context, "Pengajuan surat berhasil");
           }
         },
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: ColorsUtils.b400,
+        foregroundColor: ColorsUtils.white,
         elevation: 4,
         icon: const Icon(Icons.add),
         label: const Text(
@@ -97,16 +95,15 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ColorsUtils.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200, width: 1.5),
+        border: Border.all(color: ColorsUtils.lightgray, width: 1.5),
         boxShadow: [
           BoxShadow(
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
-            // ignore: deprecated_member_use
-            color: Colors.blue.withOpacity(0.06),
+            color: ColorsUtils.b300.withOpacity(0.10),
           ),
         ],
       ),
@@ -133,7 +130,7 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          Text(title, style: TextStyle(color: Colors.grey[600])),
+          Text(title, style: TextStyle(color: ColorsUtils.darkgray)),
         ],
       ),
     );
@@ -142,48 +139,49 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
   Widget _divider() =>
       Container(width: 1, height: 30, color: Colors.grey.shade300);
 
-  Widget _filter(PengajuanSuratViewModel vm) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _chip(vm, "Semua", FilterSurat.semua),
-            _chip(vm, "Diajukan", FilterSurat.diajukan),
-            _chip(vm, "Disetujui", FilterSurat.disetujui),
-            _chip(vm, "Ditolak", FilterSurat.ditolak),
-            _chip(vm, "Selesai", FilterSurat.selesai),
-          ],
-        ),
+Widget _filter(PengajuanSuratViewModel vm) {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _chip(vm, "Semua", FilterSurat.semua),
+          _chip(vm, "Diajukan", FilterSurat.diajukan),
+          _chip(vm, "Disetujui", FilterSurat.disetujui),
+          _chip(vm, "Ditolak", FilterSurat.ditolak),
+          _chip(vm, "Selesai", FilterSurat.selesai),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
-Widget _chip(PengajuanSuratViewModel vm, String text, FilterSurat filter) {
+Widget _chip(
+  PengajuanSuratViewModel vm,
+  String text,
+  FilterSurat filter,
+) {
   final selected = vm.selectedFilter == filter;
 
-  return Padding(
-    padding: const EdgeInsets.only(right: 8),
-    child: GestureDetector(
-      onTap: () => vm.setFilter(filter),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? Colors.blue : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: selected ? Colors.blue : Colors.grey.shade300,
-            width: 1.2,
-          ),
+  return GestureDetector(
+    onTap: () => vm.setFilter(filter),
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      margin: const EdgeInsets.only(right: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: selected ? ColorsUtils.b300 : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: selected ? Colors.transparent : Colors.grey.shade300,
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: selected ? Colors.white : Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: selected ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.w600,
         ),
       ),
     ),
@@ -197,10 +195,10 @@ Widget _list(PengajuanSuratViewModel vm) {
 
   return ListView.builder(
     padding: const EdgeInsets.only(bottom: 80),
-    itemCount: vm.list.length,
+    itemCount: vm.filteredList.length,
     itemBuilder: (context, i) {
-      final item = vm.list[i];
-      return _card(item);
+      final item = vm.filteredList[i];
+      return _card(context, item);
     },
   );
 }
@@ -209,44 +207,19 @@ bool _isActionable(SuratStatus status) {
   return status == SuratStatus.disetujui || status == SuratStatus.selesai;
 }
 
-Color _statusColor(SuratStatus status) {
-  switch (status) {
-    case SuratStatus.disetujui:
-      return Colors.green;
-    case SuratStatus.ditolak:
-      return Colors.red;
-    case SuratStatus.selesai:
-      return Colors.blue;
-    default:
-      return Colors.orange;
-  }
-}
+Widget _card(BuildContext context, PengajuanSurat item) {
+  final ui = item.status.ui;
 
-String _statusLabel(SuratStatus status) {
-  switch (status) {
-    case SuratStatus.diajukan:
-      return "Diajukan";
-    case SuratStatus.disetujui:
-      return "Disetujui";
-    case SuratStatus.ditolak:
-      return "Ditolak";
-    case SuratStatus.selesai:
-      return "Selesai";
-  }
-}
-
-Widget _card(PengajuanSurat item) {
   return Container(
     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(14),
-      color: Colors.white,
+      color: ColorsUtils.white,
       boxShadow: [
         BoxShadow(
           blurRadius: 8,
           offset: const Offset(0, 3),
-          // ignore: deprecated_member_use
-          color: Colors.grey.withOpacity(0.08),
+          color: ColorsUtils.gray.withOpacity(0.08),
         ),
       ],
     ),
@@ -256,7 +229,7 @@ Widget _card(PengajuanSurat item) {
           Container(
             width: 5,
             decoration: BoxDecoration(
-              color: _statusColor(item.status),
+              color: ui.color,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(14),
                 bottomLeft: Radius.circular(14),
@@ -275,43 +248,40 @@ Widget _card(PengajuanSurat item) {
                     children: [
                       Expanded(
                         child: Text(
-                          item.jenisSurat,
+                          item.keperluan,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),
                         ),
                       ),
+
                       _badge(item.status),
                     ],
                   ),
 
                   const SizedBox(height: 8),
-                  Text(
-                    item.keperluan,
-                    style: TextStyle(color: Colors.grey[700]),
-                  ),
-
-                  const SizedBox(height: 4),
 
                   Text(
                     item.keterangan,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    style: TextStyle(color: ColorsUtils.darkgray),
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
+
                   Text(
                     item.waktuDibuat != null
                         ? _formatDate(item.waktuDibuat!)
                         : "-",
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    style: TextStyle(color: ColorsUtils.darkgray, fontSize: 12),
                   ),
 
                   const SizedBox(height: 12),
+
                   if (_isActionable(item.status))
                     Align(
                       alignment: Alignment.centerRight,
-                      child: _actionIcon(item),
+                      child: _actionIcon(context, item),
                     ),
                 ],
               ),
@@ -323,27 +293,30 @@ Widget _card(PengajuanSurat item) {
   );
 }
 
-Widget _actionIcon(PengajuanSurat item) {
-  final isDownload = item.status == SuratStatus.selesai;
-
+Widget _actionIcon(BuildContext context, PengajuanSurat item) {
   return InkWell(
-    onTap: () {},
+    onTap: () {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: ColorsUtils.darkgray,
+        builder: (_) {
+          return DetailPengajuanSuratModal(item: item);
+        },
+      );
+    },
     borderRadius: BorderRadius.circular(8),
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isDownload ? Icons.download : Icons.visibility,
-            size: 18,
-            color: Colors.blue,
-          ),
-          const SizedBox(width: 6),
+        children: const [
+          Icon(Icons.visibility, size: 18, color: ColorsUtils.b300),
+          SizedBox(width: 6),
           Text(
-            isDownload ? "Download" : "Lihat",
-            style: const TextStyle(
-              color: Colors.blue,
+            "Lihat Detail",
+            style: TextStyle(
+              color: ColorsUtils.b200,
               fontWeight: FontWeight.w500,
               fontSize: 13,
             ),
@@ -355,17 +328,19 @@ Widget _actionIcon(PengajuanSurat item) {
 }
 
 Widget _badge(SuratStatus status) {
+  final ui = status.ui;
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(
-      color: _statusColor(status),
+      color: ui.color,
       borderRadius: BorderRadius.circular(20),
     ),
     child: Text(
-      _statusLabel(status),
-      style: const TextStyle(color: Colors.white, fontSize: 12),
+      ui.label,
+      style: const TextStyle(color: ColorsUtils.white, fontSize: 12),
     ),
   );
 }
 
 String _formatDate(DateTime d) => "${d.day}-${d.month}-${d.year}";
+}

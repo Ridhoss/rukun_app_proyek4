@@ -34,16 +34,13 @@ class _DetailIuranPageState extends State<DetailIuranPage> {
     return Scaffold(
       backgroundColor: ColorsUtils.white,
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: widget.item.iuran.nama,
         subtitle: "Detail & riwayat pembayaran iuran",
         showName: false,
         showAvatar: false,
         showGreeting: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
 
       body: Column(

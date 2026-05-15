@@ -51,6 +51,7 @@ class _DetailKKView extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Detail Kartu Keluarga",
         subtitle: "Ringkasan data detail kartu keluarga",
@@ -58,7 +59,7 @@ class _DetailKKView extends StatelessWidget {
         showAvatar: false,
         showGreeting: false,
       ),
-      
+
       body: Consumer<DetailKKViewModel>(
         builder: (context, vm, _) {
           if (vm.isLoading) {

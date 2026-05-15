@@ -70,6 +70,7 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Dashboard Kependudukan",
         subtitle: "Ringkasan data kependudukan",

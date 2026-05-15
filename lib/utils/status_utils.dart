@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
-import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 
-
-extension StatusPembayaranUI on StatusPembayaran {
+extension PembayaranUiStatus on StatusPembayaran {
   String get label {
     switch (this) {
       case StatusPembayaran.belumDibayar:
@@ -20,82 +20,47 @@ extension StatusPembayaranUI on StatusPembayaran {
   Color get color {
     switch (this) {
       case StatusPembayaran.belumDibayar:
-        return Colors.orange;
+        return ColorsUtils.yellow;
       case StatusPembayaran.diproses:
         return Colors.blue;
       case StatusPembayaran.dibayar:
-        return Colors.green;
+        return ColorsUtils.g100;
       case StatusPembayaran.ditolak:
-        return Colors.red;
+        return ColorsUtils.red;
     }
   }
 }
 
+class SuratUiStatus {
+  final String label;
+  final Color color;
 
-enum SuratStatus {
-  tertunda,
-  disetujui,
-  ditolak,
-  selesai,
+  const SuratUiStatus({required this.label, required this.color});
 }
 
-extension SuratStatusUI on SuratStatus {
-  String get label {
+extension SuratStatusExt on SuratStatus {
+  SuratUiStatus get ui {
     switch (this) {
-      case SuratStatus.tertunda:
-        return "Tertunda";
-      case SuratStatus.disetujui:
-        return "Disetujui";
-      case SuratStatus.ditolak:
-        return "Ditolak";
-      case SuratStatus.selesai:
-        return "Selesai";
-    }
-  }
+      case SuratStatus.diajukan:
+        return const SuratUiStatus(label: "Diajukan", color: ColorsUtils.o100);
 
-  Color get color {
-    switch (this) {
-      case SuratStatus.tertunda:
-        return Colors.orange;
       case SuratStatus.disetujui:
-        return Colors.green;
+        return const SuratUiStatus(label: "Disetujui", color: ColorsUtils.b200);
+
       case SuratStatus.ditolak:
-        return Colors.red;
+        return const SuratUiStatus(label: "Ditolak", color: ColorsUtils.red);
+
       case SuratStatus.selesai:
-        return Colors.blue;
+        return const SuratUiStatus(label: "Selesai", color: ColorsUtils.g100);
     }
   }
 }
 
+class KegiatanUiStatus {
+  final String label;
+  final Color color;
 
-extension KegiatanStatusUI on Kegiatan {
-  String get statusLabel {
-    if (isBerlangsung) return "Berlangsung";
-
-    switch (status) {
-      case KegiatanStatus.dibuat:
-        return "Dibuat";
-      case KegiatanStatus.ditunda:
-        return "Ditunda";
-      case KegiatanStatus.dibatalkan:
-        return "Dibatalkan";
-      case KegiatanStatus.selesai:
-        return "Selesai";
-    }
-  }
-
-  Color get statusColor {
-    if (isBerlangsung) return Colors.blue;
-
-    switch (status) {
-      case KegiatanStatus.dibuat:
-        return Colors.orange;
-      case KegiatanStatus.ditunda:
-        return Colors.grey;
-      case KegiatanStatus.dibatalkan:
-        return Colors.red;
-      case KegiatanStatus.selesai:
-        return Colors.green;
-    }
-  }
+  const KegiatanUiStatus({required this.label, required this.color});
 }
+
+enum FilterKegiatanStatus { semua, berlangsung, segera, selesai, dibatalkan }

@@ -44,6 +44,7 @@ class _RWPendudukPageState extends State<RWPendudukPage> {
       backgroundColor: const Color(0xFFF5F7FA),
 
       appBar: AppBarUtils.buildAppBar(
+        context: context,
         name: "",
         title: "Dashboard Kependudukan RW",
         subtitle: "Daftar RT dalam wilayah RW",
