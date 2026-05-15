@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
-import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 
-extension StatusPembayaranUI on StatusPembayaran {
+extension PembayaranUiStatus on StatusPembayaran {
   String get label {
     switch (this) {
       case StatusPembayaran.belumDibayar:
@@ -20,43 +20,38 @@ extension StatusPembayaranUI on StatusPembayaran {
   Color get color {
     switch (this) {
       case StatusPembayaran.belumDibayar:
-        return Colors.orange;
+        return ColorsUtils.yellow;
       case StatusPembayaran.diproses:
         return Colors.blue;
       case StatusPembayaran.dibayar:
-        return Colors.green;
+        return ColorsUtils.g100;
       case StatusPembayaran.ditolak:
-        return Colors.red;
+        return ColorsUtils.red;
     }
   }
 }
 
-enum SuratStatus { tertunda, disetujui, ditolak, selesai }
+class SuratUiStatus {
+  final String label;
+  final Color color;
 
-extension SuratStatusUI on SuratStatus {
-  String get label {
-    switch (this) {
-      case SuratStatus.tertunda:
-        return "Tertunda";
-      case SuratStatus.disetujui:
-        return "Disetujui";
-      case SuratStatus.ditolak:
-        return "Ditolak";
-      case SuratStatus.selesai:
-        return "Selesai";
-    }
-  }
+  const SuratUiStatus({required this.label, required this.color});
+}
 
-  Color get color {
+extension SuratStatusExt on SuratStatus {
+  SuratUiStatus get ui {
     switch (this) {
-      case SuratStatus.tertunda:
-        return Colors.orange;
+      case SuratStatus.diajukan:
+        return const SuratUiStatus(label: "Diajukan", color: ColorsUtils.o100);
+
       case SuratStatus.disetujui:
-        return Colors.green;
+        return const SuratUiStatus(label: "Disetujui", color: ColorsUtils.b200);
+
       case SuratStatus.ditolak:
-        return Colors.red;
+        return const SuratUiStatus(label: "Ditolak", color: ColorsUtils.red);
+
       case SuratStatus.selesai:
-        return Colors.blue;
+        return const SuratUiStatus(label: "Selesai", color: ColorsUtils.g100);
     }
   }
 }

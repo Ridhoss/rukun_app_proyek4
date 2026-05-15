@@ -5,7 +5,6 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/warga/surat/pengajuan_surat_page.dart';
 
 class TambahSuratPage extends StatefulWidget {
   const TambahSuratPage({super.key});
@@ -16,8 +15,6 @@ class TambahSuratPage extends StatefulWidget {
 
 class _TambahSuratPageState extends State<TambahSuratPage> {
   final _formKey = GlobalKey<FormState>();
-
-  String? selectedJenis;
 
   final keperluanController = TextEditingController();
   final keteranganController = TextEditingController();
@@ -70,58 +67,6 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
 
               const SizedBox(height: 10),
               _dataCard(authVM),
-
-              const SizedBox(height: 22),
-              _buildField(
-                title: "Jenis Surat",
-                isRequired: true,
-
-                child: DropdownButtonFormField<String>(
-                  initialValue: selectedJenis,
-
-                  items: const [
-                    DropdownMenuItem(
-                      value: "Surat Pengantar KTP",
-                      child: Text("Surat Pengantar KTP"),
-                    ),
-
-                    DropdownMenuItem(
-                      value: "Surat Domisili",
-                      child: Text("Surat Domisili"),
-                    ),
-
-                    DropdownMenuItem(
-                      value: "Surat Keterangan Tidak Mampu",
-                      child: Text("Surat Keterangan Tidak Mampu"),
-                    ),
-
-                    DropdownMenuItem(
-                      value: "Surat Keterangan Berkelakuan Baik",
-                      child: Text("Surat Keterangan Berkelakuan Baik"),
-                    ),
-                  ],
-
-                  onChanged: (value) {
-                    setState(() {
-                      selectedJenis = value;
-                    });
-                  },
-
-                  decoration: InputDecoration(
-                    hintText: "Pilih jenis surat",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-
-                  validator: (v) {
-                    if (v == null) {
-                      return "Silakan pilih jenis surat";
-                    }
-                    return null;
-                  },
-                ),
-              ),
 
               _buildField(
                 title: "Keperluan",
@@ -233,7 +178,6 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
 
     final data = PengajuanSurat(
       wargaId: 1,
-      jenisSurat: selectedJenis!,
       keperluan: keperluanController.text.trim(),
       keterangan: keteranganController.text.trim(),
     );
@@ -256,7 +200,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
       padding: const EdgeInsets.all(14),
 
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: ColorsUtils.b50,
         borderRadius: BorderRadius.circular(12),
       ),
 
@@ -264,10 +208,9 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
-          Icon(Icons.info_outline, color: Colors.blue),
+          Icon(Icons.info_outline, color: ColorsUtils.b200),
 
           SizedBox(width: 10),
-
           Expanded(
             child: Text(
               "Pengajuan akan diproses oleh pengurus. Pastikan data sudah benar sebelum mengajukan surat.",
@@ -293,7 +236,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
             text: title,
 
             style: const TextStyle(
-              color: Colors.black,
+              color: ColorsUtils.black,
               fontWeight: FontWeight.w600,
             ),
 
@@ -301,7 +244,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
                 ? const [
                     TextSpan(
                       text: " *",
-                      style: TextStyle(color: Colors.red),
+                      style: TextStyle(color: ColorsUtils.red),
                     ),
                   ]
                 : [],
@@ -326,10 +269,10 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: ColorsUtils.lightgray,
         borderRadius: BorderRadius.circular(14),
 
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: ColorsUtils.lightgray),
       ),
 
       child: Column(
@@ -353,7 +296,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
           SizedBox(
             width: 100,
 
-            child: Text(label, style: const TextStyle(color: Colors.grey)),
+            child: Text(label, style: const TextStyle(color: ColorsUtils.gray)),
           ),
 
           Expanded(

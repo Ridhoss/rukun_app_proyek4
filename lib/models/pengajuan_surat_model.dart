@@ -3,11 +3,11 @@ enum SuratStatus { diajukan, disetujui, ditolak, selesai }
 class PengajuanSurat {
   final int? id;
   final int? wargaId;
-  final String jenisSurat;
   final String keperluan;
   final String keterangan;
   final SuratStatus status;
   final int? disetujuiOleh;
+  final String? docRef;
   final DateTime? waktuDisetujui;
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
@@ -16,12 +16,12 @@ class PengajuanSurat {
   const PengajuanSurat({
     this.id,
     this.wargaId,
-    required this.jenisSurat,
     required this.keperluan,
     required this.keterangan,
     this.status = SuratStatus.diajukan,
     this.disetujuiOleh,
     this.waktuDisetujui,
+    this.docRef,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
@@ -30,20 +30,28 @@ class PengajuanSurat {
   PengajuanSurat copyWith({
     int? id,
     int? wargaId,
-    String? jenisSurat,
     String? keperluan,
     String? keterangan,
     SuratStatus? status,
     int? disetujuiOleh,
+    String? docRef,
+    DateTime? waktuDisetujui,
+    DateTime? waktuDibuat,
+    DateTime? waktuDiubah,
+    DateTime? waktuDihapus,
   }) {
     return PengajuanSurat(
       id: id ?? this.id,
       wargaId: wargaId ?? this.wargaId,
-      jenisSurat: jenisSurat ?? this.jenisSurat,
       keperluan: keperluan ?? this.keperluan,
       keterangan: keterangan ?? this.keterangan,
       status: status ?? this.status,
       disetujuiOleh: disetujuiOleh ?? this.disetujuiOleh,
+      docRef: docRef ?? this.docRef,
+      waktuDisetujui: waktuDisetujui ?? this.waktuDisetujui,
+      waktuDibuat: waktuDibuat ?? this.waktuDibuat,
+      waktuDiubah: waktuDiubah ?? this.waktuDiubah,
+      waktuDihapus: waktuDihapus ?? this.waktuDihapus,
     );
   }
 
@@ -51,11 +59,11 @@ class PengajuanSurat {
     return PengajuanSurat(
       id: json['id'],
       wargaId: json['warga_id'],
-      jenisSurat: json['jenis_surat'],
       keperluan: json['keperluan'],
       keterangan: json['keterangan'],
       status: _status(json['status']),
       disetujuiOleh: json['disetujui_oleh'],
+      docRef: json['doc_ref'],
       waktuDisetujui: json['waktu_disetujui'] != null
           ? DateTime.parse(json['waktu_disetujui'])
           : null,
@@ -75,11 +83,15 @@ class PengajuanSurat {
     return {
       'id': id,
       'warga_id': wargaId,
-      'jenis_surat': jenisSurat,
       'keperluan': keperluan,
       'keterangan': keterangan,
       'status': _statusToString(status),
       'disetujui_oleh': disetujuiOleh,
+      'doc_ref': docRef,
+      'waktu_disetujui': waktuDisetujui?.toIso8601String(),
+      'waktu_dibuat': waktuDibuat?.toIso8601String(),
+      'waktu_diubah': waktuDiubah?.toIso8601String(),
+      'waktu_dihapus': waktuDihapus?.toIso8601String(),
     };
   }
 

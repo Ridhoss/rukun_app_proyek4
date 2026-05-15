@@ -133,7 +133,7 @@ class WargaIuranPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
+          color: ColorsUtils.lightgray,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -201,7 +201,7 @@ class WargaIuranPage extends StatelessWidget {
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF4A90E2) : Colors.white,
+          color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
             color: selected ? Colors.transparent : Colors.grey.shade300,
