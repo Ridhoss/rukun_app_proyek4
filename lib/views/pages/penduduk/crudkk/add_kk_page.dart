@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/kartukeluarga/add_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/penduduk/kartukeluarga/add_kk_viewmodel.dart';
 
 class AddKKPage extends StatelessWidget {
   const AddKKPage({super.key});

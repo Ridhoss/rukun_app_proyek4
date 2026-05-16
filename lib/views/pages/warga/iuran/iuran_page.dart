@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rukun_app_proyek4/models/iuran_model.dart';
-import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
@@ -138,8 +138,8 @@ class WargaIuranPage extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _typeItem(vm, "Wajib", IuranType.wajib),
-            _typeItem(vm, "Sedekah", IuranType.sedekah),
+            _typeItem(vm, "Wajib", IuranType.reguler),
+            _typeItem(vm, "Sedekah", IuranType.insidentil),
           ],
         ),
       ),
@@ -301,7 +301,7 @@ class WargaIuranPage extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  if (item.iuran.tipe == IuranType.wajib &&
+                  if (item.iuran.tipe == IuranType.reguler &&
                       (item.iuran.jumlah ?? 0) > 0)
                     Row(
                       children: [

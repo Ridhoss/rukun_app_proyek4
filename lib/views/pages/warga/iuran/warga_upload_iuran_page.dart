@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rukun_app_proyek4/models/iuran_model.dart';
-import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/iuran/upload_iuran_viewmodel.dart';
 
@@ -33,7 +33,7 @@ class _UploadViewState extends State<_UploadView> {
   Widget build(BuildContext context) {
     final vm = context.watch<UploadIuranViewModel>();
     final item = vm.item;
-    final isSedekah = item.iuran.tipe == IuranType.sedekah;
+    final isSedekah = item.iuran.tipe == IuranType.insidentil;
 
     return Scaffold(
       appBar: AppBarUtils.buildAppBar(

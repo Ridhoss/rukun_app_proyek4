@@ -1,4 +1,4 @@
-import 'package:rukun_app_proyek4/models/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 
 class IuranSaya {

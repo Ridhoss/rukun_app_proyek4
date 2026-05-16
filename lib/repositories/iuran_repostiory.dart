@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:rukun_app_proyek4/models/iuran_model.dart';
-import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 
@@ -86,6 +86,18 @@ class IuranRepository {
     final result = await _safeCall(() => service.deleteIuran(id, token));
 
     _validateStatus(result);
+  }
+
+  Future<List<Iuran>> getIuranByRWId(int idRw) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(() => service.getIuranByRW(idRw, token));
+
+    _validateStatus(result);
+
+    final List data = result['data'] ?? [];
+
+    return data.map((e) => Iuran.fromJson(e)).toList();
   }
 
   Future<String> _requireToken() async {

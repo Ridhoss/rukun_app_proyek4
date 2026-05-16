@@ -5,7 +5,7 @@ import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/kartukeluarga/edit_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/penduduk/kartukeluarga/edit_kk_viewmodel.dart';
 
 class EditKKPage extends StatelessWidget {
   final int idKK;

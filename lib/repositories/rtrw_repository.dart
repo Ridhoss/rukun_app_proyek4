@@ -39,7 +39,17 @@ class RTRWRepository {
     try {
       return await fn();
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? "Terjadi kesalahan";
+      final data = e.response?.data;
+
+      String message;
+
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ?? "Terjadi kesalahan";
+      } else if (data is String) {
+        message = data;
+      } else {
+        message = "Terjadi kesalahan";
+      }
 
       throw Exception(message);
     } catch (e) {

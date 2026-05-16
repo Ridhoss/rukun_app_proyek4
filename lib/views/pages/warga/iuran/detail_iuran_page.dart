@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rukun_app_proyek4/models/iuran_model.dart';
-import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
@@ -75,7 +75,7 @@ class _IuranHeader extends StatelessWidget {
 
   const _IuranHeader({required this.item});
 
-  bool get _isWajib => item.iuran.tipe == IuranType.wajib;
+  bool get _isWajib => item.iuran.tipe == IuranType.reguler;
 
   @override
   Widget build(BuildContext context) {

@@ -7,8 +7,8 @@ import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/warga/detail_warga_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/warga/edit_warga_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/penduduk/warga/detail_warga_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/penduduk/warga/edit_warga_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/penduduk/crudwarga/edit_warga_page.dart';
 
 class DetailWargaPage extends StatelessWidget {

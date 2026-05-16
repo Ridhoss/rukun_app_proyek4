@@ -41,9 +41,9 @@ class NavViewModel {
           page: RWPendudukPage(user: user),
         ),
         NavItem(
-          icon: Icons.account_balance_wallet,
+          icon: Icons.payments,
           label: "Iuran",
-          page: const RwIuranPage(),
+          page: RwIuranPage(user: user),
         ),
         NavItem(
           icon: Icons.description,
