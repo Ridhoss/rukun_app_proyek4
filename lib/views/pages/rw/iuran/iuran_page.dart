@@ -6,7 +6,7 @@ class RwIuranPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text("Test Iuran Page RW"),
+      child: Text("Test Iuran RW"),
     );
   }
 }
