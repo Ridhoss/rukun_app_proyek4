@@ -1,16 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:rukun_app_proyek4/models/iuran_model.dart';
-import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 
 class UploadIuranViewModel extends ChangeNotifier {
   final IuranSaya item;
 
   UploadIuranViewModel({required this.item}) {
-    periode = item.iuran.periode.name;
-
-    if (item.iuran.tipe != IuranType.sedekah) {
+    if (item.iuran.tipe != IuranType.insidentil) {
       jumlah = item.iuran.jumlah;
     }
   }
@@ -83,7 +81,7 @@ class UploadIuranViewModel extends ChangeNotifier {
   }
 
   void reset() {
-    jumlah = item.iuran.tipe == IuranType.sedekah ? null : item.iuran.jumlah;
+    jumlah = item.iuran.tipe == IuranType.insidentil ? null : item.iuran.jumlah;
 
     tanggal = null;
     buktiFile = null;

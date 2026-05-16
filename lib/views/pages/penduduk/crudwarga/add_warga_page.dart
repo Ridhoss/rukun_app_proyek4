@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/penduduk/warga/add_warga_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/penduduk/warga/add_warga_viewmodel.dart';
 
 class AddWargaPage extends StatelessWidget {
   const AddWargaPage({super.key});

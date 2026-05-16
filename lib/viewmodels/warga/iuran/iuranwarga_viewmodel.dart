@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rukun_app_proyek4/models/iuran_model.dart';
-import 'package:rukun_app_proyek4/models/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 
@@ -26,7 +26,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
   List<IuranSaya> _items = [];
 
   FilterStatus selectedStatus = FilterStatus.semua;
-  IuranType selectedType = IuranType.wajib;
+  IuranType selectedType = IuranType.reguler;
 
   bool isLoading = false;
   String? errorMessage;
@@ -102,7 +102,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
   }
 
   List<IuranItem> generateHistory(IuranSaya item) {
-    if (item.iuran.periode == PeriodeType.sekali) {
+    if (item.iuran.tipe == IuranType.insidentil) {
       return [
         IuranItem(
           bulan:
@@ -160,7 +160,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
   StatusPembayaran getStatusSummary(IuranSaya item) {
     final trx = item.transaksiTerbaru;
 
-    if (item.iuran.periode == PeriodeType.sekali) {
+    if (item.iuran.tipe == IuranType.insidentil) {
       return trx?.status ?? StatusPembayaran.belumDibayar;
     }
 

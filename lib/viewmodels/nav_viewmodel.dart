@@ -37,7 +37,7 @@ if (user.pengurus?.level == "RW") {
   return [
     NavItem(icon: Icons.home, label: "Home", page: const RwHomePage()),
     NavItem(icon: Icons.groups, label: "Penduduk", page: RWPendudukPage(user: user,)),
-    NavItem(icon: Icons.payments, label: "Iuran", page: const RwIuranPage()),
+    NavItem(icon: Icons.payments, label: "Iuran", page: RwIuranPage(user: user,)),
     NavItem(icon: Icons.description, label: "Surat", page: const RwSuratPage()),
     NavItem(icon: Icons.person, label: "Profile", page: const RwProfilePage()),
   ];

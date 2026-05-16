@@ -20,14 +20,17 @@ class RWPendudukViewmodel extends ChangeNotifier {
     try {
       isLoading = true;
       errorMessage = null;
-
       notifyListeners();
 
       final rw = await repository.getRWById(rwId);
 
       rtList = rw?.rtList ?? [];
-    } catch (e) {
+    } catch (e, stack) {
       errorMessage = e.toString();
+
+      debugPrint("❌ VIEWMODEL ERROR:");
+      debugPrint(e.toString());
+      debugPrintStack(stackTrace: stack);
     } finally {
       isLoading = false;
       notifyListeners();
