@@ -5,7 +5,7 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/dashboard/dashboard_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_rw_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/kegiatan_page.dart';
 
 // pages RT
@@ -48,7 +48,7 @@ class NavViewModel {
         NavItem(
           icon: Icons.description,
           label: "Surat",
-          page: const SuratRwPage(),
+          page: const RwSuratPage(),
         ),
         NavItem(
           icon: Icons.event_available,
