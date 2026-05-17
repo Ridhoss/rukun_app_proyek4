@@ -3,7 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/keluarga_status_model.dart';
+import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_bulanan_detail_viewmodel.dart';
 
 class DetailIuranBulananPage extends StatefulWidget {
@@ -232,17 +234,314 @@ class _DetailIuranBulananPageState extends State<DetailIuranBulananPage> {
   }
 
   Widget _buildKKList(List<KeluargaStatus> list) {
+    final diprosesList = list
+        .where((e) => e.status == StatusPembayaran.diproses)
+        .toList();
+
+    final selesaiList = list
+        .where((e) => e.status != StatusPembayaran.diproses)
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (diprosesList.isNotEmpty) ...[
+          const Text(
+            "Menunggu Persetujuan",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+
+          const SizedBox(height: 12),
+
+          ...diprosesList.map((k) {
+            return Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    k.keluarga.noKK,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  const Text(
+                    "STATUS: DIPROSES",
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text("Rp ${k.nominal}"),
+
+                  Text(
+                    "Tanggal Bayar: "
+                    "${k.waktuBayar == null ? '-' : DateFormat('dd MMMM yyyy', 'id_ID').format(k.waktuBayar!)}",
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => Dialog(
+                                child: InteractiveViewer(
+                                  child: Image.network(
+                                    k.imgBukti ?? '',
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const Padding(
+                                      padding: EdgeInsets.all(20),
+                                      child: Text("Gagal memuat gambar"),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.image),
+                          label: const Text("Lihat Bukti"),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            final alasanController = TextEditingController();
+
+                            showDialog(
+                              context: context,
+                              builder: (_) {
+                                return AlertDialog(
+                                  title: const Text("Tolak Pembayaran"),
+
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Masukkan alasan penolakan pembayaran.",
+                                      ),
+
+                                      const SizedBox(height: 14),
+
+                                      TextField(
+                                        controller: alasanController,
+                                        maxLines: 3,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              "Contoh: Bukti pembayaran tidak jelas",
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text("Cancel"),
+                                    ),
+
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      onPressed: () async {
+                                        final alasan = alasanController.text
+                                            .trim();
+
+                                        if (alasan.isEmpty) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                "Alasan penolakan wajib diisi",
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        final vm = context
+                                            .read<
+                                              IuranBulananDetailViewModel
+                                            >();
+
+                                        final success = await vm
+                                            .updateStatusTransaksi(
+                                              transaksiId: k.idTransaksi!,
+                                              status: "Ditolak",
+                                              catatan: alasan,
+                                              iuranId: widget.iuranId,
+                                              rtId: widget.rtId,
+                                              month: widget.month,
+                                            );
+
+                                        if (context.mounted) {
+                                          Navigator.pop(context);
+
+                                          if (success) {
+                                            NotificationUtils.showSuccess(
+                                              context,
+                                              "Pembayaran berhasil ditolak",
+                                            );
+                                          } else {
+                                            NotificationUtils.showError(
+                                              context,
+                                              "Gagal menolak pembayaran",
+                                            );
+                                          }
+                                        }
+                                      },
+                                      child: const Text("Tolak"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.close),
+                          label: const Text("Tolak"),
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) {
+                                return AlertDialog(
+                                  title: const Text("Terima Pembayaran"),
+
+                                  content: const Text(
+                                    "Apakah Anda yakin ingin menerima pembayaran ini?",
+                                  ),
+
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text("Cancel"),
+                                    ),
+
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      onPressed: () async {
+                                        final vm = context
+                                            .read<
+                                              IuranBulananDetailViewModel
+                                            >();
+
+                                        final success = await vm
+                                            .updateStatusTransaksi(
+                                              transaksiId: k.idTransaksi!,
+                                              status: "Dibayar",
+                                              iuranId: widget.iuranId,
+                                              rtId: widget.rtId,
+                                              month: widget.month,
+                                            );
+
+                                        if (context.mounted) {
+                                          Navigator.pop(context);
+
+                                          if (success) {
+                                            NotificationUtils.showSuccess(
+                                              context,
+                                              "Pembayaran berhasil diterima",
+                                            );
+                                          } else {
+                                            NotificationUtils.showError(
+                                              context,
+                                              "Gagal menerima pembayaran",
+                                            );
+                                          }
+                                        }
+                                      },
+                                      child: const Text("Terima"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.check),
+                          label: const Text("Terima"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+
+          const SizedBox(height: 24),
+
+          Container(
+            height: 1,
+            width: double.infinity,
+            color: Colors.grey.shade300,
+          ),
+
+          const SizedBox(height: 24),
+        ],
+
         const Text(
           "Daftar Keluarga RT",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
 
         const SizedBox(height: 12),
 
-        ...list.map((k) {
+        ...selesaiList.map((k) {
           return Container(
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
@@ -273,8 +572,10 @@ class _DetailIuranBulananPageState extends State<DetailIuranBulananPage> {
 
                 if (k.sudahBayar) ...[
                   Text("Rp ${k.nominal}"),
+
                   Text(
-                    "Tanggal Bayar: ${k.waktuBayar == null ? '-' : DateFormat('dd MMMM yyyy', 'id_ID').format(k.waktuBayar!)}",
+                    "Tanggal Bayar: "
+                    "${k.waktuBayar == null ? '-' : DateFormat('dd MMMM yyyy', 'id_ID').format(k.waktuBayar!)}",
                   ),
 
                   Text("Disetujui oleh: ${k.disetujuiOleh ?? '-'}"),

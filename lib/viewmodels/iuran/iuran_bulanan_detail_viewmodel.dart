@@ -93,26 +93,85 @@ class IuranBulananDetailViewModel extends ChangeNotifier {
     return keluargaList.map((kk) {
       final tx = transaksi.where((t) {
         final d = t.waktuBayar;
+
         if (d == null) return false;
 
         final isSameMonth = d.year == month.year && d.month == month.month;
 
-        return isSameMonth &&
-            t.keluarga?.id == kk.id &&
-            t.iuranId == iuranId &&
-            t.status == StatusPembayaran.dibayar;
+        return isSameMonth && t.keluarga?.id == kk.id && t.iuranId == iuranId;
       }).toList();
 
       final data = tx.isNotEmpty ? tx.first : null;
 
       return KeluargaStatus(
         keluarga: kk,
-        sudahBayar: data != null,
+        sudahBayar: data?.status == StatusPembayaran.dibayar,
+
+        status: data?.status ?? StatusPembayaran.belumDibayar,
+
         nominal: data?.jumlah ?? 0,
+
+        idTransaksi: data?.id,
+
         waktuBayar: data?.waktuBayar,
+
         disetujuiOleh: data?.disetujuiNama,
+
         imgBukti: data?.imgRef,
       );
     }).toList();
+  }
+
+  Future<bool> updateStatusTransaksi({
+    required int transaksiId,
+    required String status,
+    String? catatan,
+    int? disetujuiOleh,
+    required int iuranId,
+    required int rtId,
+    required DateTime month,
+  }) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final body = {
+        "status": status,
+        if (catatan != null) "catatan": catatan,
+        if (disetujuiOleh != null) "disetujui_oleh": disetujuiOleh,
+      };
+
+      await iuranRepo.updateStatusTransaksi(transaksiId, body);
+
+      await fetchDetail(iuranId, rtId, month);
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  StatusPembayaran _mapStatus(String status) {
+    switch (status.toLowerCase()) {
+      case "Dibayar":
+        return StatusPembayaran.dibayar;
+
+      case "Ditolak":
+        return StatusPembayaran.ditolak;
+
+      case "Belum Dibayar":
+        return StatusPembayaran.belumDibayar;
+
+      case "Diproses":
+        return StatusPembayaran.diproses;
+
+      default:
+        return StatusPembayaran.belumDibayar;
+    }
   }
 }

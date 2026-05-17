@@ -114,4 +114,21 @@ class Transaksi {
         return "Belum Dibayar";
     }
   }
+
+  Transaksi copyWith({StatusPembayaran? status}) {
+    return Transaksi(
+      id: id,
+      iuranId: iuranId,
+      keluargaId: keluargaId,
+      waktuBayar: waktuBayar,
+      jumlah: jumlah,
+      status: status ?? this.status,
+      imgRef: imgRef,
+      catatan: catatan,
+      disetujuiOleh: disetujuiOleh,
+      waktuDisetujui: waktuDisetujui,
+      keluarga: keluarga,
+      disetujuiNama: disetujuiNama,
+    );
+  }
 }

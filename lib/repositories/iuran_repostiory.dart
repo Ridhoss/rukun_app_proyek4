@@ -69,6 +69,16 @@ class IuranRepository {
     _validateStatus(result);
   }
 
+  Future<void> updateStatusTransaksi(int id, Map<String, dynamic> data) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.updateStatusTransaksi(id, data, token),
+    );
+
+    _validateStatus(result);
+  }
+
   Future<void> deleteIuran(int id) async {
     final token = await _requireToken();
 
@@ -134,9 +144,9 @@ class IuranRepository {
     }
   }
 
-  void _validateStatus(Map<String, dynamic> result) {
-    if (result['status'] != 'success') {
-      throw Exception(result['message'] ?? "Unknown error");
+  void _validateStatus(Map<String, dynamic> res) {
+    if (res["status"] != "success") {
+      throw Exception(res["message"] ?? "Unknown error");
     }
   }
 }
