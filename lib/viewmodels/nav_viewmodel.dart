@@ -11,7 +11,7 @@ import 'package:rukun_app_proyek4/views/pages/rw/profile_page.dart';
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/profile_page.dart';
 
@@ -48,7 +48,7 @@ if (user.pengurus?.level == "RT") {
   return [
     NavItem(icon: Icons.home, label: "Home", page: const RtHomePage()),
     NavItem(icon: Icons.groups, label: "Penduduk", page: RtPendudukPage(user: user)),
-    NavItem(icon: Icons.payments, label: "Iuran", page: const RtIuranPage()),
+    NavItem(icon: Icons.payments, label: "Iuran", page:  RtIuranPage(user: user)),
     NavItem(icon: Icons.description, label: "Surat", page: const RtSuratPage()),
     NavItem(icon: Icons.person, label: "Profile", page: const RtProfilePage()),
   ];
