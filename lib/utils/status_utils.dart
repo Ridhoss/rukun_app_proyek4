@@ -38,7 +38,7 @@ class SuratUiStatus {
   const SuratUiStatus({required this.label, required this.color});
 }
 
-extension SuratStatusExt on SuratStatus {
+extension SuratStatusExtention on SuratStatus {
   SuratUiStatus get ui {
     switch (this) {
       case SuratStatus.diajukan:

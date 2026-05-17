@@ -266,13 +266,13 @@ class _RwSuratPageState extends State<RwSuratPage> {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: ColorsUtils.white,
+        color: ColorsUtils.lightgray,
 
         borderRadius: BorderRadius.circular(24),
 
         boxShadow: [
           BoxShadow(
-            color: ColorsUtils.black.withOpacity(0.05),
+            color: ColorsUtils.black.withOpacity(0.16),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -344,16 +344,27 @@ class _RwSuratPageState extends State<RwSuratPage> {
 
               child: ElevatedButton(
                 onPressed: () {
+                  final namaWarga = vm.getNamaWarga(surat.wargaId ?? 0);
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
-
+                    backgroundColor: ColorsUtils.white,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(24),
+                      ),
+                    ),
                     builder: (_) {
-                      return TindakLanjutModal();
+                      return FractionallySizedBox(
+                        heightFactor: 0.8,
+                        child: TindakLanjutModal(
+                          surat: surat,
+                          namaWarga: namaWarga,
+                        ),
+                      );
                     },
                   );
                 },
-
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorsUtils.b300,
                   foregroundColor: ColorsUtils.white,

@@ -131,7 +131,10 @@ void main() async {
               AddIuranViewModel(context.read<IuranRepository>()),
         ),
 
-        ChangeNotifierProvider(create: (_) => SuratRwViewModel()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              SuratRwViewModel(context.read<WargaRepository>()),// sesuaikan
+        ),
       ],
       child: const MyApp(),
     ),
