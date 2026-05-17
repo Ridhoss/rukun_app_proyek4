@@ -2,54 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
-import 'package:rukun_app_proyek4/models/transaksi_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/keluarga_status_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_rt_detail_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_bulanan_page.dart';
+import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_bulanan_detail_viewmodel.dart';
 
-class IuranRTDetailPage extends StatefulWidget {
+class DetailIuranBulananPage extends StatefulWidget {
   final int iuranId;
   final int rtId;
+  final DateTime month;
 
-  const IuranRTDetailPage({
+  const DetailIuranBulananPage({
     super.key,
     required this.iuranId,
     required this.rtId,
+    required this.month,
   });
 
   @override
-  State<IuranRTDetailPage> createState() => _IuranRTDetailPageState();
+  State<DetailIuranBulananPage> createState() => _DetailIuranBulananPageState();
 }
 
-class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
+class _DetailIuranBulananPageState extends State<DetailIuranBulananPage> {
   @override
   void initState() {
     super.initState();
 
     Future.microtask(() {
-      context.read<IuranRTDetailViewModel>().fetchDetail(
+      context.read<IuranBulananDetailViewModel>().fetchDetail(
         widget.iuranId,
         widget.rtId,
+        widget.month,
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final monthLabel = DateFormat('MMMM yyyy', 'id_ID').format(widget.month);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
 
       appBar: AppBarUtils.buildAppBar(
         context: context,
         name: "",
-        title: "Detail Iuran RT",
-        subtitle: "Status iuran & periode bulan",
+        title: "Detail Bulan",
+        subtitle: monthLabel,
         showName: false,
         showAvatar: false,
         showGreeting: false,
       ),
 
-      body: Consumer<IuranRTDetailViewModel>(
+      body: Consumer<IuranBulananDetailViewModel>(
         builder: (context, vm, _) {
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -60,22 +64,19 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
           }
 
           final iuran = vm.iuran;
-          final transaksi = vm.transaksi;
+          final rt = vm.rtDetail;
 
-          if (iuran == null) {
+          if (iuran == null || rt == null) {
             return const Center(child: Text("Data tidak ditemukan"));
           }
 
-          final rt = vm.rtDetail;
-
-          final startDate = iuran.waktuDibuat ?? DateTime.now();
-          final months = generateMonths(startDate);
+          final list = vm.getKeluargaStatus(widget.month, widget.iuranId);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _buildSummaryCard(iuran: iuran, terkumpul: vm.totalTerkumpul),
+                _buildSummaryCard(iuran, vm.totalTerkumpul),
 
                 const SizedBox(height: 16),
 
@@ -83,17 +84,15 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
 
                 const SizedBox(height: 16),
 
-                if (rt != null) _buildRtInfo(rt),
+                _buildRtInfo(rt),
 
                 const SizedBox(height: 16),
 
-                _buildMonthlyList(
-                  months,
-                  transaksi,
-                  rt?.totalKeluarga ?? 0,
-                  rt?.id ?? 0,
-                  iuran.id ?? 0,
-                ),
+                _buildMonthCard(widget.month),
+
+                const SizedBox(height: 16),
+
+                _buildKKList(list),
               ],
             ),
           );
@@ -102,14 +101,8 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
     );
   }
 
-  Widget _buildSummaryCard({required Iuran iuran, required int terkumpul}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-      ),
+  Widget _buildSummaryCard(Iuran iuran, int terkumpul) {
+    return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -122,11 +115,9 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
 
           Row(
             children: [
-              _buildBadge(iuran.level.name.toUpperCase(), Colors.grey),
-
+              _badge(iuran.level.name.toUpperCase(), Colors.grey),
               const SizedBox(width: 8),
-
-              _buildBadge(iuran.tipe.name.toUpperCase(), Colors.green),
+              _badge(iuran.tipe.name.toUpperCase(), Colors.green),
             ],
           ),
 
@@ -135,9 +126,8 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _MiniStat(title: "Total Terkumpul", value: "Rp.$terkumpul"),
-
-              _MiniStat(title: "Biaya Iuran", value: "Rp.${iuran.jumlah}"),
+              _MiniStat(title: "Terkumpul", value: "Rp $terkumpul"),
+              _MiniStat(title: "Iuran", value: "Rp ${iuran.jumlah}"),
             ],
           ),
         ],
@@ -224,84 +214,97 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
     );
   }
 
-  Widget _buildMonthlyList(
-    List<DateTime> months,
-    List<Transaksi> transaksi,
-    int totalKeluarga,
-    int rtId,
-    int iuranId,
-  ) {
+  Widget _buildMonthCard(DateTime month) {
+    final label = DateFormat('MMMM yyyy', 'id_ID').format(month);
+
+    return _card(
+      child: Row(
+        children: [
+          const Icon(Icons.calendar_month, color: Colors.blue),
+          const SizedBox(width: 10),
+          Text(
+            "Periode: $label",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKKList(List<KeluargaStatus> list) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Periode Iuran",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          "Daftar Keluarga RT",
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
+
         const SizedBox(height: 12),
 
-        ...months.map((month) {
-          final label = DateFormat('MMMM yyyy', 'id_ID').format(month);
+        ...list.map((k) {
+          return Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  k.keluarga.noKK,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
 
-          final transaksiBulan = transaksi.where((t) {
-            final tDate = t.waktuBayar;
-            if (tDate == null) return false;
+                const SizedBox(height: 6),
 
-            return tDate.year == month.year &&
-                tDate.month == month.month &&
-                t.status == StatusPembayaran.dibayar;
-          }).toList();
-
-          final jumlahPembayar = transaksiBulan.length;
-
-          final totalPendapatan = transaksiBulan.fold<int>(
-            0,
-            (sum, item) => sum + (item.jumlah ?? 0),
-          );
-
-          final progress = "$jumlahPembayar/$totalKeluarga";
-
-          return InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DetailIuranBulananPage(
-                    iuranId: iuranId,
-                    rtId: rtId,
-                    month: month,
+                Text(
+                  k.sudahBayar ? "LUNAS" : "BELUM",
+                  style: TextStyle(
+                    color: k.sudahBayar ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Progress: $progress"),
-                      Text(
-                        "Rp $totalPendapatan",
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                const SizedBox(height: 6),
+
+                if (k.sudahBayar) ...[
+                  Text("Rp ${k.nominal}"),
+                  Text(
+                    "Tanggal Bayar: ${k.waktuBayar == null ? '-' : DateFormat('dd MMMM yyyy', 'id_ID').format(k.waktuBayar!)}",
                   ),
+
+                  Text("Disetujui oleh: ${k.disetujuiOleh ?? '-'}"),
+
+                  const SizedBox(height: 10),
+
+                  if (k.imgBukti != null && k.imgBukti!.isNotEmpty)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => Dialog(
+                            child: InteractiveViewer(
+                              child: Image.network(
+                                k.imgBukti!,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Padding(
+                                  padding: EdgeInsets.all(20),
+                                  child: Text("Gagal memuat gambar"),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.image),
+                      label: const Text("Lihat Bukti"),
+                    ),
                 ],
-              ),
+              ],
             ),
           );
         }),
@@ -309,7 +312,19 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
     );
   }
 
-  Widget _buildBadge(String text, Color color) {
+  Widget _card({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _badge(String text, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -326,21 +341,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
       ),
     );
   }
-
-  List<DateTime> generateMonths(DateTime start) {
-    final now = DateTime.now();
-    final months = <DateTime>[];
-
-    var current = DateTime(start.year, start.month);
-
-    while (current.isBefore(DateTime(now.year, now.month + 1))) {
-      months.add(current);
-
-      current = DateTime(current.year, current.month + 1);
-    }
-
-    return months;
-  }
 }
 
 class _MiniStat extends StatelessWidget {
@@ -354,10 +354,7 @@ class _MiniStat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-
-        const SizedBox(height: 4),
-
+        Text(title, style: const TextStyle(fontSize: 12)),
         Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
     );
@@ -375,15 +372,10 @@ class _InfoRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 16, color: Colors.blue),
-
           const SizedBox(width: 8),
-
-          Expanded(
-            child: Text(text, softWrap: true, overflow: TextOverflow.visible),
-          ),
+          Expanded(child: Text(text)),
         ],
       ),
     );

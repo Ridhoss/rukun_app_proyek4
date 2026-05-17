@@ -17,6 +17,7 @@ class Transaksi {
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
   final Keluarga? keluarga;
+  final String? disetujuiNama;
 
   Transaksi({
     this.id,
@@ -33,6 +34,7 @@ class Transaksi {
     this.waktuDiubah,
     this.waktuDihapus,
     this.keluarga,
+    this.disetujuiNama,
   });
 
   factory Transaksi.fromJson(Map<String, dynamic> json) {
@@ -63,6 +65,7 @@ class Transaksi {
       keluarga: json['keluarga'] != null
           ? Keluarga.fromJson(json['keluarga'])
           : null,
+      disetujuiNama: json['disetujui_nama'],
     );
   }
 

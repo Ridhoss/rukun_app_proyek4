@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rukun_app_proyek4/core/navigation/route_observer.dart';
+import 'package:rukun_app_proyek4/core/route_observer.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/rt_model.dart';
 import 'package:rukun_app_proyek4/models/rw_model.dart';
