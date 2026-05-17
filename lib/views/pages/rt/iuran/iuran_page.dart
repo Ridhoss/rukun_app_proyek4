@@ -180,25 +180,25 @@ class _RtIuranPageState extends State<RtIuranPage> {
           ),
         ),
 
-        TextButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => AddIuranPage(user: widget.user),
-              ),
-            ).then((result) {
-              if (result == true) {
-                final rwId = widget.user.rw?.id;
-                if (rwId != null) {
-                  context.read<RwIuranViewModel>().fetchDashboard(rwId);
-                }
-              }
-            });
-          },
-          icon: const Icon(Icons.add),
-          label: const Text("Tambah"),
-        ),
+        // TextButton.icon(
+        //   onPressed: () {
+        //     Navigator.push(
+        //       context,
+        //       MaterialPageRoute(
+        //         builder: (_) => AddIuranPage(user: widget.user),
+        //       ),
+        //     ).then((result) {
+        //       if (result == true) {
+        //         final rwId = widget.user.rw?.id;
+        //         if (rwId != null) {
+        //           context.read<RwIuranViewModel>().fetchDashboard(rwId);
+        //         }
+        //       }
+        //     });
+        //   },
+        //   icon: const Icon(Icons.add),
+        //   label: const Text("Tambah"),
+        // ),
       ],
     );
   }
