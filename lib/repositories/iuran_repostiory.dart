@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/iuran/rw/iuran_detail_rw_model.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 
@@ -86,6 +87,27 @@ class IuranRepository {
     final List data = result['data'] ?? [];
 
     return data.map((e) => Iuran.fromJson(e)).toList();
+  }
+
+  Future<IuranRWDetail> getIuranRWDetail(int id) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.getIuranDetailWithRT(id, token),
+    );
+
+    _validateStatus(result);
+
+    final data = result['data'];
+
+    print("DATA TYPE: ${data.runtimeType}");
+    print("DATA CONTENT: $data");
+
+    if (data == null) {
+      throw Exception("Data tidak ditemukan");
+    }
+
+    return IuranRWDetail.fromJson(data);
   }
 
   Future<String> _requireToken() async {

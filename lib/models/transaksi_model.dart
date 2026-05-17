@@ -1,10 +1,11 @@
+import 'package:rukun_app_proyek4/models/keluarga_model.dart';
+
 enum StatusPembayaran { belumDibayar, diproses, dibayar, ditolak }
 
 class Transaksi {
   final int? id;
   final int iuranId;
   final int? keluargaId;
-  final int? wargaId;
   final int? jumlah;
   final DateTime? waktuBayar;
   final StatusPembayaran status;
@@ -15,12 +16,12 @@ class Transaksi {
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
+  final Keluarga? keluarga;
 
   Transaksi({
     this.id,
     required this.iuranId,
     this.keluargaId,
-    this.wargaId,
     this.jumlah,
     this.waktuBayar,
     required this.status,
@@ -31,6 +32,7 @@ class Transaksi {
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
+    this.keluarga,
   });
 
   factory Transaksi.fromJson(Map<String, dynamic> json) {
@@ -38,7 +40,6 @@ class Transaksi {
       id: json['id'],
       iuranId: json['iuran_id'],
       keluargaId: json['keluarga_id'],
-      wargaId: json['warga_id'],
       jumlah: json['jumlah'],
       waktuBayar: json['waktu_bayar'] != null
           ? DateTime.parse(json['waktu_bayar'])
@@ -59,6 +60,9 @@ class Transaksi {
       waktuDihapus: json['waktu_dihapus'] != null
           ? DateTime.parse(json['waktu_dihapus'])
           : null,
+      keluarga: json['keluarga'] != null
+          ? Keluarga.fromJson(json['keluarga'])
+          : null,
     );
   }
 
@@ -67,7 +71,6 @@ class Transaksi {
       'id': id,
       'iuran_id': iuranId,
       'keluarga_id': keluargaId,
-      'warga_id': wargaId,
       'jumlah': jumlah,
       'status': _statusToString(status),
       'img_referensi': imgRef,

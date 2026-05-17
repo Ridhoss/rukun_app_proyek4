@@ -116,9 +116,9 @@ class _AddIuranPageState extends State<AddIuranPage> {
                           v == null || v.isEmpty ? "Wajib diisi" : null,
                     ),
 
-                    if (!isKhusus) ...[
-                      const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
+                    if (selectedType != IuranType.insidentil) ...[
                       const Text(
                         "Jumlah",
                         style: TextStyle(fontWeight: FontWeight.w600),
@@ -133,10 +133,11 @@ class _AddIuranPageState extends State<AddIuranPage> {
                           border: OutlineInputBorder(),
                         ),
                         validator: (v) {
-                          if (isKhusus) return null;
                           return v == null || v.isEmpty ? "Wajib diisi" : null;
                         },
                       ),
+
+                      const SizedBox(height: 16),
                     ],
                   ],
                 ),
@@ -216,9 +217,13 @@ class _AddIuranPageState extends State<AddIuranPage> {
 
     final vm = context.read<AddIuranViewModel>();
 
+    final jumlah = selectedType == IuranType.insidentil
+        ? null
+        : int.tryParse(jumlahController.text.trim());
+
     final success = await vm.createIuran(
       nama: namaController.text.trim(),
-      jumlah: int.parse(jumlahController.text),
+      jumlah: jumlah,
       level: selectedLevel,
       rwId: widget.user.rw?.id ?? 0,
       rtId: selectedLevel == "RT" ? widget.user.rt?.id : null,

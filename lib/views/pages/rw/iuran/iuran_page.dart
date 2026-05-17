@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
@@ -207,9 +208,12 @@ class _RwIuranPageState extends State<RwIuranPage> {
 
     return GestureDetector(
       onTap: () {
+        final id = item.id;
+        if (id == null) return;
+
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => IuranRWDetailPage()),
+          MaterialPageRoute(builder: (_) => IuranRWDetailPage(id: id)),
         );
       },
       child: Container(
@@ -266,16 +270,40 @@ class _RwIuranPageState extends State<RwIuranPage> {
 
             const SizedBox(height: 12),
 
-            Text(
-              "Rp $jumlah",
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+            if (item.tipe != IuranType.insidentil)
+              Text(
+                "Biaya Iuran: Rp $jumlah",
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
 
             const SizedBox(height: 10),
 
-            const Text(
-              "Iuran aktif",
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+            Text(
+              "Dibuat: ${item.waktuDibuat != null ? DateFormat('dd MMMM yyyy', 'id_ID').format(item.waktuDibuat!) : '-'}",
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              "Terkumpul: Rp.${item.totalTerkumpul ?? 0}",
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.green,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Chip(
+              label: Text(
+                (item.isActive ?? false) ? 'Iuran Aktif' : 'Iuran Non-Aktif',
+              ),
+              labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+              backgroundColor: (item.isActive ?? false)
+                  ? Colors.green
+                  : Colors.red,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
             ),
           ],
         ),

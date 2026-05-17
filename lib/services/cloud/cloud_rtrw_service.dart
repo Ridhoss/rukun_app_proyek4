@@ -12,4 +12,13 @@ class CloudRtRwService {
 
     return response.data;
   }
+
+  Future<Map<String, dynamic>> getRtId(String token, int idRt) async {
+    final response = await _dio.get(
+      '/rukun-tetangga/$idRt',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+
+    return response.data;
+  }
 }
