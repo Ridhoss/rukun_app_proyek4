@@ -48,7 +48,7 @@ class IuranRepository {
     return Iuran.fromJson(data);
   }
 
-  Future<Iuran?> createIuran(Iuran iuran) async {
+  Future<void> createIuran(Iuran iuran) async {
     final token = await _requireToken();
 
     final result = await _safeCall(
@@ -56,15 +56,9 @@ class IuranRepository {
     );
 
     _validateStatus(result);
-
-    final data = result['data'];
-
-    if (data == null) return null;
-
-    return Iuran.fromJson(data);
   }
 
-  Future<Iuran?> updateIuran(int id, Iuran iuran) async {
+  Future<void> updateIuran(int id, Iuran iuran) async {
     final token = await _requireToken();
 
     final result = await _safeCall(
@@ -72,12 +66,6 @@ class IuranRepository {
     );
 
     _validateStatus(result);
-
-    final data = result['data'];
-
-    if (data == null) return null;
-
-    return Iuran.fromJson(data);
   }
 
   Future<void> deleteIuran(int id) async {
