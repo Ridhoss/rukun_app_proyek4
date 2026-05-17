@@ -27,8 +27,7 @@ class RWPendudukViewmodel extends ChangeNotifier {
       rtList = rw?.rtList ?? [];
     } catch (e, stack) {
       errorMessage = e.toString();
-
-      debugPrint("❌ VIEWMODEL ERROR:");
+      
       debugPrint(e.toString());
       debugPrintStack(stackTrace: stack);
     } finally {

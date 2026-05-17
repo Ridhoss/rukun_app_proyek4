@@ -15,13 +15,15 @@ class AuthRepository {
 
     _validateStatus(result);
 
-    final auth = AuthResponse.fromJson(result['data']);
-    await local.saveToken(auth.token);
+    final token = result['data']['token'];
 
-    final me = await service.getMe(auth.token);
+    await local.saveToken(token);
+
+    final me = await service.getMe(token);
+
     final user = User.fromJson(me['data']);
 
-    return AuthResponse(token: auth.token, user: user);
+    return AuthResponse(token: token, user: user);
   }
 
   Future<void> register({

@@ -4,7 +4,7 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 // pages RW
 import 'package:rukun_app_proyek4/views/pages/rw/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/profile_page.dart';
 

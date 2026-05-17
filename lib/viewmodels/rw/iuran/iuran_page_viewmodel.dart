@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 
+enum IuranFilter { semua, rutin, khusus }
+
 class RwIuranViewModel extends ChangeNotifier {
   final IuranRepository repository;
 
@@ -11,9 +13,31 @@ class RwIuranViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  IuranFilter _selectedFilter = IuranFilter.semua;
+
   List<Iuran> get iurans => _iurans;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  IuranFilter get selectedFilter => _selectedFilter;
+
+  List<Iuran> get filteredIurans {
+    switch (_selectedFilter) {
+      case IuranFilter.semua:
+        return _iurans;
+
+      case IuranFilter.rutin:
+        return _iurans.where((e) => e.tipe == IuranType.reguler).toList();
+
+      case IuranFilter.khusus:
+        return _iurans.where((e) => e.tipe == IuranType.insidentil).toList();
+    }
+  }
+
+  void setFilter(IuranFilter filter) {
+    _selectedFilter = filter;
+    notifyListeners();
+  }
 
   Future<void> fetchDashboard(int rwId) async {
     _isLoading = true;

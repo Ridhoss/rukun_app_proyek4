@@ -19,9 +19,10 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/hive_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/iuran/add_iuran_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/detail_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/iuran/iuran_page_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/penduduk_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rw/penduduk/penduduk_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
@@ -120,6 +121,11 @@ void main() async {
         ChangeNotifierProvider(
           create: (context) =>
               RwIuranViewModel(repository: context.read<IuranRepository>()),
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) =>
+              AddIuranViewModel(context.read<IuranRepository>()),
         ),
       ],
       child: const MyApp(),

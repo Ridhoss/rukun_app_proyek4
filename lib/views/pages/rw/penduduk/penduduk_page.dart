@@ -4,7 +4,7 @@ import 'package:rukun_app_proyek4/models/rt_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/penduduk_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rw/penduduk/penduduk_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/penduduk/detail_rt_page.dart';
 
 class RWPendudukPage extends StatefulWidget {

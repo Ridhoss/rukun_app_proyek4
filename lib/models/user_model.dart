@@ -1,3 +1,4 @@
+import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/pengurus_model.dart';
 import 'package:rukun_app_proyek4/models/rt_model.dart';
 import 'package:rukun_app_proyek4/models/rw_model.dart';
@@ -8,9 +9,10 @@ class User {
   final int wargaId;
   final bool? isAdmin;
   final Warga? warga;
-  final Pengurus? pengurus;
+  final Keluarga? keluarga;
   final RtModel? rt;
   final RwModel? rw;
+  final Pengurus? pengurus;
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
@@ -20,9 +22,10 @@ class User {
     required this.wargaId,
     this.isAdmin,
     this.warga,
-    this.pengurus,
+    this.keluarga,
     this.rt,
     this.rw,
+    this.pengurus,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
@@ -34,12 +37,14 @@ class User {
       wargaId: json['warga_id'],
       isAdmin: json['is_admin'],
       warga: json['warga'] != null ? Warga.fromJson(json['warga']) : null,
-
-      pengurus: json['pengurus'] != null
-          ? Pengurus.fromJson(json['pengurus'])
+      keluarga: json['keluarga'] != null
+          ? Keluarga.fromJson(json['keluarga'])
           : null,
       rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
       rw: json['rw'] != null ? RwModel.fromJson(json['rw']) : null,
+      pengurus: json['pengurus'] != null
+          ? Pengurus.fromJson(json['pengurus'])
+          : null,
 
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
@@ -59,9 +64,10 @@ class User {
       'warga_id': wargaId,
       'is_admin': isAdmin,
       'warga': warga?.toJson(),
-      'pengurus': pengurus?.toJson(),
+      'keluarga': keluarga?.toJson(),
       'rt': rt?.toJson(),
       'rw': rw?.toJson(),
+      'pengurus': pengurus?.toJson(),
     };
   }
 }
