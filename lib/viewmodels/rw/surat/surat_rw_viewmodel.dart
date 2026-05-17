@@ -1,80 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
-import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
+import 'package:rukun_app_proyek4/models/warga_model.dart';
 
-enum SuratFilterStatus { semua, diajukan, disetujui, ditolak, selesai }
+enum SuratRwFilterStatus { semua, disetujui, selesai }
 
 class SuratRwViewModel extends ChangeNotifier {
-  final SuratRepository repository;
-
-  SuratRwViewModel(this.repository);
 
   bool isLoading = false;
-
-  List<PengajuanSurat> _allData = [];
-
   String searchQuery = "";
+  SuratRwFilterStatus selectedStatus = SuratRwFilterStatus.semua;
 
-  SuratFilterStatus selectedStatus = SuratFilterStatus.semua;
-
-  final Map<int, String> wargaDummy = {
-    1: "Budi Santoso",
-    2: "Aira Putri",
-    3: "Ali Putra",
-  };
-
-  String getNamaWarga(int wargaId) {
-    return wargaDummy[wargaId] ?? "Warga";
-  }
+  final List<PengajuanSurat> _allData = [];
+  final Map<int, Warga> _wargaMap = {};
 
   List<PengajuanSurat> get data {
-    List<PengajuanSurat> result = [..._allData];
+    List<PengajuanSurat> result = _filterByStatus(_allData);
 
-    switch (selectedStatus) {
-      case SuratFilterStatus.diajukan:
-        result = result.where((e) => e.status == SuratStatus.diajukan).toList();
-        break;
-
-      case SuratFilterStatus.disetujui:
-        result = result
-            .where((e) => e.status == SuratStatus.disetujui)
-            .toList();
-        break;
-
-      case SuratFilterStatus.ditolak:
-        result = result.where((e) => e.status == SuratStatus.ditolak).toList();
-        break;
-
-      case SuratFilterStatus.selesai:
-        result = result.where((e) => e.status == SuratStatus.selesai).toList();
-        break;
-
-      case SuratFilterStatus.semua:
-        break;
-    }
-
-    if (searchQuery.isNotEmpty) {
-      result = result.where((e) {
-        final query = searchQuery.toLowerCase();
-
-        return e.keperluan.toLowerCase().contains(query) ||
-            e.keterangan.toLowerCase().contains(query);
-      }).toList();
-    }
+    result = _filterBySearch(result);
 
     return result;
   }
 
-  int get totalDiajukan =>
-      _allData.where((e) => e.status == SuratStatus.diajukan).length;
-
-  int get totalDitolak =>
-      _allData.where((e) => e.status == SuratStatus.ditolak).length;
+  int get totalDisetujui =>
+      _allData.where((e) => e.status == SuratStatus.disetujui).length;
 
   int get totalSelesai =>
       _allData.where((e) => e.status == SuratStatus.selesai).length;
 
   int get totalSemua => _allData.length;
+
+  List<PengajuanSurat> _filterByStatus(List<PengajuanSurat> source) {
+    switch (selectedStatus) {
+      case SuratRwFilterStatus.disetujui:
+        return source.where((e) => e.status == SuratStatus.disetujui).toList();
+
+      case SuratRwFilterStatus.selesai:
+        return source.where((e) => e.status == SuratStatus.selesai).toList();
+
+      case SuratRwFilterStatus.semua:
+        return source;
+    }
+  }
+
+  List<PengajuanSurat> _filterBySearch(List<PengajuanSurat> source) {
+    if (searchQuery.isEmpty) {
+      return source;
+    }
+
+    final query = searchQuery.toLowerCase();
+
+    return source.where((e) {
+      final namaWarga = getNamaWarga(e.wargaId ?? 0).toLowerCase();
+
+      return e.keperluan.toLowerCase().contains(query) ||
+          e.keterangan.toLowerCase().contains(query) ||
+          namaWarga.contains(query);
+    }).toList();
+  }
+
+
+  Warga? getWarga(int wargaId) {
+    return _wargaMap[wargaId];
+  }
+
+  String getNamaWarga(int wargaId) {
+    return _wargaMap[wargaId]?.nama ?? "Warga";
+  }
+
+  String getNikWarga(int wargaId) {
+    return _wargaMap[wargaId]?.nik ?? "-";
+  }
+
+  String getAvatarInitial(int wargaId) {
+    final nama = getNamaWarga(wargaId);
+
+    if (nama.isEmpty) {
+      return "?";
+    }
+
+    return nama[0].toUpperCase();
+  }
+
 
   Future<void> fetchSurat() async {
     try {
@@ -82,51 +88,75 @@ class SuratRwViewModel extends ChangeNotifier {
 
       notifyListeners();
 
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 700));
 
-      _allData = [
-        PengajuanSurat(
-          id: 1,
-          wargaId: 1,
-          keperluan: "Surat Domisili",
-          keterangan: "Keperluan kerja",
-          status: SuratStatus.diajukan,
-          docRef:
-              "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        ),
+      _loadDummyWarga();
 
-        PengajuanSurat(
-          id: 2,
-          wargaId: 2,
-          keperluan: "Surat Pindah",
-          keterangan: "Pindah luar kota",
-          status: SuratStatus.selesai,
-          docRef:
-              "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        ),
-
-        PengajuanSurat(
-          id: 3,
-          wargaId: 3,
-          keperluan: "Surat Usaha",
-          keterangan: "UMKM",
-          status: SuratStatus.ditolak,
-          docRef:
-              "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        ),
-      ];
-
-      // _allData =
-      //    await repository.getAllSurat();
+      _loadDummySurat();
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("ERROR FETCH SURAT RW: $e");
     } finally {
       isLoading = false;
+
       notifyListeners();
     }
   }
 
-  void setStatus(SuratFilterStatus status) {
+  void _loadDummyWarga() {
+    _wargaMap.clear();
+
+    final warga1 = Warga(id: 1, nik: "3201010101010001", nama: "Budi Santoso");
+
+    final warga2 = Warga(id: 2, nik: "3201010101010002", nama: "Aira Putri");
+
+    final warga3 = Warga(
+      id: 3,
+      nik: "3201010101010003",
+      nama: "Rizky Ramadhan",
+    );
+
+    _wargaMap[1] = warga1;
+    _wargaMap[2] = warga2;
+    _wargaMap[3] = warga3;
+  }
+
+  void _loadDummySurat() {
+    _allData.clear();
+
+    _allData.addAll([
+      PengajuanSurat(
+        id: 1,
+        wargaId: 1,
+        keperluan: "Surat Domisili",
+        keterangan: "Digunakan untuk keperluan kerja",
+        status: SuratStatus.disetujui,
+        docRef: "https://example.com/surat-domisili.pdf",
+        waktuDibuat: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+
+      PengajuanSurat(
+        id: 2,
+        wargaId: 2,
+        keperluan: "Surat Pengantar Nikah",
+        keterangan: "Digunakan untuk syarat KUA",
+        status: SuratStatus.selesai,
+        docRef: "https://bckendari.id/assets/web/download/dummy1.pdf",
+        waktuDibuat: DateTime.now().subtract(const Duration(days: 3)),
+      ),
+
+      PengajuanSurat(
+        id: 3,
+        wargaId: 3,
+        keperluan: "Surat Keterangan Usaha",
+        keterangan: "Untuk pengajuan UMKM",
+        status: SuratStatus.disetujui,
+        docRef: "https://bckendari.id/assets/web/download/dummy1.pdf",
+        waktuDibuat: DateTime.now().subtract(const Duration(days: 2)),
+      ),
+    ]);
+  }
+
+  void setStatus(SuratRwFilterStatus status) {
     selectedStatus = status;
 
     notifyListeners();
@@ -138,29 +168,25 @@ class SuratRwViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> rejectSurat({required int id, required String reason}) async {
-    final index = _allData.indexWhere((e) => e.id == id);
 
-    if (index != -1) {
-      _allData[index] = _allData[index].copyWith(status: SuratStatus.ditolak);
-
-      notifyListeners();
-    }
-  }
-
-  Future<void> approveSurat({
+  Future<void> selesaiSurat({
     required int id,
-    required String signedDocPath,
+    required String signedDocument,
   }) async {
     final index = _allData.indexWhere((e) => e.id == id);
 
-    if (index != -1) {
-      _allData[index] = _allData[index].copyWith(
-        status: SuratStatus.selesai,
-        docRef: signedDocPath,
-      );
+    if (index == -1) return;
 
-      notifyListeners();
-    }
+    _allData[index] = _allData[index].copyWith(
+      status: SuratStatus.selesai,
+
+      docRef: signedDocument,
+    );
+
+    notifyListeners();
+  }
+
+  Future<void> refresh() async {
+    await fetchSurat();
   }
 }

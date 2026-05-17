@@ -26,9 +26,9 @@ import 'package:rukun_app_proyek4/viewmodels/penduduk/detail_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/iuran/iuran_page_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/penduduk/penduduk_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rw/surat/surat_rw_viewmodel.dart';
 // import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
 // import 'package:rukun_app_proyek4/viewmodels/warga/profile/kelola_profile_viewmodel.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -130,6 +130,8 @@ void main() async {
           create: (context) =>
               AddIuranViewModel(context.read<IuranRepository>()),
         ),
+
+        ChangeNotifierProvider(create: (_) => SuratRwViewModel()),
       ],
       child: const MyApp(),
     ),
