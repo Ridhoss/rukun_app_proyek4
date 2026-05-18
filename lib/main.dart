@@ -1,3 +1,5 @@
+import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:rukun_app_proyek4/core/route_observer.dart';
@@ -27,8 +29,9 @@ import 'package:rukun_app_proyek4/viewmodels/rw/iuran/detail_iuran_rw_viewmodel.
 import 'package:rukun_app_proyek4/viewmodels/rw/iuran/iuran_page_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/penduduk/penduduk_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
-import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/viewmodels/rw/surat/surat_rw_viewmodel.dart';
+// import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
+// import 'package:rukun_app_proyek4/viewmodels/warga/profile/kelola_profile_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -150,6 +153,8 @@ void main() async {
             kkRepository: context.read<KKRepository>(),
           ),
         ),
+
+        ChangeNotifierProvider(create: (_) => SuratRwViewModel()),
       ],
       child: const MyApp(),
     ),

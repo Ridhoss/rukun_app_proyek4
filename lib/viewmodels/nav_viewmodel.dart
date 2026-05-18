@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 
 // pages RW
-import 'package:rukun_app_proyek4/views/pages/rw/home_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/dashboard/dashboard_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/surat_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/profile_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/profile/rw_profile_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/kegiatan_page.dart';
 
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
@@ -31,38 +32,69 @@ class NavItem {
 
 class NavViewModel {
   List<NavItem> getNavItems(User user) {
+    // RW
+    if (user.pengurus?.level == "RW") {
+      return [
+        NavItem(icon: Icons.home, label: "Home", page: const RwDashboard()),
+        NavItem(
+          icon: Icons.groups,
+          label: "Penduduk",
+          page: RWPendudukPage(user: user),
+        ),
+        NavItem(
+          icon: Icons.payments,
+          label: "Iuran",
+          page: RwIuranPage(user: user),
+        ),
+        NavItem(
+          icon: Icons.description,
+          label: "Surat",
+          page: const RwSuratPage(),
+        ),
+        NavItem(
+          icon: Icons.person,
+          label: "Profile",
+          page: const RwProfilePage(),
+        ),
+      ];
+    }
 
-// RW
-if (user.pengurus?.level == "RW") {
-  return [
-    NavItem(icon: Icons.home, label: "Home", page: const RwHomePage()),
-    NavItem(icon: Icons.groups, label: "Penduduk", page: RWPendudukPage(user: user,)),
-    NavItem(icon: Icons.payments, label: "Iuran", page: RwIuranPage(user: user,)),
-    NavItem(icon: Icons.description, label: "Surat", page: const RwSuratPage()),
-    NavItem(icon: Icons.person, label: "Profile", page: const RwProfilePage()),
-  ];
-}
-
-// RT
-if (user.pengurus?.level == "RT") {
-  return [
-    NavItem(icon: Icons.home, label: "Home", page: const RtHomePage()),
-    NavItem(icon: Icons.groups, label: "Penduduk", page: RtPendudukPage(user: user)),
-    NavItem(icon: Icons.payments, label: "Iuran", page:  RtIuranPage(user: user)),
-    NavItem(icon: Icons.description, label: "Surat", page: const RtSuratPage()),
-    NavItem(icon: Icons.person, label: "Profile", page: const RtProfilePage()),
-  ];
-}
+    // RT
+    if (user.pengurus?.level == "RT") {
+      return [
+        NavItem(icon: Icons.home, label: "Home", page: const RtHomePage()),
+        NavItem(
+          icon: Icons.groups,
+          label: "Penduduk",
+          page: RtPendudukPage(user: user),
+        ),
+        NavItem(
+          icon: Icons.payments,
+          label: "Iuran",
+          page: RtIuranPage(user: user),
+        ),
+        NavItem(
+          icon: Icons.description,
+          label: "Surat",
+          page: const RtSuratPage(),
+        ),
+        NavItem(
+          icon: Icons.person,
+          label: "Profile",
+          page: const RtProfilePage(),
+        ),
+      ];
+    }
 
     // Warga
     return [
       NavItem(icon: Icons.home, label: "Home", page: WargaHomePage()),
+      NavItem(icon: Icons.upload_file, label: "Upload", page: WargaIuranPage()),
       NavItem(
-        icon: Icons.upload_file,
-        label: "Upload",
-        page: WargaIuranPage(),
+        icon: Icons.description,
+        label: "Surat",
+        page: PengajuanSuratPage(),
       ),
-      NavItem(icon: Icons.description, label: "Surat", page: PengajuanSuratPage()),
       NavItem(icon: Icons.person, label: "Profile", page: WargaProfilePage()),
     ];
   }

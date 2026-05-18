@@ -55,7 +55,7 @@ class _NotificationCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: ColorsUtils.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color, width: 1.5),
         ),
