@@ -6,19 +6,18 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/iuran/iuran_page_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/iuran/crud/add_iuran_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/iuran/detail_iuran_rw_page.dart';
+import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_rt_page.dart';
 
-class RwIuranPage extends StatefulWidget {
+class RtIuranPage extends StatefulWidget {
   final User user;
 
-  const RwIuranPage({super.key, required this.user});
+  const RtIuranPage({super.key, required this.user});
 
   @override
-  State<RwIuranPage> createState() => _RwIuranPageState();
+  State<RtIuranPage> createState() => _RtIuranPageState();
 }
 
-class _RwIuranPageState extends State<RwIuranPage> {
+class _RtIuranPageState extends State<RtIuranPage> {
   @override
   void initState() {
     super.initState();
@@ -44,8 +43,8 @@ class _RwIuranPageState extends State<RwIuranPage> {
       appBar: AppBarUtils.buildAppBar(
         context: context,
         name: "",
-        title: "Dashboard Iuran RW",
-        subtitle: "Daftar Iuran dalam wilayah RW",
+        title: "Dashboard Iuran RT",
+        subtitle: "Daftar Iuran dalam wilayah RW dan RT",
         showName: false,
         showAvatar: false,
         showGreeting: false,
@@ -180,25 +179,25 @@ class _RwIuranPageState extends State<RwIuranPage> {
           ),
         ),
 
-        TextButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => AddIuranPage(user: widget.user),
-              ),
-            ).then((result) {
-              if (result == true) {
-                final rwId = widget.user.rw?.id;
-                if (rwId != null) {
-                  context.read<RwIuranViewModel>().fetchDashboard(rwId);
-                }
-              }
-            });
-          },
-          icon: const Icon(Icons.add),
-          label: const Text("Tambah"),
-        ),
+        // TextButton.icon(
+        //   onPressed: () {
+        //     Navigator.push(
+        //       context,
+        //       MaterialPageRoute(
+        //         builder: (_) => AddIuranPage(user: widget.user),
+        //       ),
+        //     ).then((result) {
+        //       if (result == true) {
+        //         final rwId = widget.user.rw?.id;
+        //         if (rwId != null) {
+        //           context.read<RwIuranViewModel>().fetchDashboard(rwId);
+        //         }
+        //       }
+        //     });
+        //   },
+        //   icon: const Icon(Icons.add),
+        //   label: const Text("Tambah"),
+        // ),
       ],
     );
   }
@@ -211,9 +210,15 @@ class _RwIuranPageState extends State<RwIuranPage> {
         final id = item.id;
         if (id == null) return;
 
+        final rtId = widget.user.rt?.id;
+        if (rtId == null) return;
+
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => IuranRWDetailPage(id: id, user: widget.user,)),
+          MaterialPageRoute(
+            builder: (_) =>
+                IuranRTDetailPage(iuranId: id, rtId: rtId, user: widget.user),
+          ),
         );
       },
       child: Container(

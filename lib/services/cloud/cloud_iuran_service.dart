@@ -70,4 +70,43 @@ class CloudIuranService {
 
     return response.data;
   }
+
+  Future<Map<String, dynamic>> getIuranDetailWithRT(
+    int idIuran,
+    String token,
+  ) async {
+    final response = await _dio.get(
+      '/iuran/$idIuran/detail',
+      options: _authHeader(token),
+    );
+
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> updateStatusTransaksi(
+    int idTrans,
+    Map<String, dynamic> data,
+    String token,
+  ) async {
+    final response = await _dio.put(
+      '/transaksi/$idTrans/status',
+      data: data,
+      options: _authHeader(token),
+    );
+
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> createTransaksi(
+    Map<String, dynamic> data,
+    String token,
+  ) async {
+    final response = await _dio.post(
+      '/transaksi',
+      data: data,
+      options: _authHeader(token),
+    );
+
+    return response.data;
+  }
 }

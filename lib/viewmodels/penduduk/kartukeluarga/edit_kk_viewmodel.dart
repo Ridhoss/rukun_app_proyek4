@@ -51,7 +51,7 @@ class EditKKViewModel extends ChangeNotifier {
 
       kk = result;
 
-      noKK = result.noKK ?? '';
+      noKK = result.noKK;
       alamat = result.alamat ?? '';
       kodePos = result.kodePos ?? '';
 

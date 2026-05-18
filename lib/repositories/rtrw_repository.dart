@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:rukun_app_proyek4/models/rt_model.dart';
 import 'package:rukun_app_proyek4/models/rw_model.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_rtrw_service.dart';
@@ -21,6 +22,20 @@ class RTRWRepository {
     if (data == null) return null;
 
     return RwModel.fromJson(data);
+  }
+
+  Future<RtModel?> getRTById(int rtId) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(() => service.getRtId(token, rtId));
+
+    _validateStatus(result);
+
+    final data = result['data'];
+
+    if (data == null) return null;
+
+    return RtModel.fromJson(data);
   }
 
   Future<String> _requireToken() async {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
@@ -11,8 +12,9 @@ import 'package:rukun_app_proyek4/views/pages/warga/iuran/warga_upload_iuran_pag
 
 class DetailIuranPage extends StatefulWidget {
   final IuranSaya item;
+  final User user;
 
-  const DetailIuranPage({super.key, required this.item});
+  const DetailIuranPage({super.key, required this.item, required this.user});
 
   @override
   State<DetailIuranPage> createState() => _DetailIuranPageState();
@@ -58,7 +60,11 @@ class _DetailIuranPageState extends State<DetailIuranPage> {
                 ...history.map(
                   (data) => Padding(
                     padding: const EdgeInsets.only(bottom: 14),
-                    child: _MonthlyIuranCard(item: widget.item, data: data),
+                    child: _MonthlyIuranCard(
+                      item: widget.item,
+                      data: data,
+                      user: widget.user,
+                    ),
                   ),
                 ),
               ],
@@ -181,8 +187,13 @@ class _SectionTitle extends StatelessWidget {
 class _MonthlyIuranCard extends StatelessWidget {
   final IuranSaya item;
   final IuranItem data;
+  final User user;
 
-  const _MonthlyIuranCard({required this.item, required this.data});
+  const _MonthlyIuranCard({
+    required this.item,
+    required this.data,
+    required this.user,
+  });
 
   bool _canUpload(StatusPembayaran status) {
     return status == StatusPembayaran.belumDibayar ||
@@ -246,7 +257,7 @@ class _MonthlyIuranCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => _goToUpload(context),
+                onPressed: () => _goToUpload(context, user, data),
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   backgroundColor: data.status == StatusPembayaran.ditolak
@@ -277,11 +288,22 @@ class _MonthlyIuranCard extends StatelessWidget {
     );
   }
 
-  void _goToUpload(BuildContext context) {
-    Navigator.push(
+  Future<void> _goToUpload(
+    BuildContext context,
+    User user,
+    IuranItem data,
+  ) async {
+    final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => WargaUploadIuranPage(item: item)),
+      MaterialPageRoute(
+        builder: (_) =>
+            WargaUploadIuranPage(item: item, user: user, selectedItem: data),
+      ),
     );
+
+    if (result == true) {
+      Navigator.pop(context, true);
+    }
   }
 }
 

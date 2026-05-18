@@ -5,13 +5,13 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/dashboard/dashboard_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/profile/rw_profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/kegiatan_page.dart';
 
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/profile_page.dart';
 
@@ -51,9 +51,9 @@ class NavViewModel {
           page: const RwSuratPage(),
         ),
         NavItem(
-          icon: Icons.event_available,
-          label: "Kegiatan",
-          page: const RwKegiatanPage(),
+          icon: Icons.person,
+          label: "Profile",
+          page: const RwProfilePage(),
         ),
       ];
     }
@@ -70,7 +70,7 @@ class NavViewModel {
         NavItem(
           icon: Icons.payments,
           label: "Iuran",
-          page: const RtIuranPage(),
+          page: RtIuranPage(user: user),
         ),
         NavItem(
           icon: Icons.description,
@@ -87,8 +87,16 @@ class NavViewModel {
 
     // Warga
     return [
-      NavItem(icon: Icons.home, label: "Home", page: WargaHomePage()),
-      NavItem(icon: Icons.upload_file, label: "Upload", page: WargaIuranPage()),
+      NavItem(
+        icon: Icons.home,
+        label: "Home",
+        page: WargaHomePage(user: user),
+      ),
+      NavItem(
+        icon: Icons.upload_file,
+        label: "Upload",
+        page: WargaIuranPage(user: user),
+      ),
       NavItem(
         icon: Icons.description,
         label: "Surat",

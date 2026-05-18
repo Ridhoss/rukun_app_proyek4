@@ -50,7 +50,7 @@ class IuranwargaViewmodel extends ChangeNotifier {
     return _items.where((item) {
       if (item.iuran.tipe != selectedType) return false;
 
-      final trx = item.transaksiTerbaru;
+      final trx = getLatestTransaksi(item);
 
       switch (selectedStatus) {
         case FilterStatus.semua:
@@ -101,6 +101,30 @@ class IuranwargaViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Transaksi? getLatestTransaksi(IuranSaya item) {
+    if (item.transaksi.isEmpty) return null;
+
+    Transaksi? latest;
+
+    for (final t in item.transaksi) {
+      final tanggal = t.waktuBayar ?? t.waktuDibuat;
+      if (tanggal == null) continue;
+
+      if (latest == null) {
+        latest = t;
+      } else {
+        final latestDate = latest.waktuBayar ?? latest.waktuDibuat;
+        if (latestDate == null) continue;
+
+        if (tanggal.isAfter(latestDate)) {
+          latest = t;
+        }
+      }
+    }
+
+    return latest;
+  }
+
   List<IuranItem> generateHistory(IuranSaya item) {
     if (item.iuran.tipe == IuranType.insidentil) {
       return [
@@ -115,7 +139,9 @@ class IuranwargaViewmodel extends ChangeNotifier {
       ];
     }
 
-    final start = item.iuran.waktuDibuat ?? DateTime.now();
+    final start =
+        item.iuran.waktuDibuat ??
+        DateTime(DateTime.now().year, DateTime.now().month);
     final now = DateTime.now();
 
     final List<IuranItem> result = [];
@@ -176,5 +202,10 @@ class IuranwargaViewmodel extends ChangeNotifier {
     return adaBelumBayar
         ? StatusPembayaran.belumDibayar
         : StatusPembayaran.dibayar;
+  }
+
+  Future<void> refresh() async {
+    await loadIuranSaya();
+    notifyListeners();
   }
 }

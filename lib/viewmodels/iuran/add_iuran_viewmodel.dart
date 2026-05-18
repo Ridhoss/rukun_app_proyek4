@@ -17,7 +17,7 @@ class AddIuranViewModel extends ChangeNotifier {
 
   Future<bool> createIuran({
     required String nama,
-    required int jumlah,
+    int? jumlah,
     required String level,
     required int rwId,
     int? rtId,
@@ -36,6 +36,7 @@ class AddIuranViewModel extends ChangeNotifier {
         rwId: rwId,
         rtId: rtId,
         tipe: tipe,
+        isActive: true
       );
 
       await repository.createIuran(iuran);

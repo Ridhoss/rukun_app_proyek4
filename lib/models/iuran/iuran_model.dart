@@ -1,3 +1,5 @@
+import 'package:rukun_app_proyek4/models/transaksi_model.dart';
+
 enum IuranLevel { rt, rw }
 
 enum IuranType { reguler, insidentil }
@@ -10,9 +12,12 @@ class Iuran {
   final int? rtId;
   final int? rwId;
   final IuranType tipe;
+  final bool? isActive;
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
+  final int? totalTerkumpul;
+  final List<Transaksi>? transaksi;
 
   Iuran({
     this.id,
@@ -22,28 +27,40 @@ class Iuran {
     this.rtId,
     this.rwId,
     required this.tipe,
+    this.isActive,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
+    this.totalTerkumpul,
+    this.transaksi,
   });
 
   factory Iuran.fromJson(Map<String, dynamic> json) {
     return Iuran(
       id: json['id'],
-      nama: json['nama'],
-      jumlah: json['jumlah'],
+      nama: json['nama']?.toString() ?? '',
+      jumlah: json['jumlah'] != null
+          ? int.tryParse(json['jumlah'].toString())
+          : null,
       level: _level(json['level']),
       rtId: json['rt_id'],
       rwId: json['rw_id'],
       tipe: _type(json['tipe']),
+      isActive: json['is_active'],
       waktuDibuat: json['waktu_dibuat'] != null
-          ? DateTime.parse(json['waktu_dibuat'])
+          ? DateTime.tryParse(json['waktu_dibuat'].toString())
           : null,
       waktuDiubah: json['waktu_diubah'] != null
-          ? DateTime.parse(json['waktu_diubah'])
+          ? DateTime.tryParse(json['waktu_diubah'].toString())
           : null,
       waktuDihapus: json['waktu_dihapus'] != null
-          ? DateTime.parse(json['waktu_dihapus'])
+          ? DateTime.tryParse(json['waktu_dihapus'].toString())
+          : null,
+      totalTerkumpul: json['total_terkumpul'],
+      transaksi: json['transaksi'] != null
+          ? (json['transaksi'] as List)
+                .map((e) => Transaksi.fromJson(e))
+                .toList()
           : null,
     );
   }
@@ -56,6 +73,7 @@ class Iuran {
       'rt_id': rtId,
       'rw_id': rwId,
       'tipe': tipe.name,
+      'is_active': isActive,
     };
 
     if (id != null) {
@@ -65,9 +83,15 @@ class Iuran {
     return data;
   }
 
-  static IuranLevel _level(String v) =>
-      v == "RT" ? IuranLevel.rt : IuranLevel.rw;
+  static IuranLevel _level(dynamic v) {
+    final value = v?.toString().toUpperCase();
+    if (value == "RT") return IuranLevel.rt;
+    return IuranLevel.rw;
+  }
 
-  static IuranType _type(String v) =>
-      v == "reguler" ? IuranType.reguler : IuranType.insidentil;
+  static IuranType _type(dynamic v) {
+    final value = v?.toString().toLowerCase();
+    if (value == "reguler") return IuranType.reguler;
+    return IuranType.insidentil;
+  }
 }
