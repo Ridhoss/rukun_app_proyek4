@@ -154,9 +154,10 @@ void main() async {
           ),
         ),
 
-        // ChangeNotifierProvider(
-        //   create: (_) => SuratRwViewModel(WargaRepository()),
-        // ),
+        ChangeNotifierProvider(
+          create: (context) =>
+              SuratRwViewModel(context.read<WargaRepository>()),
+        ),
       ],
       child: const MyApp(),
     ),
