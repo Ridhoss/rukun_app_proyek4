@@ -18,17 +18,25 @@ class KegiatanViewmodel extends ChangeNotifier {
 
       case FilterKegiatanStatus.berlangsung:
         return _all
-            .where((e) => getUiStatus(e).label == "Berlangsung")
+            .where(
+              (e) => getUiStatus(e).type == FilterKegiatanStatus.berlangsung,
+            )
             .toList();
 
       case FilterKegiatanStatus.segera:
-        return _all.where((e) => getUiStatus(e).label == "Segera").toList();
+        return _all
+            .where((e) => getUiStatus(e).type == FilterKegiatanStatus.segera)
+            .toList();
 
       case FilterKegiatanStatus.selesai:
-        return _all.where((e) => getUiStatus(e).label == "Selesai").toList();
+        return _all
+            .where((e) => getUiStatus(e).type == FilterKegiatanStatus.selesai)
+            .toList();
 
       case FilterKegiatanStatus.dibatalkan:
-        return _all.where((e) => getUiStatus(e).label == "Dibatalkan").toList();
+        return _all
+            .where((e) => getUiStatus(e).type == FilterKegiatanStatus.dibatalkan)
+            .toList();
     }
   }
 
@@ -46,11 +54,16 @@ class KegiatanViewmodel extends ChangeNotifier {
       return const KegiatanUiStatus(
         label: "Dibatalkan",
         color: ColorsUtils.red,
+        type: FilterKegiatanStatus.dibatalkan,
       );
     }
 
     if (item.status == KegiatanStatus.selesai) {
-      return const KegiatanUiStatus(label: "Selesai", color: ColorsUtils.g100);
+      return const KegiatanUiStatus(
+        label: "Selesai",
+        color: ColorsUtils.g100,
+        type: FilterKegiatanStatus.selesai,
+      );
     }
 
     final isBerlangsung =
@@ -60,16 +73,25 @@ class KegiatanViewmodel extends ChangeNotifier {
       return const KegiatanUiStatus(
         label: "Berlangsung",
         color: ColorsUtils.b200,
+        type: FilterKegiatanStatus.berlangsung,
       );
     }
 
     final isSegera = now.isBefore(item.tanggalMulai);
 
     if (isSegera) {
-      return const KegiatanUiStatus(label: "Segera", color: ColorsUtils.o100);
+      return const KegiatanUiStatus(
+        label: "Segera",
+        color: ColorsUtils.o100,
+        type: FilterKegiatanStatus.segera,
+      );
     }
 
-    return const KegiatanUiStatus(label: "Selesai", color: ColorsUtils.g100);
+    return const KegiatanUiStatus(
+      label: "Selesai",
+      color: ColorsUtils.g100,
+      type: FilterKegiatanStatus.selesai,
+    );
   }
 
   Future<void> loadDummy() async {

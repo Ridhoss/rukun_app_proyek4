@@ -1,3 +1,4 @@
+import 'package:rukun_app_proyek4/viewmodels/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -30,8 +31,7 @@ import 'package:rukun_app_proyek4/viewmodels/rw/iuran/iuran_page_viewmodel.dart'
 import 'package:rukun_app_proyek4/viewmodels/rw/penduduk/penduduk_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/surat/surat_rw_viewmodel.dart';
-// import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
-// import 'package:rukun_app_proyek4/viewmodels/warga/profile/kelola_profile_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -155,9 +155,17 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
+          create: (context) => DataKKViewModel(
+            kkRepository: context.read<KKRepository>(),
+            wargaRepository: context.read<WargaRepository>(),
+          ),
+        ),
+
+        ChangeNotifierProvider(
           create: (context) =>
               SuratRwViewModel(context.read<WargaRepository>()),
         ),
+        ChangeNotifierProvider(create: (_) => KegiatanRwViewModel()),
       ],
       child: const MyApp(),
     ),
