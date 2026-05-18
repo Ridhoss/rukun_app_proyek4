@@ -4,8 +4,8 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 // pages RW
 import 'package:rukun_app_proyek4/views/pages/rw/dashboard/dashboard_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/rw_kegiatan_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/profile/rw_profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
 
 // pages RT
@@ -51,9 +51,9 @@ class NavViewModel {
           page: const RwSuratPage(),
         ),
         NavItem(
-          icon: Icons.person,
+          icon: Icons.event,
           label: "Profile",
-          page: const RwProfilePage(),
+          page: const RwKegiatanPage(),
         ),
       ];
     }
