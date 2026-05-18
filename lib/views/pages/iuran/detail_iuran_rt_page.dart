@@ -17,7 +17,7 @@ class IuranRTDetailPage extends StatefulWidget {
     super.key,
     required this.iuranId,
     required this.rtId,
-    required this.user
+    required this.user,
   });
 
   @override
@@ -262,11 +262,25 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
             (sum, item) => sum + (item.jumlah ?? 0),
           );
 
+          final transaksiPending = transaksi.where((t) {
+            final tDate = t.waktuBayar;
+
+            if (tDate == null) return false;
+
+            return tDate.year == month.year &&
+                tDate.month == month.month &&
+                t.status == StatusPembayaran.diproses;
+          }).toList();
+
+          final totalPending = transaksiPending.length;
+
+          final hasPending = totalPending > 0;
+
           final progress = "$jumlahPembayar/$totalKeluarga";
 
           return InkWell(
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => DetailIuranBulananPage(
@@ -277,6 +291,13 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                   ),
                 ),
               );
+
+              if (context.mounted) {
+                context.read<IuranRTDetailViewModel>().fetchDetail(
+                  widget.iuranId,
+                  widget.rtId,
+                );
+              }
             },
             child: Container(
               margin: const EdgeInsets.only(bottom: 10),
@@ -288,16 +309,45 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+
+                      if (hasPending)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            "$totalPending diproses",
+                            style: TextStyle(
+                              color: Colors.orange.shade800,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
+
+                  const SizedBox(height: 10),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("Progress: $progress"),
+
                       Text(
                         "Rp $totalPendapatan",
                         style: const TextStyle(fontWeight: FontWeight.bold),

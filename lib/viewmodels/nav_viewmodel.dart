@@ -3,7 +3,7 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 
 // pages RW
 import 'package:rukun_app_proyek4/views/pages/rw/dashboard/dashboard_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
+import 'package:rukun_app_proyek4/views/pages/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/profile/rw_profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
@@ -11,7 +11,6 @@ import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/profile_page.dart';
 
@@ -43,7 +42,7 @@ class NavViewModel {
         NavItem(
           icon: Icons.payments,
           label: "Iuran",
-          page: RwIuranPage(user: user),
+          page: PengurusIuranPage(user: user),
         ),
         NavItem(
           icon: Icons.description,
@@ -70,7 +69,7 @@ class NavViewModel {
         NavItem(
           icon: Icons.payments,
           label: "Iuran",
-          page: RtIuranPage(user: user),
+          page: PengurusIuranPage(user: user),
         ),
         NavItem(
           icon: Icons.description,

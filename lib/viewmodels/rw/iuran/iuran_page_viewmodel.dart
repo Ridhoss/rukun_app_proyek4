@@ -4,6 +4,8 @@ import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 
 enum IuranFilter { semua, rutin, khusus }
 
+enum DashboardMode { rw, rt }
+
 class RwIuranViewModel extends ChangeNotifier {
   final IuranRepository repository;
 
@@ -21,16 +23,33 @@ class RwIuranViewModel extends ChangeNotifier {
 
   IuranFilter get selectedFilter => _selectedFilter;
 
+  DashboardMode _mode = DashboardMode.rw;
+
+  DashboardMode get mode => _mode;
+
+  void setMode(DashboardMode value) {
+    _mode = value;
+    notifyListeners();
+  }
+
   List<Iuran> get filteredIurans {
+    var data = _iurans.where((e) {
+      if (_mode == DashboardMode.rw) {
+        return e.level == IuranLevel.rw;
+      }
+
+      return e.level == IuranLevel.rt;
+    }).toList();
+
     switch (_selectedFilter) {
       case IuranFilter.semua:
-        return _iurans;
+        return data;
 
       case IuranFilter.rutin:
-        return _iurans.where((e) => e.tipe == IuranType.reguler).toList();
+        return data.where((e) => e.tipe == IuranType.reguler).toList();
 
       case IuranFilter.khusus:
-        return _iurans.where((e) => e.tipe == IuranType.insidentil).toList();
+        return data.where((e) => e.tipe == IuranType.insidentil).toList();
     }
   }
 
