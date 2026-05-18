@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_rt_detail_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_bulanan_page.dart';
@@ -10,11 +11,13 @@ import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_bulanan_page.da
 class IuranRTDetailPage extends StatefulWidget {
   final int iuranId;
   final int rtId;
+  final User user;
 
   const IuranRTDetailPage({
     super.key,
     required this.iuranId,
     required this.rtId,
+    required this.user
   });
 
   @override
@@ -270,6 +273,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                     iuranId: iuranId,
                     rtId: rtId,
                     month: month,
+                    user: widget.user,
                   ),
                 ),
               );

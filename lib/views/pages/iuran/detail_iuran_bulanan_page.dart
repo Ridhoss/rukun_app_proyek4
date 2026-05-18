@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/keluarga_status_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_bulanan_detail_viewmodel.dart';
@@ -12,12 +13,14 @@ class DetailIuranBulananPage extends StatefulWidget {
   final int iuranId;
   final int rtId;
   final DateTime month;
+  final User user;
 
   const DetailIuranBulananPage({
     super.key,
     required this.iuranId,
     required this.rtId,
     required this.month,
+    required this.user,
   });
 
   @override
@@ -242,6 +245,8 @@ class _DetailIuranBulananPageState extends State<DetailIuranBulananPage> {
         .where((e) => e.status != StatusPembayaran.diproses)
         .toList();
 
+    final isRW = widget.user.pengurus?.level.toLowerCase() == "rw";
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -323,201 +328,202 @@ class _DetailIuranBulananPageState extends State<DetailIuranBulananPage> {
                     ],
                   ),
 
-                  const SizedBox(height: 10),
+                  if (!isRW) ...[
+                    const SizedBox(height: 10),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: () {
-                            final alasanController = TextEditingController();
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              final alasanController = TextEditingController();
 
-                            showDialog(
-                              context: context,
-                              builder: (_) {
-                                return AlertDialog(
-                                  title: const Text("Tolak Pembayaran"),
+                              showDialog(
+                                context: context,
+                                builder: (_) {
+                                  return AlertDialog(
+                                    title: const Text("Tolak Pembayaran"),
 
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Masukkan alasan penolakan pembayaran.",
-                                      ),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          "Masukkan alasan penolakan pembayaran.",
+                                        ),
 
-                                      const SizedBox(height: 14),
+                                        const SizedBox(height: 14),
 
-                                      TextField(
-                                        controller: alasanController,
-                                        maxLines: 3,
-                                        decoration: InputDecoration(
-                                          hintText:
-                                              "Contoh: Bukti pembayaran tidak jelas",
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
+                                        TextField(
+                                          controller: alasanController,
+                                          maxLines: 3,
+                                          decoration: InputDecoration(
+                                            hintText:
+                                                "Contoh: Bukti pembayaran tidak jelas",
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                           ),
                                         ),
+                                      ],
+                                    ),
+
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("Cancel"),
+                                      ),
+
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: () async {
+                                          final alasan = alasanController.text
+                                              .trim();
+
+                                          if (alasan.isEmpty) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Alasan penolakan wajib diisi",
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          final vm = context
+                                              .read<
+                                                IuranBulananDetailViewModel
+                                              >();
+
+                                          final success = await vm
+                                              .updateStatusTransaksi(
+                                                transaksiId: k.idTransaksi!,
+                                                status: "Ditolak",
+                                                catatan: alasan,
+                                                iuranId: widget.iuranId,
+                                                rtId: widget.rtId,
+                                                month: widget.month,
+                                              );
+
+                                          if (context.mounted) {
+                                            Navigator.pop(context);
+
+                                            if (success) {
+                                              NotificationUtils.showSuccess(
+                                                context,
+                                                "Pembayaran berhasil ditolak",
+                                              );
+                                            } else {
+                                              NotificationUtils.showError(
+                                                context,
+                                                "Gagal menolak pembayaran",
+                                              );
+                                            }
+                                          }
+                                        },
+                                        child: const Text("Tolak"),
                                       ),
                                     ],
-                                  ),
-
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Cancel"),
-                                    ),
-
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      onPressed: () async {
-                                        final alasan = alasanController.text
-                                            .trim();
-
-                                        if (alasan.isEmpty) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                "Alasan penolakan wajib diisi",
-                                              ),
-                                            ),
-                                          );
-                                          return;
-                                        }
-
-                                        final vm = context
-                                            .read<
-                                              IuranBulananDetailViewModel
-                                            >();
-
-                                        final success = await vm
-                                            .updateStatusTransaksi(
-                                              transaksiId: k.idTransaksi!,
-                                              status: "Ditolak",
-                                              catatan: alasan,
-                                              iuranId: widget.iuranId,
-                                              rtId: widget.rtId,
-                                              month: widget.month,
-                                            );
-
-                                        if (context.mounted) {
-                                          Navigator.pop(context);
-
-                                          if (success) {
-                                            NotificationUtils.showSuccess(
-                                              context,
-                                              "Pembayaran berhasil ditolak",
-                                            );
-                                          } else {
-                                            NotificationUtils.showError(
-                                              context,
-                                              "Gagal menolak pembayaran",
-                                            );
-                                          }
-                                        }
-                                      },
-                                      child: const Text("Tolak"),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          icon: const Icon(Icons.close),
-                          label: const Text("Tolak"),
-                        ),
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
+                                  );
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.close),
+                            label: const Text("Tolak"),
                           ),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (_) {
-                                return AlertDialog(
-                                  title: const Text("Terima Pembayaran"),
-
-                                  content: const Text(
-                                    "Apakah Anda yakin ingin menerima pembayaran ini?",
-                                  ),
-
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text("Cancel"),
-                                    ),
-
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      onPressed: () async {
-                                        final vm = context
-                                            .read<
-                                              IuranBulananDetailViewModel
-                                            >();
-
-                                        final success = await vm
-                                            .updateStatusTransaksi(
-                                              transaksiId: k.idTransaksi!,
-                                              status: "Dibayar",
-                                              iuranId: widget.iuranId,
-                                              rtId: widget.rtId,
-                                              month: widget.month,
-                                            );
-
-                                        if (context.mounted) {
-                                          Navigator.pop(context);
-
-                                          if (success) {
-                                            NotificationUtils.showSuccess(
-                                              context,
-                                              "Pembayaran berhasil diterima",
-                                            );
-                                          } else {
-                                            NotificationUtils.showError(
-                                              context,
-                                              "Gagal menerima pembayaran",
-                                            );
-                                          }
-                                        }
-                                      },
-                                      child: const Text("Terima"),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          icon: const Icon(Icons.check),
-                          label: const Text("Terima"),
                         ),
-                      ),
-                    ],
-                  ),
+
+                        const SizedBox(width: 10),
+
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) {
+                                  return AlertDialog(
+                                    title: const Text("Terima Pembayaran"),
+
+                                    content: const Text(
+                                      "Apakah Anda yakin ingin menerima pembayaran ini?",
+                                    ),
+
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("Cancel"),
+                                      ),
+
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        onPressed: () async {
+                                          final vm = context
+                                              .read<
+                                                IuranBulananDetailViewModel
+                                              >();
+
+                                          final success = await vm
+                                              .updateStatusTransaksi(
+                                                transaksiId: k.idTransaksi!,
+                                                status: "Dibayar",
+                                                iuranId: widget.iuranId,
+                                                rtId: widget.rtId,
+                                                month: widget.month,
+                                              );
+
+                                          if (context.mounted) {
+                                            Navigator.pop(context);
+
+                                            if (success) {
+                                              NotificationUtils.showSuccess(
+                                                context,
+                                                "Pembayaran berhasil diterima",
+                                              );
+                                            } else {
+                                              NotificationUtils.showError(
+                                                context,
+                                                "Gagal menerima pembayaran",
+                                              );
+                                            }
+                                          }
+                                        },
+                                        child: const Text("Terima"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.check),
+                            label: const Text("Terima"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             );

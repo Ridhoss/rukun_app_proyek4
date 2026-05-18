@@ -2,18 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
+import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/iuran/iuranwarga_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/iuran/upload_iuran_viewmodel.dart';
 
 class WargaUploadIuranPage extends StatelessWidget {
   final IuranSaya item;
+  final User user;
+  final IuranItem selectedItem;
 
-  const WargaUploadIuranPage({super.key, required this.item});
+  const WargaUploadIuranPage({
+    super.key,
+    required this.item,
+    required this.user,
+    required this.selectedItem,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => UploadIuranViewModel(item: item),
+      create: (_) => UploadIuranViewModel(
+        item: item,
+        keluargaId: user.keluarga!.id!,
+        selectedItem: selectedItem,
+        cloudinaryService: context.read<CloudinaryService>(),
+        iuranRepository: context.read<IuranRepository>(),
+      ),
       child: const _UploadView(),
     );
   }
@@ -55,18 +73,6 @@ class _UploadViewState extends State<_UploadView> {
 
               const SizedBox(height: 16),
 
-              // periode (readonly)
-              _inputWrapper(
-                title: "Periode Iuran",
-                child: TextFormField(
-                  initialValue: vm.periode,
-                  enabled: false,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-
               // jml
               if (isSedekah)
                 _inputWrapper(
@@ -103,41 +109,6 @@ class _UploadViewState extends State<_UploadView> {
                     ),
                   ),
                 ),
-
-              // tgl
-              _inputWrapper(
-                title: "Tanggal Pembayaran",
-                isRequired: true,
-                child: TextFormField(
-                  readOnly: true,
-                  controller: TextEditingController(
-                    text: vm.tanggal != null
-                        ? "${vm.tanggal!.day}-${vm.tanggal!.month}-${vm.tanggal!.year}"
-                        : "",
-                  ),
-                  decoration: const InputDecoration(
-                    hintText: "Pilih tanggal",
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_month),
-                  ),
-                  validator: (_) {
-                    if (vm.tanggal == null) {
-                      return "Tanggal wajib diisi";
-                    }
-                    return null;
-                  },
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2100),
-                      initialDate: vm.tanggal ?? DateTime.now(),
-                    );
-
-                    if (date != null) vm.setTanggal(date);
-                  },
-                ),
-              ),
 
               // file bukti
               _inputWrapper(
@@ -307,20 +278,11 @@ class _UploadViewState extends State<_UploadView> {
                     await vm.submit();
 
                     if (vm.errorMessage != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(vm.errorMessage!),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
+                      NotificationUtils.showError(context, vm.errorMessage!);
                     } else if (vm.isSuccess) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Berhasil upload"),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      Navigator.pop(context);
+                      NotificationUtils.showSuccess(context, "Berhasil upload");
+
+                      Navigator.pop(context, true);
                     }
                   },
             icon: const Icon(Icons.send),

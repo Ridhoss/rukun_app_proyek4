@@ -3,11 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/transaksi_model.dart';
+import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
+import 'package:rukun_app_proyek4/viewmodels/warga/iuran/iuranwarga_viewmodel.dart';
 
 class UploadIuranViewModel extends ChangeNotifier {
   final IuranSaya item;
+  final int keluargaId;
+  final CloudinaryService cloudinaryService;
+  final IuranRepository iuranRepository;
+  IuranItem selectedItem;
 
-  UploadIuranViewModel({required this.item}) {
+  UploadIuranViewModel({
+    required this.item,
+    required this.keluargaId,
+    required this.cloudinaryService,
+    required this.iuranRepository,
+    required this.selectedItem,
+  }) {
     if (item.iuran.tipe != IuranType.insidentil) {
       jumlah = item.iuran.jumlah;
     }
@@ -15,7 +29,6 @@ class UploadIuranViewModel extends ChangeNotifier {
 
   String periode = "";
   int? jumlah;
-  DateTime? tanggal;
   File? buktiFile;
   bool isLoading = false;
   bool isSuccess = false;
@@ -23,11 +36,6 @@ class UploadIuranViewModel extends ChangeNotifier {
 
   void setJumlah(String value) {
     jumlah = int.tryParse(value);
-    notifyListeners();
-  }
-
-  void setTanggal(DateTime date) {
-    tanggal = date;
     notifyListeners();
   }
 
@@ -47,16 +55,10 @@ class UploadIuranViewModel extends ChangeNotifier {
 
   Future<void> submit() async {
     isLoading = true;
-
     errorMessage = null;
-
     notifyListeners();
 
     try {
-      if (tanggal == null) {
-        throw Exception("Tanggal wajib diisi");
-      }
-
       if (buktiFile == null) {
         throw Exception("Bukti pembayaran wajib diupload");
       }
@@ -65,10 +67,29 @@ class UploadIuranViewModel extends ChangeNotifier {
         throw Exception("Jumlah pembayaran tidak valid");
       }
 
-      // TODO:
-      // upload API disini
+      final imageUrl = await cloudinaryService.uploadFile(
+        buktiFile!,
+        folder: "bukti_iuran",
+      );
 
-      await Future.delayed(const Duration(seconds: 2));
+      if (imageUrl == null) {
+        throw Exception("Gagal upload bukti pembayaran");
+      }
+
+      final transaksi = Transaksi(
+        iuranId: item.iuran.id!,
+        keluargaId: keluargaId,
+        jumlah: jumlah,
+        waktuBayar: DateTime(
+          selectedItem.bulan.year,
+          selectedItem.bulan.month,
+          1,
+        ),
+        status: StatusPembayaran.diproses,
+        imgRef: imageUrl,
+      );
+
+      await iuranRepository.createTransaksi(transaksi);
 
       isSuccess = true;
     } catch (e) {
@@ -76,14 +97,12 @@ class UploadIuranViewModel extends ChangeNotifier {
     }
 
     isLoading = false;
-
     notifyListeners();
   }
 
   void reset() {
     jumlah = item.iuran.tipe == IuranType.insidentil ? null : item.iuran.jumlah;
 
-    tanggal = null;
     buktiFile = null;
     errorMessage = null;
     isSuccess = false;

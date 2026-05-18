@@ -77,6 +77,7 @@ class Transaksi {
       'jumlah': jumlah,
       'status': _statusToString(status),
       'img_referensi': imgRef,
+      'waktu_bayar': waktuBayar?.toIso8601String(),
       'catatan': catatan,
       'disetujui_oleh': disetujuiOleh,
     };

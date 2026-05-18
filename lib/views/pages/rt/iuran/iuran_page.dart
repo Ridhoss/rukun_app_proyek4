@@ -6,7 +6,6 @@ import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/iuran/iuran_page_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/iuran/crud/add_iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_rt_page.dart';
 
 class RtIuranPage extends StatefulWidget {
@@ -217,7 +216,8 @@ class _RtIuranPageState extends State<RtIuranPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => IuranRTDetailPage(iuranId: id, rtId: rtId),
+            builder: (_) =>
+                IuranRTDetailPage(iuranId: id, rtId: rtId, user: widget.user),
           ),
         );
       },

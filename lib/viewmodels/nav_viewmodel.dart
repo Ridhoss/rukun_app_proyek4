@@ -7,7 +7,6 @@ import 'package:rukun_app_proyek4/views/pages/rw/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/profile/rw_profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/kegiatan_page.dart';
 
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
@@ -88,8 +87,16 @@ class NavViewModel {
 
     // Warga
     return [
-      NavItem(icon: Icons.home, label: "Home", page: WargaHomePage()),
-      NavItem(icon: Icons.upload_file, label: "Upload", page: WargaIuranPage()),
+      NavItem(
+        icon: Icons.home,
+        label: "Home",
+        page: WargaHomePage(user: user),
+      ),
+      NavItem(
+        icon: Icons.upload_file,
+        label: "Upload",
+        page: WargaIuranPage(user: user),
+      ),
       NavItem(
         icon: Icons.description,
         label: "Surat",

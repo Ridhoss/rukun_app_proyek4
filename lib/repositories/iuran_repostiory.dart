@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/rw/iuran_detail_rw_model.dart';
+import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/services/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 
@@ -118,6 +119,16 @@ class IuranRepository {
     }
 
     return IuranRWDetail.fromJson(data);
+  }
+
+  Future<void> createTransaksi(Transaksi transaksi) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.createTransaksi(transaksi.toJson(), token),
+    );
+
+    _validateStatus(result);
   }
 
   Future<String> _requireToken() async {

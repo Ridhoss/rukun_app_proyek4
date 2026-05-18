@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/iuran/detail_iuran_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_rt_page.dart';
 
 class IuranRWDetailPage extends StatefulWidget {
   final int id;
+  final User user;
 
-  const IuranRWDetailPage({super.key, required this.id});
+  const IuranRWDetailPage({super.key, required this.id, required this.user});
 
   @override
   State<IuranRWDetailPage> createState() => _IuranRWDetailPageState();
@@ -185,6 +187,7 @@ class _IuranRWDetailPageState extends State<IuranRWDetailPage> {
                   builder: (_) => IuranRTDetailPage(
                     iuranId: widget.id,
                     rtId: rt.rtId,
+                    user: widget.user,
                   ),
                 ),
               );

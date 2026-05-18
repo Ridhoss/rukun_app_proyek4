@@ -213,7 +213,7 @@ class _RwIuranPageState extends State<RwIuranPage> {
 
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => IuranRWDetailPage(id: id)),
+          MaterialPageRoute(builder: (_) => IuranRWDetailPage(id: id, user: widget.user,)),
         );
       },
       child: Container(

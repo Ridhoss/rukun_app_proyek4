@@ -96,4 +96,17 @@ class CloudIuranService {
 
     return response.data;
   }
+
+  Future<Map<String, dynamic>> createTransaksi(
+    Map<String, dynamic> data,
+    String token,
+  ) async {
+    final response = await _dio.post(
+      '/transaksi',
+      data: data,
+      options: _authHeader(token),
+    );
+
+    return response.data;
+  }
 }
