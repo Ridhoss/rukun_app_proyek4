@@ -225,8 +225,8 @@ class _AddIuranPageState extends State<AddIuranPage> {
       nama: namaController.text.trim(),
       jumlah: jumlah,
       level: selectedLevel,
-      rwId: widget.user.rw?.id ?? 0,
-      rtId: selectedLevel == "RT" ? widget.user.rt?.id : null,
+      rw: widget.user.rw!,
+      rt: selectedLevel == "RT" ? widget.user.rt! : null,
       tipe: selectedType,
     );
 

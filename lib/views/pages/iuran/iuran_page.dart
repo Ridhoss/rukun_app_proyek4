@@ -356,26 +356,15 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
               children: [
                 Expanded(
                   child: Text(
-                    item.nama,
+                    item.level == IuranLevel.rt
+                        ? "${item.nama} - RT ${item.rt?.noRt ?? '-'}"
+                        : item.nama,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
                 ),
-
-                if (item.level == IuranLevel.rt) ...[
-                  const SizedBox(height: 4),
-
-                  Text(
-                    "RT ${item.rtId ?? '-'}",
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
 
                 Container(
                   padding: const EdgeInsets.symmetric(
