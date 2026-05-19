@@ -40,20 +40,69 @@ class RwKegiatanPage extends StatelessWidget {
 
                 _statusFilter(vm),
 
+                _headerKegiatan(context, vm),
+
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: vm.data.length,
-                    itemBuilder: (_, i) {
-                      final kegiatan = vm.data[i];
-                      return _card(context, vm, kegiatan);
-                    },
-                  ),
+                  child: vm.data.isEmpty
+                      ? const Center(child: Text("Belum ada kegiatan"))
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: vm.data.length,
+                          itemBuilder: (_, i) {
+                            final kegiatan = vm.data[i];
+                            return _card(context, vm, kegiatan);
+                          },
+                        ),
                 ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _headerKegiatan(BuildContext context, KegiatanRwViewModel vm) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text(
+              "Daftar Kegiatan",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+
+          if (vm.selectedLevel == KegiatanLevel.rw)
+            ElevatedButton(
+              onPressed: () {
+                _openCreate(context);
+              },
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorsUtils.lightgray,
+                foregroundColor: Colors.black,
+
+                elevation: 0,
+
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+
+              child: const Text(
+                "+ Tambah",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -146,11 +195,13 @@ class RwKegiatanPage extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
 
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+
         padding: const EdgeInsets.symmetric(vertical: 14),
 
         decoration: BoxDecoration(
-          color: selected ? Colors.blue : Colors.white,
+          color: selected ? ColorsUtils.b300 : Colors.white,
           borderRadius: BorderRadius.circular(16),
         ),
 
@@ -177,8 +228,11 @@ class RwKegiatanPage extends StatelessWidget {
         child: Row(
           children: [
             _chip(vm, "Semua", KegiatanFilterStatus.semua),
+
             _chip(vm, "Dibuat", KegiatanFilterStatus.dibuat),
+
             _chip(vm, "Dibatalkan", KegiatanFilterStatus.dibatalkan),
+
             _chip(vm, "Selesai", KegiatanFilterStatus.selesai),
           ],
         ),
@@ -196,19 +250,24 @@ class RwKegiatanPage extends StatelessWidget {
     return GestureDetector(
       onTap: () => vm.setStatus(status),
 
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+
         margin: const EdgeInsets.only(right: 10),
 
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
 
         decoration: BoxDecoration(
-          color: selected ? Colors.blue : Colors.white,
+          color: selected ? ColorsUtils.b300 : Colors.white,
           borderRadius: BorderRadius.circular(14),
         ),
 
         child: Text(
           label,
-          style: TextStyle(color: selected ? Colors.white : Colors.black),
+          style: TextStyle(
+            color: selected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -227,6 +286,14 @@ class RwKegiatanPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
 
       child: Column(
@@ -249,10 +316,26 @@ class RwKegiatanPage extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
 
-          Text(
-            "${kegiatan.tanggalMulai.day}/${kegiatan.tanggalMulai.month}/${kegiatan.tanggalMulai.year}",
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today_rounded,
+                size: 16,
+                color: Colors.grey.shade600,
+              ),
+
+              const SizedBox(width: 8),
+
+              Text(
+                vm.formatTanggalRange(kegiatan),
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
 
           const SizedBox(height: 16),
@@ -264,25 +347,104 @@ class RwKegiatanPage extends StatelessWidget {
           if (vm.isReadonly(kegiatan)) ...[
             _fullButton(
               label: "Lihat Kegiatan",
-              onTap: () => _openDetail(context, kegiatan, true),
+              onTap: () {
+                _openDetail(context, kegiatan, true);
+              },
+            ),
+          ] else if (vm.canUploadBukti(kegiatan)) ...[
+            _fullButton(
+              label: "Upload Bukti Kegiatan",
+              onTap: () {
+                vm.uploadDummyBukti(kegiatan.id!);
+              },
+            ),
+          ] else if (vm.isOngoing(kegiatan)) ...[
+            Container(
+              width: double.infinity,
+
+              padding: const EdgeInsets.symmetric(vertical: 14),
+
+              decoration: BoxDecoration(
+                color: ColorsUtils.o100.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+
+              child: const Center(
+                child: Text(
+                  "Kegiatan Sedang Berlangsung",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: ColorsUtils.o100,
+                  ),
+                ),
+              ),
             ),
           ] else ...[
             Row(
               children: [
                 if (vm.canCancel(kegiatan))
                   Expanded(
-                    child: _outlineButton(label: "Batalkan", color: Colors.red),
+                    child: _outlineButton(
+                      label: "Batalkan",
+                      color: Colors.red,
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              title: const Text("Batalkan Kegiatan"),
+                              content: const Text(
+                                "Apakah anda yakin ingin membatalkan kegiatan ini?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Tidak"),
+                                ),
+
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Dummy pembatalan kegiatan berhasil",
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text("Ya"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
 
-                const SizedBox(width: 12),
+                if (vm.canCancel(kegiatan)) const SizedBox(width: 12),
 
                 Expanded(
                   child: _fullButton(
                     label: vm.canEdit(kegiatan)
                         ? "Edit Kegiatan"
                         : "Lihat Kegiatan",
-                    onTap: () =>
-                        _openDetail(context, kegiatan, !vm.canEdit(kegiatan)),
+
+                    onTap: () {
+                      if (vm.canEdit(kegiatan)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Halaman edit kegiatan belum tersedia",
+                            ),
+                          ),
+                        );
+                      } else {
+                        _openDetail(context, kegiatan, true);
+                      }
+                    },
                   ),
                 ),
               ],
@@ -294,7 +456,7 @@ class RwKegiatanPage extends StatelessWidget {
   }
 
   Widget _badge(KegiatanStatus status) {
-    Color color = Colors.blue;
+    Color color = ColorsUtils.b300;
     String label = "Dibuat";
 
     switch (status) {
@@ -327,13 +489,21 @@ class RwKegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _outlineButton({required String label, required Color color}) {
+  Widget _outlineButton({
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return OutlinedButton(
-      onPressed: () {},
+      onPressed: onTap,
 
       style: OutlinedButton.styleFrom(
         foregroundColor: color,
+
         side: BorderSide(color: color),
+
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+
         padding: const EdgeInsets.symmetric(vertical: 14),
       ),
 
@@ -346,10 +516,13 @@ class RwKegiatanPage extends StatelessWidget {
       onPressed: onTap,
 
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: ColorsUtils.b300,
+        foregroundColor: Colors.white,
+
         elevation: 0,
-        side: BorderSide(color: Colors.grey.shade300),
+
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+
         padding: const EdgeInsets.symmetric(vertical: 14),
       ),
 
@@ -371,7 +544,29 @@ class RwKegiatanPage extends StatelessWidget {
       builder: (_) {
         return FractionallySizedBox(
           heightFactor: 0.92,
+
           child: DetailKegiatanModal(kegiatan: kegiatan, readonly: readonly),
+        );
+      },
+    );
+  }
+
+  void _openCreate(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+
+      backgroundColor: Colors.white,
+
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+
+      builder: (_) {
+        return const FractionallySizedBox(
+          heightFactor: 0.92,
+
+          child: Center(child: Text("Form Tambah Kegiatan")),
         );
       },
     );

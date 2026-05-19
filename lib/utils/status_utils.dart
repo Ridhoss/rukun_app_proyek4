@@ -87,13 +87,6 @@ extension KegiatanStatusExtension on KegiatanStatus {
           type: FilterKegiatanStatus.segera,
         );
 
-      case KegiatanStatus.ditunda:
-        return const KegiatanUiStatus(
-          label: "Ditunda",
-          color: ColorsUtils.o100,
-          type: FilterKegiatanStatus.segera,
-        );
-
       case KegiatanStatus.dibatalkan:
         return const KegiatanUiStatus(
           label: "Dibatalkan",

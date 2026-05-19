@@ -18,25 +18,17 @@ class KegiatanViewmodel extends ChangeNotifier {
 
       case FilterKegiatanStatus.berlangsung:
         return _all
-            .where(
-              (e) => getUiStatus(e).type == FilterKegiatanStatus.berlangsung,
-            )
+            .where((e) => getUiStatus(e).label == "Berlangsung")
             .toList();
 
       case FilterKegiatanStatus.segera:
-        return _all
-            .where((e) => getUiStatus(e).type == FilterKegiatanStatus.segera)
-            .toList();
+        return _all.where((e) => getUiStatus(e).label == "Segera").toList();
 
       case FilterKegiatanStatus.selesai:
-        return _all
-            .where((e) => getUiStatus(e).type == FilterKegiatanStatus.selesai)
-            .toList();
+        return _all.where((e) => getUiStatus(e).label == "Selesai").toList();
 
       case FilterKegiatanStatus.dibatalkan:
-        return _all
-            .where((e) => getUiStatus(e).type == FilterKegiatanStatus.dibatalkan)
-            .toList();
+        return _all.where((e) => getUiStatus(e).label == "Dibatalkan").toList();
     }
   }
 
@@ -47,7 +39,6 @@ class KegiatanViewmodel extends ChangeNotifier {
 
   KegiatanUiStatus getUiStatus(Kegiatan item) {
     final now = DateTime.now();
-
     final selesai = item.tanggalSelesai ?? item.tanggalMulai;
 
     if (item.status == KegiatanStatus.dibatalkan) {

@@ -1,6 +1,6 @@
 enum KegiatanLevel { rt, rw }
 
-enum KegiatanStatus { dibuat, ditunda, dibatalkan, selesai }
+enum KegiatanStatus { dibuat, dibatalkan, selesai }
 
 class Kegiatan {
   final int? id;
@@ -98,7 +98,6 @@ class Kegiatan {
       case "Dibuat":
         return KegiatanStatus.dibuat;
       case "Ditunda":
-        return KegiatanStatus.ditunda;
       case "Dibatalkan":
         return KegiatanStatus.dibatalkan;
       default:
@@ -110,8 +109,6 @@ class Kegiatan {
     switch (status) {
       case KegiatanStatus.dibuat:
         return "Dibuat";
-      case KegiatanStatus.ditunda:
-        return "Ditunda";
       case KegiatanStatus.dibatalkan:
         return "Dibatalkan";
       case KegiatanStatus.selesai:
