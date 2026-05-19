@@ -63,11 +63,6 @@ class User {
       'id': id,
       'warga_id': wargaId,
       'is_admin': isAdmin,
-      'warga': warga?.toJson(),
-      'keluarga': keluarga?.toJson(),
-      'rt': rt?.toJson(),
-      'rw': rw?.toJson(),
-      'pengurus': pengurus?.toJson(),
     };
   }
 }
