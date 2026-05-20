@@ -1,11 +1,5 @@
 flutter_native_splash:
-  # Background color (menggunakan warna ColorsUtils.b500)
   color: "#003E9C"
 
-  # Path ke gambar logomu
-  image: "assets/images/icon_rukun.png"
-
-  # Konfigurasi khusus Android 12 ke atas (wajib ditambahkan)
   android_12:
     color: "#003E9C"
-    image: "assets/images/icon_rukun.png"
