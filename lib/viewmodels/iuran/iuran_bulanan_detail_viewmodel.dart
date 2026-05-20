@@ -155,23 +155,4 @@ class IuranBulananDetailViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  StatusPembayaran _mapStatus(String status) {
-    switch (status.toLowerCase()) {
-      case "Dibayar":
-        return StatusPembayaran.dibayar;
-
-      case "Ditolak":
-        return StatusPembayaran.ditolak;
-
-      case "Belum Dibayar":
-        return StatusPembayaran.belumDibayar;
-
-      case "Diproses":
-        return StatusPembayaran.diproses;
-
-      default:
-        return StatusPembayaran.belumDibayar;
-    }
-  }
 }

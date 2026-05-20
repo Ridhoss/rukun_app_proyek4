@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 
 class TambahSuratPage extends StatefulWidget {
-  const TambahSuratPage({super.key});
+  final User user;
+
+  const TambahSuratPage({super.key, required this.user});
 
   @override
   State<TambahSuratPage> createState() => _TambahSuratPageState();
@@ -177,9 +180,10 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
     }
 
     final data = PengajuanSurat(
-      wargaId: 1,
+      wargaId: widget.user.wargaId,
       keperluan: keperluanController.text.trim(),
       keterangan: keteranganController.text.trim(),
+      status: SuratStatus.diajukan,
     );
 
     final success = await context.read<PengajuanSuratViewModel>().submit(data);
@@ -188,10 +192,6 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
 
     if (success) {
       Navigator.pop(context, true);
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Pengajuan berhasil")));
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/menucard_utils.dart';
@@ -9,7 +10,9 @@ import 'package:rukun_app_proyek4/views/pages/warga/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/surat/pengajuan_surat_page.dart';
 
 class WargaHomePage extends StatelessWidget {
-  const WargaHomePage({super.key});
+  final User user;
+
+  const WargaHomePage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +24,13 @@ class WargaHomePage extends StatelessWidget {
         "title": "Ajukan Surat",
         "subtitle": "Buat pengajuan surat",
         "image": "assets/images/add_surat.png",
-        "builder": (BuildContext context) => const PengajuanSuratPage(),
+        "builder": (BuildContext context) => PengajuanSuratPage(user: user),
       },
       {
         "title": "Iuran Saya",
         "subtitle": "Status & bukti pembayaran",
         "image": "assets/images/fee.png",
-        "builder": (BuildContext context) => const WargaIuranPage(),
+        "builder": (BuildContext context) => WargaIuranPage(user: user),
       },
       {
         "title": "Daftar Kegiatan",

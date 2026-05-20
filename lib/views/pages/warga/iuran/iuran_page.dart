@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
@@ -10,16 +11,32 @@ import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/iuran/iuranwarga_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/iuran/detail_iuran_page.dart';
 
-class WargaIuranPage extends StatelessWidget {
-  const WargaIuranPage({super.key});
+class WargaIuranPage extends StatefulWidget {
+  final User user;
+
+  const WargaIuranPage({super.key, required this.user});
+
+  @override
+  State<WargaIuranPage> createState() => _WargaIuranPageState();
+}
+
+class _WargaIuranPageState extends State<WargaIuranPage> {
+  late IuranwargaViewmodel vm;
+
+  @override
+  void initState() {
+    super.initState();
+
+    vm = IuranwargaViewmodel(context.read<IuranRepository>());
+    vm.loadIuranSaya();
+  }
 
   @override
   Widget build(BuildContext context) {
     final nama = context.watch<AuthViewModel>().currentUser?.warga?.nama ?? "-";
 
-    return ChangeNotifierProvider(
-      create: (_) =>
-          IuranwargaViewmodel(context.read<IuranRepository>())..loadIuranSaya(),
+    return ChangeNotifierProvider.value(
+      value: vm,
       child: Scaffold(
         backgroundColor: ColorsUtils.white,
 
@@ -246,16 +263,20 @@ class WargaIuranPage extends StatelessWidget {
     final status = vm.getStatusSummary(item);
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ChangeNotifierProvider.value(
               value: context.read<IuranwargaViewmodel>(),
-              child: DetailIuranPage(item: item),
+              child: DetailIuranPage(item: item, user: widget.user),
             ),
           ),
         );
+
+        if (result == true) {
+          context.read<IuranwargaViewmodel>().refresh();
+        }
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

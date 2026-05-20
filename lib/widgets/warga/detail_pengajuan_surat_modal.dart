@@ -98,7 +98,7 @@ class DetailPengajuanSuratModal extends StatelessWidget {
 
               child: Row(
                 children: [
-                  const Icon(Icons.picture_as_pdf, color: Colors.white),
+                  const Icon(Icons.picture_as_pdf, color: ColorsUtils.white),
 
                   const SizedBox(width: 12),
 
@@ -106,7 +106,7 @@ class DetailPengajuanSuratModal extends StatelessWidget {
                     child: Text(
                       "surat_pengajuan.pdf",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: ColorsUtils.white,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -118,8 +118,8 @@ class DetailPengajuanSuratModal extends StatelessWidget {
                     },
 
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.blue,
+                      backgroundColor: ColorsUtils.white,
+                      foregroundColor: ColorsUtils.b200,
                     ),
 
                     icon: const Icon(Icons.download, size: 16),
@@ -154,9 +154,9 @@ class DetailPengajuanSuratModal extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: ColorsUtils.lightgray,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: ColorsUtils.lightgray),
           ),
           child: Text(value, maxLines: maxLines),
         ),

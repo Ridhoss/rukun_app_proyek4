@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
@@ -38,7 +39,7 @@ class SuratUiStatus {
   const SuratUiStatus({required this.label, required this.color});
 }
 
-extension SuratStatusExt on SuratStatus {
+extension SuratStatusExtention on SuratStatus {
   SuratUiStatus get ui {
     switch (this) {
       case SuratStatus.diajukan:
@@ -56,11 +57,49 @@ extension SuratStatusExt on SuratStatus {
   }
 }
 
+enum FilterKegiatanStatus {
+  semua,
+  berlangsung,
+  segera,
+  selesai,
+  dibatalkan,
+}
+
 class KegiatanUiStatus {
   final String label;
   final Color color;
+  final FilterKegiatanStatus type;
 
-  const KegiatanUiStatus({required this.label, required this.color});
+  const KegiatanUiStatus({
+    required this.label,
+    required this.color,
+    required this.type,
+  });
 }
 
-enum FilterKegiatanStatus { semua, berlangsung, segera, selesai, dibatalkan }
+extension KegiatanStatusExtension on KegiatanStatus {
+  KegiatanUiStatus get ui {
+    switch (this) {
+      case KegiatanStatus.dibuat:
+        return const KegiatanUiStatus(
+          label: "Dibuat",
+          color: ColorsUtils.b300,
+          type: FilterKegiatanStatus.segera,
+        );
+
+      case KegiatanStatus.dibatalkan:
+        return const KegiatanUiStatus(
+          label: "Dibatalkan",
+          color: ColorsUtils.red,
+          type: FilterKegiatanStatus.dibatalkan,
+        );
+
+      case KegiatanStatus.selesai:
+        return const KegiatanUiStatus(
+          label: "Selesai",
+          color: ColorsUtils.g100,
+          type: FilterKegiatanStatus.selesai,
+        );
+    }
+  }
+}
