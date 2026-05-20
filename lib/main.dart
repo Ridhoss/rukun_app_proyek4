@@ -32,6 +32,7 @@ import 'package:rukun_app_proyek4/viewmodels/rw/penduduk/penduduk_rw_viewmodel.d
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/surat/surat_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -166,6 +167,7 @@ void main() async {
               SuratRwViewModel(context.read<WargaRepository>()),
         ),
         ChangeNotifierProvider(create: (_) => KegiatanRwViewModel()),
+        ChangeNotifierProvider(create: (_) => RtDashboardViewModel()),
       ],
       child: const MyApp(),
     ),
