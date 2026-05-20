@@ -114,12 +114,18 @@ class RwKegiatanPage extends StatelessWidget {
 
       child: Row(
         children: [
-          Expanded(child: _summaryCard(vm.totalDibuat, "Dibuat", ColorsUtils.b200)),
+          Expanded(
+            child: _summaryCard(vm.totalDibuat, "Dibuat", ColorsUtils.b200),
+          ),
 
           const SizedBox(width: 12),
 
           Expanded(
-            child: _summaryCard(vm.totalDibatalkan, "Dibatalkan", ColorsUtils.red),
+            child: _summaryCard(
+              vm.totalDibatalkan,
+              "Dibatalkan",
+              ColorsUtils.red,
+            ),
           ),
 
           const SizedBox(width: 12),
@@ -337,12 +343,19 @@ class RwKegiatanPage extends StatelessWidget {
           Text(kegiatan.deskripsi ?? "-", style: const TextStyle(height: 1.5)),
 
           const SizedBox(height: 20),
+
           if (vm.isReadonly(kegiatan)) ...[
-            _fullButton(
-              label: "Lihat Kegiatan",
-              onTap: () {
-                _openDetail(context, kegiatan, true);
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: _fullButton(
+                    label: "Lihat Kegiatan",
+                    onTap: () {
+                      _openDetail(context, kegiatan, true);
+                    },
+                  ),
+                ),
+              ],
             ),
           ] else if (vm.canUploadBukti(kegiatan)) ...[
             _fullButton(
@@ -379,7 +392,7 @@ class RwKegiatanPage extends StatelessWidget {
                   Expanded(
                     child: _outlineButton(
                       label: "Batalkan",
-                      color: ColorsUtils.red,
+                      color: Colors.red,
                       onTap: () {
                         showDialog(
                           context: context,
@@ -438,29 +451,23 @@ class RwKegiatanPage extends StatelessWidget {
     );
   }
 
-Widget _badge(KegiatanStatus status) {
-  final ui = status.ui;
+  Widget _badge(KegiatanStatus status) {
+    final ui = status.ui;
 
-  return Container(
-    padding: const EdgeInsets.symmetric(
-      horizontal: 16,
-      vertical: 8,
-    ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
 
-    decoration: BoxDecoration(
-      color: ui.color.withOpacity(0.15),
-      borderRadius: BorderRadius.circular(30),
-    ),
-
-    child: Text(
-      ui.label,
-      style: TextStyle(
-        color: ui.color,
-        fontWeight: FontWeight.bold,
+      decoration: BoxDecoration(
+        color: ui.color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(30),
       ),
-    ),
-  );
-}
+
+      child: Text(
+        ui.label,
+        style: TextStyle(color: ui.color, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
 
   Widget _outlineButton({
     required String label,
@@ -490,7 +497,7 @@ Widget _badge(KegiatanStatus status) {
 
       style: ElevatedButton.styleFrom(
         backgroundColor: ColorsUtils.b300,
-        foregroundColor: ColorsUtils.white,
+        foregroundColor: Colors.white,
 
         elevation: 0,
 
@@ -508,7 +515,7 @@ Widget _badge(KegiatanStatus status) {
       context: context,
       isScrollControlled: true,
 
-      backgroundColor: ColorsUtils.white,
+      backgroundColor: Colors.white,
 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -529,7 +536,7 @@ Widget _badge(KegiatanStatus status) {
       context: context,
       isScrollControlled: true,
 
-      backgroundColor: ColorsUtils.white,
+      backgroundColor: Colors.white,
 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
