@@ -18,23 +18,28 @@ class _BottomNavState extends State<BottomNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+
       body: widget.items[_page].page,
 
-      bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.transparent,
-        buttonBackgroundColor: ColorsUtils.b200,
-        color: ColorsUtils.b500,
-        animationDuration: const Duration(milliseconds: 300),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: CurvedNavigationBar(
+          backgroundColor: Colors.transparent,
+          buttonBackgroundColor: ColorsUtils.b200,
+          color: ColorsUtils.b500,
+          animationDuration: const Duration(milliseconds: 300),
 
-        items: widget.items
-            .map((e) => Icon(e.icon, size: 26, color: ColorsUtils.white))
-            .toList(),
+          items: widget.items
+              .map((e) => Icon(e.icon, size: 26, color: ColorsUtils.white))
+              .toList(),
 
-        onTap: (index) {
-          setState(() {
-            _page = index;
-          });
-        },
+          onTap: (index) {
+            setState(() {
+              _page = index;
+            });
+          },
+        ),
       ),
     );
   }
