@@ -99,7 +99,7 @@ class NavViewModel {
       NavItem(
         icon: Icons.description,
         label: "Surat",
-        page: PengajuanSuratPage(),
+        page: PengajuanSuratPage(user: user),
       ),
       NavItem(icon: Icons.person, label: "Profile", page: WargaProfilePage()),
     ];

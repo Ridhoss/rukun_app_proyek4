@@ -6,8 +6,9 @@ class PengajuanSurat {
   final String keperluan;
   final String keterangan;
   final SuratStatus status;
-  final int? disetujuiOleh;
   final String? docRef;
+  final String? catatan;
+  final int? disetujuiOleh;
   final DateTime? waktuDisetujui;
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
@@ -20,8 +21,9 @@ class PengajuanSurat {
     required this.keterangan,
     this.status = SuratStatus.diajukan,
     this.disetujuiOleh,
-    this.waktuDisetujui,
     this.docRef,
+    this.catatan,
+    this.waktuDisetujui,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
@@ -33,8 +35,9 @@ class PengajuanSurat {
     String? keperluan,
     String? keterangan,
     SuratStatus? status,
-    int? disetujuiOleh,
     String? docRef,
+    String? catatan,
+    int? disetujuiOleh,
     DateTime? waktuDisetujui,
     DateTime? waktuDibuat,
     DateTime? waktuDiubah,
@@ -46,8 +49,9 @@ class PengajuanSurat {
       keperluan: keperluan ?? this.keperluan,
       keterangan: keterangan ?? this.keterangan,
       status: status ?? this.status,
-      disetujuiOleh: disetujuiOleh ?? this.disetujuiOleh,
       docRef: docRef ?? this.docRef,
+      catatan: catatan ?? this.catatan,
+      disetujuiOleh: disetujuiOleh ?? this.disetujuiOleh,
       waktuDisetujui: waktuDisetujui ?? this.waktuDisetujui,
       waktuDibuat: waktuDibuat ?? this.waktuDibuat,
       waktuDiubah: waktuDiubah ?? this.waktuDiubah,
@@ -62,8 +66,9 @@ class PengajuanSurat {
       keperluan: json['keperluan'],
       keterangan: json['keterangan'],
       status: _status(json['status']),
+      docRef: json['doc_referensi'],
+      catatan: json['catatan'],
       disetujuiOleh: json['disetujui_oleh'],
-      docRef: json['doc_ref'],
       waktuDisetujui: json['waktu_disetujui'] != null
           ? DateTime.parse(json['waktu_disetujui'])
           : null,
@@ -86,8 +91,9 @@ class PengajuanSurat {
       'keperluan': keperluan,
       'keterangan': keterangan,
       'status': _statusToString(status),
+      'doc_referensi': docRef,
+      'catatan': catatan,
       'disetujui_oleh': disetujuiOleh,
-      'doc_ref': docRef,
       'waktu_disetujui': waktuDisetujui?.toIso8601String(),
       'waktu_dibuat': waktuDibuat?.toIso8601String(),
       'waktu_diubah': waktuDiubah?.toIso8601String(),

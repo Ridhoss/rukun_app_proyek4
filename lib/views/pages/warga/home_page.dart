@@ -24,7 +24,7 @@ class WargaHomePage extends StatelessWidget {
         "title": "Ajukan Surat",
         "subtitle": "Buat pengajuan surat",
         "image": "assets/images/add_surat.png",
-        "builder": (BuildContext context) => const PengajuanSuratPage(),
+        "builder": (BuildContext context) => PengajuanSuratPage(user: user),
       },
       {
         "title": "Iuran Saya",
