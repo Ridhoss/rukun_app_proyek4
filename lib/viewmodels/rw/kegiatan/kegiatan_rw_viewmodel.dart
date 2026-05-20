@@ -1,17 +1,21 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 
 enum KegiatanFilterStatus { semua, dibuat, dibatalkan, selesai }
 
 class KegiatanRwViewModel extends ChangeNotifier {
-  bool isLoading = false;
+  File? buktiImage;
+  File? dokumenFile;
 
+  bool isUploading = false;
   KegiatanLevel selectedLevel = KegiatanLevel.rw;
-
   KegiatanFilterStatus selectedStatus = KegiatanFilterStatus.semua;
 
-//dummy data kegiatan
+  //dummy data kegiatan
   final List<Kegiatan> _allData = [
     Kegiatan(
       id: 1,
@@ -185,10 +189,21 @@ class KegiatanRwViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void uploadDummyBukti(int id) {
+  Future<void> uploadDummyBukti(int id) async {
+    if (buktiImage == null) return;
+
+    isUploading = true;
+    notifyListeners();
+
+    await Future.delayed(const Duration(seconds: 1));
+
     final index = _allData.indexWhere((e) => e.id == id);
 
-    if (index == -1) return;
+    if (index == -1) {
+      isUploading = false;
+      notifyListeners();
+      return;
+    }
 
     final kegiatan = _allData[index];
 
@@ -202,10 +217,15 @@ class KegiatanRwViewModel extends ChangeNotifier {
       rtId: kegiatan.rtId,
       rwId: kegiatan.rwId,
       status: kegiatan.status,
-      docReferensi: kegiatan.docReferensi,
 
-      imgReferensi: "dummy_bukti_kegiatan.jpg",
+      docReferensi: dokumenFile?.path.split("/").last ?? kegiatan.docReferensi,
+
+      imgReferensi: buktiImage?.path.split("/").last ?? kegiatan.imgReferensi,
     );
+
+    clearUpload();
+
+    isUploading = false;
 
     notifyListeners();
   }
@@ -222,5 +242,40 @@ class KegiatanRwViewModel extends ChangeNotifier {
     }
 
     return "$mulai - $selesai";
+  }
+
+  Future<void> pickBuktiImage() async {
+    final picker = ImagePicker();
+
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (picked == null) return;
+
+    buktiImage = File(picked.path);
+
+    notifyListeners();
+  }
+
+  Future<void> pickDokumenFile() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx'],
+    );
+
+    if (result == null) return;
+
+    dokumenFile = File(result.files.single.path!);
+
+    notifyListeners();
+  }
+
+  void clearUpload() {
+    buktiImage = null;
+    dokumenFile = null;
+
+    notifyListeners();
   }
 }

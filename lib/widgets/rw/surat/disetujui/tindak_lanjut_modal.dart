@@ -275,7 +275,6 @@ class TindakLanjutModal extends StatelessWidget {
         ),
 
         const SizedBox(width: 10),
-
         Expanded(
           child: ElevatedButton(
             onPressed: vm.isUploading

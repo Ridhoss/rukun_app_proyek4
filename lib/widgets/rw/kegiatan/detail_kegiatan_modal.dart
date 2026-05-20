@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/status_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 
 class DetailKegiatanModal extends StatelessWidget {
   final Kegiatan kegiatan;
@@ -13,6 +17,8 @@ class DetailKegiatanModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<KegiatanRwViewModel>();
+
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -41,68 +47,117 @@ class DetailKegiatanModal extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            _field("Nama Kegiatan", kegiatan.nama),
-
+            _field(
+              label: "Nama Kegiatan",
+              value: kegiatan.nama,
+              readonly: readonly,
+            ),
             const SizedBox(height: 16),
 
             _field(
-              "Deskripsi Kegiatan",
-              kegiatan.deskripsi ?? "-",
+              label: "Deskripsi Kegiatan",
+              value: kegiatan.deskripsi ?? "-",
+              readonly: readonly,
               maxLines: 5,
             ),
 
             const SizedBox(height: 16),
-
             Row(
               children: [
                 Expanded(
-                  child: _field("Tanggal Mulai", _date(kegiatan.tanggalMulai)),
+                  child: _dateField(
+                    context: context,
+                    label: "Tanggal Mulai",
+                    value: _date(kegiatan.tanggalMulai),
+                    readonly: readonly,
+
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: kegiatan.tanggalMulai,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2035),
+                      );
+
+                      if (picked != null) {
+                        // update tanggal mulai
+                      }
+                    },
+                  ),
                 ),
 
                 const SizedBox(width: 12),
 
                 Expanded(
-                  child: _field(
-                    "Tanggal Selesai",
-                    kegiatan.tanggalSelesai != null
+                  child: _dateField(
+                    context: context,
+                    label: "Tanggal Selesai",
+                    value: kegiatan.tanggalSelesai != null
                         ? _date(kegiatan.tanggalSelesai!)
                         : "-",
+                    readonly: readonly,
+
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate:
+                            kegiatan.tanggalSelesai ?? kegiatan.tanggalMulai,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2035),
+                      );
+
+                      if (picked != null) {
+                        // update tanggal selesai
+                      }
+                    },
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 24),
-
             const Text(
               "Dokumen Pendukung Kegiatan",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 12),
-
-            _uploadBox(kegiatan.docReferensi ?? "Belum ada dokumen"),
+            _documentBox(context, vm, kegiatan.docReferensi),
 
             const SizedBox(height: 24),
-
             const Text(
               "Foto Pendukung",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 12),
-
-            _uploadBox(kegiatan.imgReferensi ?? "Belum ada foto kegiatan"),
+            _imageBox(context, vm, kegiatan.imgReferensi),
 
             const SizedBox(height: 32),
-
             if (!readonly)
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text("Batal"),
+
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: ColorsUtils.red,
+
+                        side: BorderSide(
+                          color: ColorsUtils.red.withOpacity(0.4),
+                        ),
+
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+
+                      child: const Text(
+                        "Batal",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
 
@@ -110,8 +165,37 @@ class DetailKegiatanModal extends StatelessWidget {
 
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {},
-                      child: const Text("Simpan"),
+                      onPressed: vm.isUploading
+                          ? null
+                          : () async {
+                              await vm.uploadDummyBukti(kegiatan.id!);
+
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            },
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorsUtils.green,
+                        foregroundColor: Colors.white,
+
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: vm.isUploading
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: ColorsUtils.white,
+                              ),
+                            )
+                          : const Text("Simpan"),
                     ),
                   ),
                 ],
@@ -122,7 +206,12 @@ class DetailKegiatanModal extends StatelessWidget {
     );
   }
 
-  Widget _field(String label, String value, {int maxLines = 1}) {
+  Widget _field({
+    required String label,
+    required String value,
+    required bool readonly,
+    int maxLines = 1,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
 
@@ -131,61 +220,181 @@ class DetailKegiatanModal extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        Container(
-          width: double.infinity,
+        readonly
+            ? Container(
+                width: double.infinity,
 
-          padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(14),
 
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: ColorsUtils.gray),
+                  borderRadius: BorderRadius.circular(12),
+                ),
 
-          child: Text(value, maxLines: maxLines),
-        ),
+                child: Text(value, maxLines: maxLines),
+              )
+            : TextFormField(
+                initialValue: value,
+                maxLines: maxLines,
+
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
       ],
     );
   }
 
-  Widget _uploadBox(String text) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
+  Widget _documentBox(
+    BuildContext context,
+    KegiatanRwViewModel vm,
+    String? fileName,
+  ) {
+    final currentFile =
+        vm.dokumenFile?.path.split("/").last ?? fileName ?? "Belum ada dokumen";
 
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(14),
+    return GestureDetector(
+      onTap: readonly ? null : vm.pickDokumenFile,
+
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+
+        decoration: BoxDecoration(
+          border: Border.all(color: ColorsUtils.gray),
+          borderRadius: BorderRadius.circular(14),
+        ),
+
+        child: Row(
+          children: [
+            const Icon(Icons.description_outlined),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Text(
+                currentFile,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+
+            if (!readonly) const Icon(Icons.upload_file_rounded),
+          ],
+        ),
       ),
+    );
+  }
 
-      child: Column(
-        children: [
-          const Icon(Icons.upload_file_outlined),
+  Widget _imageBox(
+    BuildContext context,
+    KegiatanRwViewModel vm,
+    String? imageName,
+  ) {
+    return GestureDetector(
+      onTap: readonly ? null : vm.pickBuktiImage,
 
-          const SizedBox(height: 10),
+      child: Container(
+        width: double.infinity,
+        height: 180,
 
-          Text(text, textAlign: TextAlign.center),
-        ],
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: ColorsUtils.gray),
+        ),
+
+        child: vm.buktiImage != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+
+                child: Image.file(
+                  vm.buktiImage!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+
+                children: [
+                  const Icon(Icons.image_outlined, size: 42),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    imageName ?? "Belum ada foto kegiatan",
+                    textAlign: TextAlign.center,
+                  ),
+
+                  if (!readonly) ...[
+                    const SizedBox(height: 10),
+
+                    const Text(
+                      "Tap untuk upload foto",
+                      style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
+                    ),
+                  ],
+                ],
+              ),
       ),
     );
   }
 
   Widget _statusBadge() {
+    final ui = kegiatan.status.ui;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
 
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.12),
+        color: ui.color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(30),
       ),
 
-      child: const Text(
-        "Dibuat",
+      child: Text(
+        ui.label,
         style: TextStyle(
-          color: Colors.blue,
+          color: ui.color,
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
       ),
+    );
+  }
+
+  Widget _dateField({
+    required BuildContext context,
+    required String label,
+    required String value,
+    required bool readonly,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+
+        const SizedBox(height: 8),
+
+        GestureDetector(
+          onTap: readonly ? null : onTap,
+
+          child: AbsorbPointer(
+            child: TextFormField(
+              initialValue: value,
+
+              decoration: InputDecoration(
+                suffixIcon: const Icon(Icons.calendar_today),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

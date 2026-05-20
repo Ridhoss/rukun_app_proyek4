@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/widgets/rw/kegiatan/detail_kegiatan_modal.dart';
@@ -83,7 +84,7 @@ class RwKegiatanPage extends StatelessWidget {
 
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorsUtils.lightgray,
-                foregroundColor: Colors.black,
+                foregroundColor: ColorsUtils.black,
 
                 elevation: 0,
 
@@ -113,18 +114,18 @@ class RwKegiatanPage extends StatelessWidget {
 
       child: Row(
         children: [
-          Expanded(child: _summaryCard(vm.totalDibuat, "Dibuat", Colors.blue)),
+          Expanded(child: _summaryCard(vm.totalDibuat, "Dibuat", ColorsUtils.b200)),
 
           const SizedBox(width: 12),
 
           Expanded(
-            child: _summaryCard(vm.totalDibatalkan, "Dibatalkan", Colors.red),
+            child: _summaryCard(vm.totalDibatalkan, "Dibatalkan", ColorsUtils.red),
           ),
 
           const SizedBox(width: 12),
 
           Expanded(
-            child: _summaryCard(vm.totalSelesai, "Selesai", Colors.green),
+            child: _summaryCard(vm.totalSelesai, "Selesai", ColorsUtils.green),
           ),
         ],
       ),
@@ -136,7 +137,7 @@ class RwKegiatanPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 18),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ColorsUtils.white,
         borderRadius: BorderRadius.circular(18),
       ),
 
@@ -152,7 +153,6 @@ class RwKegiatanPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 6),
-
           Text(title),
         ],
       ),
@@ -201,7 +201,7 @@ class RwKegiatanPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
 
         decoration: BoxDecoration(
-          color: selected ? ColorsUtils.b300 : Colors.white,
+          color: selected ? ColorsUtils.b300 : ColorsUtils.white,
           borderRadius: BorderRadius.circular(16),
         ),
 
@@ -209,7 +209,7 @@ class RwKegiatanPage extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? Colors.white : Colors.black,
+              color: selected ? ColorsUtils.white : ColorsUtils.black,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -228,11 +228,8 @@ class RwKegiatanPage extends StatelessWidget {
         child: Row(
           children: [
             _chip(vm, "Semua", KegiatanFilterStatus.semua),
-
             _chip(vm, "Dibuat", KegiatanFilterStatus.dibuat),
-
             _chip(vm, "Dibatalkan", KegiatanFilterStatus.dibatalkan),
-
             _chip(vm, "Selesai", KegiatanFilterStatus.selesai),
           ],
         ),
@@ -258,14 +255,14 @@ class RwKegiatanPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
 
         decoration: BoxDecoration(
-          color: selected ? ColorsUtils.b300 : Colors.white,
+          color: selected ? ColorsUtils.b300 : ColorsUtils.white,
           borderRadius: BorderRadius.circular(14),
         ),
 
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : Colors.black,
+            color: selected ? ColorsUtils.white : ColorsUtils.black,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -284,12 +281,12 @@ class RwKegiatanPage extends StatelessWidget {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ColorsUtils.white,
         borderRadius: BorderRadius.circular(22),
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: ColorsUtils.black.withOpacity(0.03),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -317,7 +314,6 @@ class RwKegiatanPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 10),
-
           Row(
             children: [
               Icon(
@@ -327,11 +323,10 @@ class RwKegiatanPage extends StatelessWidget {
               ),
 
               const SizedBox(width: 8),
-
               Text(
                 vm.formatTanggalRange(kegiatan),
                 style: TextStyle(
-                  color: Colors.grey.shade700,
+                  color: ColorsUtils.slateGray,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -339,11 +334,9 @@ class RwKegiatanPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-
           Text(kegiatan.deskripsi ?? "-", style: const TextStyle(height: 1.5)),
 
           const SizedBox(height: 20),
-
           if (vm.isReadonly(kegiatan)) ...[
             _fullButton(
               label: "Lihat Kegiatan",
@@ -386,7 +379,7 @@ class RwKegiatanPage extends StatelessWidget {
                   Expanded(
                     child: _outlineButton(
                       label: "Batalkan",
-                      color: Colors.red,
+                      color: ColorsUtils.red,
                       onTap: () {
                         showDialog(
                           context: context,
@@ -433,17 +426,7 @@ class RwKegiatanPage extends StatelessWidget {
                         : "Lihat Kegiatan",
 
                     onTap: () {
-                      if (vm.canEdit(kegiatan)) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Halaman edit kegiatan belum tersedia",
-                            ),
-                          ),
-                        );
-                      } else {
-                        _openDetail(context, kegiatan, true);
-                      }
+                      _openDetail(context, kegiatan, !vm.canEdit(kegiatan));
                     },
                   ),
                 ),
@@ -455,39 +438,29 @@ class RwKegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _badge(KegiatanStatus status) {
-    Color color = ColorsUtils.b300;
-    String label = "Dibuat";
+Widget _badge(KegiatanStatus status) {
+  final ui = status.ui;
 
-    switch (status) {
-      case KegiatanStatus.dibatalkan:
-        color = Colors.red;
-        label = "Dibatalkan";
-        break;
+  return Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 8,
+    ),
 
-      case KegiatanStatus.selesai:
-        color = Colors.green;
-        label = "Selesai";
-        break;
+    decoration: BoxDecoration(
+      color: ui.color.withOpacity(0.15),
+      borderRadius: BorderRadius.circular(30),
+    ),
 
-      default:
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(30),
+    child: Text(
+      ui.label,
+      style: TextStyle(
+        color: ui.color,
+        fontWeight: FontWeight.bold,
       ),
-
-      child: Text(
-        label,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _outlineButton({
     required String label,
@@ -517,7 +490,7 @@ class RwKegiatanPage extends StatelessWidget {
 
       style: ElevatedButton.styleFrom(
         backgroundColor: ColorsUtils.b300,
-        foregroundColor: Colors.white,
+        foregroundColor: ColorsUtils.white,
 
         elevation: 0,
 
@@ -535,7 +508,7 @@ class RwKegiatanPage extends StatelessWidget {
       context: context,
       isScrollControlled: true,
 
-      backgroundColor: Colors.white,
+      backgroundColor: ColorsUtils.white,
 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -556,7 +529,7 @@ class RwKegiatanPage extends StatelessWidget {
       context: context,
       isScrollControlled: true,
 
-      backgroundColor: Colors.white,
+      backgroundColor: ColorsUtils.white,
 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
