@@ -1,3 +1,5 @@
+import 'package:rukun_app_proyek4/models/user_model.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/surat_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
@@ -166,6 +168,15 @@ void main() async {
               SuratRwViewModel(context.read<WargaRepository>()),
         ),
         ChangeNotifierProvider(create: (_) => KegiatanRwViewModel()),
+
+        ChangeNotifierProvider(
+          create: (context) => SuratRtViewModel(
+            context.read<WargaRepository>(),
+            context.read<SuratRepository>(),
+            context.read<CloudinaryService>(),
+            context.read<AuthViewModel>()
+          ),
+        ),
       ],
       child: const MyApp(),
     ),

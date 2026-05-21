@@ -74,7 +74,7 @@ class NavViewModel {
         NavItem(
           icon: Icons.description,
           label: "Surat",
-          page: const RtSuratPage(),
+          page: RtSuratPage(user: user),
         ),
         NavItem(
           icon: Icons.person,
