@@ -33,7 +33,7 @@ import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmod
 import 'package:rukun_app_proyek4/viewmodels/rw/surat/surat_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
+import 'package:rukun_app_proyek4/views/pages/splash_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -184,7 +184,7 @@ class MyApp extends StatelessWidget {
       title: 'RukunApp',
       debugShowCheckedModeBanner: false,
       navigatorObservers: [routeObserver],
-      home: const WelcomePage(),
+      home: const SplashPage(),
     );
   }
 }
