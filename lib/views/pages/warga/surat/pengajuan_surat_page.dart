@@ -59,39 +59,82 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
             children: [
               _summary(vm),
               _filter(vm),
+              const SizedBox(height: 12),
+
+              _topAction(),
+
               const SizedBox(height: 10),
+
               Expanded(child: _list(vm)),
             ],
           );
         },
       ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TambahSuratPage(user: widget.user),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () async {
+      //     final result = await Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (_) => TambahSuratPage(user: widget.user),
+      //       ),
+      //     );
+
+      //     if (result == true && context.mounted) {
+      //       await context.read<PengajuanSuratViewModel>().fetchSuratSaya();
+
+      //       NotificationUtils.showSuccess(context, "Pengajuan surat berhasil");
+      //     }
+      //   },
+      //   backgroundColor: ColorsUtils.b400,
+      //   foregroundColor: ColorsUtils.white,
+      //   elevation: 4,
+      //   icon: const Icon(Icons.add),
+      //   label: const Text(
+      //     "Ajukan Surat",
+      //     style: TextStyle(fontWeight: FontWeight.w600),
+      //   ),
+      //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      // ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  Widget _topAction() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text(
+              "Daftar Pengajuan Surat",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-          );
+          ),
 
-          if (result == true && context.mounted) {
-            await context.read<PengajuanSuratViewModel>().fetchSuratSaya();
+          TextButton.icon(
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TambahSuratPage(user: widget.user),
+                ),
+              );
 
-            NotificationUtils.showSuccess(context, "Pengajuan surat berhasil");
-          }
-        },
-        backgroundColor: ColorsUtils.b400,
-        foregroundColor: ColorsUtils.white,
-        elevation: 4,
-        icon: const Icon(Icons.add),
-        label: const Text(
-          "Ajukan Surat",
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              if (result == true && mounted) {
+                await context.read<PengajuanSuratViewModel>().fetchSuratSaya();
+
+                NotificationUtils.showSuccess(
+                  context,
+                  "Pengajuan surat berhasil",
+                );
+              }
+            },
+            icon: const Icon(Icons.add),
+            label: const Text("Ajukan"),
+          ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -281,14 +324,212 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
                     ),
 
                     const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Wrap(
+                        spacing: 8,
+                        children: [
+                          // jika masih diajukan
+                          if (item.status == SuratStatus.diajukan) ...[
+                            _editButton(item),
+                            _deleteButton(item),
+                          ],
 
-                    if (_isActionable(item.status))
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: _actionIcon(context, item),
+                          // jika sudah diproses
+                          if (_isActionable(item.status))
+                            _actionIcon(context, item),
+                        ],
                       ),
+                    ),
                   ],
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _deleteButton(PengajuanSurat item) {
+    return InkWell(
+      onTap: () async {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: const Text("Hapus Surat"),
+              content: const Text("Yakin ingin menghapus pengajuan surat ini?"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text("Batal"),
+                ),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: const Text("Hapus"),
+                ),
+              ],
+            );
+          },
+        );
+
+        if (confirm == true && mounted) {
+          final success = await context
+              .read<PengajuanSuratViewModel>()
+              .deleteSurat(item.id!);
+
+          if (success) {
+            NotificationUtils.showSuccess(
+              context,
+              "Pengajuan surat berhasil dihapus",
+            );
+          } else {
+            NotificationUtils.showError(context, "Gagal menghapus surat");
+          }
+        }
+      },
+
+      borderRadius: BorderRadius.circular(8),
+
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.delete, size: 18, color: Colors.red),
+
+            SizedBox(width: 4),
+
+            Text(
+              "Hapus",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showActionModal(PengajuanSurat item) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.edit, color: Colors.orange),
+
+                  title: const Text("Edit Surat"),
+
+                  onTap: () async {
+                    Navigator.pop(context);
+
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TambahSuratPage(
+                          user: widget.user,
+                          surat: item,
+                          isEdit: true,
+                        ),
+                      ),
+                    );
+
+                    if (result == true && mounted) {
+                      context.read<PengajuanSuratViewModel>().fetchSuratSaya();
+                    }
+                  },
+                ),
+
+                ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+
+                  title: const Text("Hapus Surat"),
+
+                  onTap: () async {
+                    Navigator.pop(context);
+
+                    final success = await context
+                        .read<PengajuanSuratViewModel>()
+                        .deleteSurat(item.id!);
+
+                    if (success && mounted) {
+                      NotificationUtils.showSuccess(
+                        context,
+                        "Pengajuan surat berhasil dihapus",
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _editButton(PengajuanSurat item) {
+    return InkWell(
+      onTap: () async {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                TambahSuratPage(user: widget.user, surat: item, isEdit: true),
+          ),
+        );
+
+        if (result == true && mounted) {
+          context.read<PengajuanSuratViewModel>().fetchSuratSaya();
+
+          NotificationUtils.showSuccess(
+            context,
+            "Pengajuan surat berhasil diperbarui",
+          );
+        }
+      },
+
+      borderRadius: BorderRadius.circular(8),
+
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.edit, size: 18, color: Colors.orange),
+            SizedBox(width: 4),
+            Text(
+              "Edit",
+              style: TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -309,14 +550,19 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
           },
         );
       },
+
       borderRadius: BorderRadius.circular(8),
+
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
             Icon(Icons.visibility, size: 18, color: ColorsUtils.b300),
+
             SizedBox(width: 6),
+
             Text(
               "Lihat Detail",
               style: TextStyle(

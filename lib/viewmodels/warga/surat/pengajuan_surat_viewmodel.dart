@@ -97,4 +97,49 @@ class PengajuanSuratViewModel extends ChangeNotifier {
       return false;
     }
   }
+
+  // Future<bool> updateSurat(int id, PengajuanSurat data) async {
+  //   isLoading = true;
+  //   errorMessage = null;
+
+  //   notifyListeners();
+
+  //   try {
+  //     await repository.updateSurat(id, data);
+
+  //     await fetchSuratSaya();
+
+  //     isLoading = false;
+
+  //     notifyListeners();
+
+  //     return true;
+  //   } catch (e) {
+  //     errorMessage = e.toString().replaceAll("Exception: ", "");
+
+  //     isLoading = false;
+
+  //     notifyListeners();
+
+  //     return false;
+  //   }
+  // }
+
+  Future<bool> deleteSurat(int id) async {
+    try {
+      await repository.deleteSurat(id);
+
+      _list.removeWhere((e) => e.id == id);
+
+      notifyListeners();
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString().replaceAll("Exception: ", "");
+
+      notifyListeners();
+
+      return false;
+    }
+  }
 }
