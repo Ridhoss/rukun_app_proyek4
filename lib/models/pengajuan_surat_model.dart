@@ -4,7 +4,7 @@ class PengajuanSurat {
   final int? id;
   final int? wargaId;
   final String keperluan;
-  final String keterangan;
+  final String? keterangan;
   final SuratStatus status;
   final String? docRef;
   final String? catatan;
@@ -18,7 +18,7 @@ class PengajuanSurat {
     this.id,
     this.wargaId,
     required this.keperluan,
-    required this.keterangan,
+    this.keterangan,
     this.status = SuratStatus.diajukan,
     this.disetujuiOleh,
     this.docRef,

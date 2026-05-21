@@ -55,7 +55,7 @@ class DetailPengajuanSuratModal extends StatelessWidget {
             _field(title: "Keperluan", value: item.keperluan),
 
             const SizedBox(height: 16),
-            _field(title: "Keterangan", value: item.keterangan, maxLines: 4),
+            _field(title: "Keterangan", value: item.keterangan ?? '-', maxLines: 4),
 
             const SizedBox(height: 16),
             Row(

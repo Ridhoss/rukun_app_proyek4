@@ -78,7 +78,7 @@ class TindakLanjutModal extends StatelessWidget {
 
             const SizedBox(height: 24),
             _detail("Keperluan", surat.keperluan),
-            _detail("Keterangan", surat.keterangan),
+            _detail("Keterangan", surat.keterangan ?? '-'),
 
             const SizedBox(height: 10),
             const Text(

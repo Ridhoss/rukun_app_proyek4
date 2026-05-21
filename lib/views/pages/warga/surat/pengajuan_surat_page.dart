@@ -264,7 +264,7 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
                     const SizedBox(height: 8),
 
                     Text(
-                      item.keterangan,
+                      item.keterangan ?? '-',
                       style: TextStyle(color: ColorsUtils.darkgray),
                     ),
 
