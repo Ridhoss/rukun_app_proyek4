@@ -97,11 +97,16 @@ class SuratRwViewModel extends ChangeNotifier {
     final query = searchQuery.toLowerCase().trim();
 
     return source.where((e) {
-      final namaWarga = getNamaWarga(e.wargaId ?? 0).toLowerCase();
+      final namaWarga = (getNamaWarga(e.wargaId ?? 0)).toLowerCase();
 
-      return e.keperluan.toLowerCase().contains(query) ||
-          e.keterangan.toLowerCase().contains(query) ||
-          namaWarga.contains(query);
+      final keperluan = (e.keperluan).toLowerCase();
+      final keterangan = (e.keterangan ?? '').toLowerCase();
+
+      final q = query.toLowerCase();
+
+      return keperluan.contains(q) ||
+          keterangan.contains(q) ||
+          namaWarga.contains(q);
     }).toList();
   }
 

@@ -8,14 +8,14 @@ import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/surat/surat_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/widgets/rw/surat/disetujui/tindak_lanjut_modal.dart';
 
-class RwSuratPage extends StatefulWidget {
-  const RwSuratPage({super.key});
+class RtSuratPage extends StatefulWidget {
+  const RtSuratPage({super.key});
 
   @override
-  State<RwSuratPage> createState() => _RwSuratPageState();
+  State<RtSuratPage> createState() => _RtSuratPageState();
 }
 
-class _RwSuratPageState extends State<RwSuratPage> {
+class _RtSuratPageState extends State<RtSuratPage> {
   @override
   void initState() {
     super.initState();
@@ -34,8 +34,8 @@ class _RwSuratPageState extends State<RwSuratPage> {
 
       appBar: AppBarUtils.buildAppBar(
         context: context,
-        title: "Approved Surat",
-        subtitle: "Surat dari RT untuk ditindaklanjuti RW",
+        title: "Pengajuan Surat",
+        subtitle: "List pengajuan surat keterangan warga",
         name: nama,
         showAvatar: false,
         showGreeting: false,
@@ -55,9 +55,11 @@ class _RwSuratPageState extends State<RwSuratPage> {
               children: [
                 _buildSummary(vm),
 
-                _buildFilter(vm),
-
                 _buildSearch(vm),
+
+                const SizedBox(height: 4),
+
+                _buildFilter(vm),
 
                 const SizedBox(height: 8),
 
@@ -79,7 +81,7 @@ class _RwSuratPageState extends State<RwSuratPage> {
           Expanded(
             child: _summaryCard(
               total: vm.totalDisetujui,
-              title: "Ditindaklajuti",
+              title: "Disetujui",
               color: ColorsUtils.b300,
             ),
           ),
@@ -114,7 +116,7 @@ class _RwSuratPageState extends State<RwSuratPage> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 10),
 
       decoration: BoxDecoration(
         color: ColorsUtils.white,
@@ -142,7 +144,7 @@ class _RwSuratPageState extends State<RwSuratPage> {
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             title,
             textAlign: TextAlign.center,

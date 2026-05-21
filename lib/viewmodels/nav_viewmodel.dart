@@ -11,7 +11,7 @@ import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/surat_page.dart';
+import 'package:rukun_app_proyek4/views/pages/rt/surat/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/profile_page.dart';
 
 // pages Warga
