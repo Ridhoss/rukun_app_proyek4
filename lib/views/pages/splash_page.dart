@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
@@ -47,7 +48,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const WelcomePage()), // ← ke WelcomePage
+          MaterialPageRoute(builder: (context) => const AuthGate()),
         );
       }
     });
