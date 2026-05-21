@@ -30,7 +30,7 @@ class _RwSuratPageState extends State<RwSuratPage> {
     final nama = context.watch<AuthViewModel>().currentUser?.warga?.nama ?? "-";
 
     return Scaffold(
-      backgroundColor: ColorsUtils.lightgray,
+      // backgroundColor: ColorsUtils.lightgray,
 
       appBar: AppBarUtils.buildAppBar(
         context: context,
@@ -55,9 +55,9 @@ class _RwSuratPageState extends State<RwSuratPage> {
               children: [
                 _buildSummary(vm),
 
-                _buildFilter(vm),
-
                 _buildSearch(vm),
+                
+                _buildFilter(vm),
 
                 const SizedBox(height: 8),
 
@@ -115,12 +115,9 @@ class _RwSuratPageState extends State<RwSuratPage> {
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 18),
-
       decoration: BoxDecoration(
         color: ColorsUtils.white,
-
-        borderRadius: BorderRadius.circular(18),
-
+        borderRadius: BorderRadius.circular(18), 
         boxShadow: [
           BoxShadow(
             color: ColorsUtils.black.withOpacity(0.05),
@@ -330,14 +327,14 @@ class _RwSuratPageState extends State<RwSuratPage> {
             ],
           ),
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 10),
           _detailRow("Keperluan", surat.keperluan),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           _detailRow("Keterangan", surat.keterangan),
 
           if (surat.status == SuratStatus.disetujui) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 18),
 
             SizedBox(
               width: double.infinity,
