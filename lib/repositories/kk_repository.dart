@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
-import 'package:rukun_app_proyek4/services/auth_local_service.dart';
+import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 
 class KKRepository {
   final CloudKKService service;

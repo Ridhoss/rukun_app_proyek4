@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/warga_model.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 
@@ -159,7 +160,7 @@ class AddWargaViewModel extends ChangeNotifier {
     return v.trim().isEmpty ? null : v;
   }
 
-  Future<bool> saveWarga() async {
+  Future<bool> saveWarga(Keluarga kel) async {
     isSaving = true;
     errorMessage = null;
     notifyListeners();
@@ -186,7 +187,7 @@ class AddWargaViewModel extends ChangeNotifier {
         noKitap: _nullable(noKitap),
         namaAyah: _nullable(namaAyah),
         namaIbu: _nullable(namaIbu),
-        keluargaId: kkId,
+        keluarga: kel,
       );
 
       await repo.createWarga(warga);

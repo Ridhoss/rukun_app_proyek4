@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
-import 'package:rukun_app_proyek4/services/auth_local_service.dart';
+import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 
 class AuthRepository {

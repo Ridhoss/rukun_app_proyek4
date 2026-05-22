@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
-import 'package:rukun_app_proyek4/services/auth_local_service.dart';
+import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_surat_service.dart';
 
 class SuratRepository {
@@ -47,6 +47,30 @@ class SuratRepository {
     return PengajuanSurat.fromJson(data);
   }
 
+  Future<List<PengajuanSurat>> getSuratByRt(int rtId) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(() => service.getSuratByRt(rtId, token));
+
+    _validateStatus(result);
+
+    final List data = result['data'] ?? [];
+
+    return data.map((e) => PengajuanSurat.fromJson(e)).toList();
+  }
+
+  Future<List<PengajuanSurat>> getSuratByRw(int rwId) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(() => service.getSuratByRw(rwId, token));
+
+    _validateStatus(result);
+
+    final List data = result['data'] ?? [];
+
+    return data.map((e) => PengajuanSurat.fromJson(e)).toList();
+  }
+
   Future<bool> createSurat(PengajuanSurat surat) async {
     final token = await _requireToken();
 
@@ -62,9 +86,7 @@ class SuratRepository {
   Future<void> updateStatusSurat(int id, Map<String, dynamic> data) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.updateStatusSurat(id, data, token),
-    );
+    final result = await _safeCall(() => service.updateSurat(id, data, token));
 
     _validateStatus(result);
   }
@@ -93,10 +115,16 @@ class SuratRepository {
     try {
       return await fn();
     } on DioException catch (e) {
-      final message =
-          e.response?.data?['message'] ??
-          e.response?.data?['meta']?['message'] ??
-          "Terjadi kesalahan";
+      final data = e.response?.data;
+
+      String message = "Terjadi kesalahan";
+
+      if (data is Map<String, dynamic>) {
+        message =
+            data['message'] ?? data['meta']?['message'] ?? "Terjadi kesalahan";
+      } else if (data is String) {
+        message = data;
+      }
 
       throw Exception(message);
     } catch (e) {

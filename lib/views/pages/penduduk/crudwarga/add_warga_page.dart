@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/warga/add_warga_viewmodel.dart';
 
 class AddWargaPage extends StatelessWidget {
-  const AddWargaPage({super.key});
+  final Keluarga keluarga;
+
+  const AddWargaPage({super.key, required this.keluarga});
 
   @override
   Widget build(BuildContext context) {
@@ -315,7 +318,7 @@ class AddWargaPage extends StatelessWidget {
           onPressed: vm.isSaving
               ? null
               : () async {
-                  await vm.saveWarga();
+                  await vm.saveWarga(keluarga);
 
                   if (vm.errorMessage != null) {
                     NotificationUtils.showError(context, vm.errorMessage!);

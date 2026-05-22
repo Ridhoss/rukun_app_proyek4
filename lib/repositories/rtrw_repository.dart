@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/rt_model.dart';
 import 'package:rukun_app_proyek4/models/rw_model.dart';
-import 'package:rukun_app_proyek4/services/auth_local_service.dart';
+import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_rtrw_service.dart';
 
 class RTRWRepository {

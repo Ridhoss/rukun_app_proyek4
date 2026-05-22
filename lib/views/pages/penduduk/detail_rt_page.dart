@@ -193,7 +193,7 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
           MaterialPageRoute(
             builder: (_) => DetailKKPage(
               kkId: kk.id!,
-              currentUserKKId: widget.currentUser.warga?.keluargaId,
+              currentUserKKId: widget.currentUser.warga?.keluarga?.id,
               currentUserWargaId: widget.currentUser.wargaId,
             ),
           ),

@@ -1,37 +1,46 @@
+import 'package:rukun_app_proyek4/models/rt_model.dart';
+
 enum SuratStatus { diajukan, disetujui, ditolak, selesai }
 
 class PengajuanSurat {
   final int? id;
   final int? wargaId;
+  final int? rtId;
   final String keperluan;
-  final String keterangan;
+  final String? keterangan;
   final SuratStatus status;
   final String? docRef;
   final String? catatan;
   final int? disetujuiOleh;
   final DateTime? waktuDisetujui;
+  final bool isSigned;
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
+  final RtModel? rt;
 
   const PengajuanSurat({
     this.id,
     this.wargaId,
+    this.rtId,
     required this.keperluan,
-    required this.keterangan,
+    this.keterangan,
     this.status = SuratStatus.diajukan,
     this.disetujuiOleh,
     this.docRef,
     this.catatan,
     this.waktuDisetujui,
+    this.isSigned = false,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
+    this.rt,
   });
 
   PengajuanSurat copyWith({
     int? id,
     int? wargaId,
+    int? rtId,
     String? keperluan,
     String? keterangan,
     SuratStatus? status,
@@ -39,13 +48,16 @@ class PengajuanSurat {
     String? catatan,
     int? disetujuiOleh,
     DateTime? waktuDisetujui,
+    bool? isSigned,
     DateTime? waktuDibuat,
     DateTime? waktuDiubah,
     DateTime? waktuDihapus,
+    RtModel? rt,
   }) {
     return PengajuanSurat(
       id: id ?? this.id,
       wargaId: wargaId ?? this.wargaId,
+      rtId: rtId ?? this.rtId,
       keperluan: keperluan ?? this.keperluan,
       keterangan: keterangan ?? this.keterangan,
       status: status ?? this.status,
@@ -53,9 +65,11 @@ class PengajuanSurat {
       catatan: catatan ?? this.catatan,
       disetujuiOleh: disetujuiOleh ?? this.disetujuiOleh,
       waktuDisetujui: waktuDisetujui ?? this.waktuDisetujui,
+      isSigned: isSigned ?? this.isSigned,
       waktuDibuat: waktuDibuat ?? this.waktuDibuat,
       waktuDiubah: waktuDiubah ?? this.waktuDiubah,
       waktuDihapus: waktuDihapus ?? this.waktuDihapus,
+      rt: rt ?? this.rt,
     );
   }
 
@@ -63,6 +77,7 @@ class PengajuanSurat {
     return PengajuanSurat(
       id: json['id'],
       wargaId: json['warga_id'],
+      rtId: json['rt_id'],
       keperluan: json['keperluan'],
       keterangan: json['keterangan'],
       status: _status(json['status']),
@@ -72,6 +87,7 @@ class PengajuanSurat {
       waktuDisetujui: json['waktu_disetujui'] != null
           ? DateTime.parse(json['waktu_disetujui'])
           : null,
+      isSigned: json['is_signed'] ?? false,
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
@@ -81,6 +97,7 @@ class PengajuanSurat {
       waktuDihapus: json['waktu_dihapus'] != null
           ? DateTime.parse(json['waktu_dihapus'])
           : null,
+      rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
     );
   }
 
@@ -88,6 +105,7 @@ class PengajuanSurat {
     return {
       'id': id,
       'warga_id': wargaId,
+      'rt_id': rtId,
       'keperluan': keperluan,
       'keterangan': keterangan,
       'status': _statusToString(status),
@@ -95,6 +113,7 @@ class PengajuanSurat {
       'catatan': catatan,
       'disetujui_oleh': disetujuiOleh,
       'waktu_disetujui': waktuDisetujui?.toIso8601String(),
+      'is_signed': isSigned,
       'waktu_dibuat': waktuDibuat?.toIso8601String(),
       'waktu_diubah': waktuDiubah?.toIso8601String(),
       'waktu_dihapus': waktuDihapus?.toIso8601String(),
