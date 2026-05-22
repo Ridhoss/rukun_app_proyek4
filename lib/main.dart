@@ -32,7 +32,6 @@ import 'package:rukun_app_proyek4/viewmodels/roles/rw/iuran/detail_iuran_rw_view
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/iuran/iuran_page_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/penduduk/penduduk_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/warga/surat/pengajuan_surat_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/roles/rw/surat/surat_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/warga/profile/data_kk_viewmodel.dart';
 
 void main() async {
@@ -160,15 +159,6 @@ void main() async {
           create: (context) => DataKKViewModel(
             kkRepository: context.read<KKRepository>(),
             wargaRepository: context.read<WargaRepository>(),
-          ),
-        ),
-
-        ChangeNotifierProvider(
-          create: (context) => SuratRwViewModel(
-            context.read<WargaRepository>(),
-            context.read<SuratRepository>(),
-            context.read<CloudinaryService>(),
-            context.read<AuthViewModel>(),
           ),
         ),
 
