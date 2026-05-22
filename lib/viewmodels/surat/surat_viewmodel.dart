@@ -26,8 +26,6 @@ class SuratViewModel extends ChangeNotifier {
     this.authVm,
   );
 
-  File? signedFile;
-
   bool isUploading = false;
   bool isLoading = false;
 
@@ -37,37 +35,13 @@ class SuratViewModel extends ChangeNotifier {
   final List<PengajuanSurat> _allData = [];
   final Map<int, Warga> _wargaMap = {};
 
-  Future<void> pickFile() async {
-    try {
-      final result = await fp.FilePicker.pickFiles(
-        type: fp.FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx'],
-      );
-
-      if (result == null || result.files.single.path == null) return;
-
-      signedFile = File(result.files.single.path!);
-
-      notifyListeners();
-    } catch (e) {
-      debugPrint("ERROR PICK FILE: $e");
-    }
-  }
-
-  void clearFile() {
-    signedFile = null;
-    notifyListeners();
-  }
-
-  Future<bool> uploadSurat({required int id}) async {
-    if (signedFile == null) return false;
-
+  Future<bool> uploadDraftByRt({required int id, required File file}) async {
     isUploading = true;
     notifyListeners();
 
     try {
       final url = await cloudinaryService.uploadFile(
-        signedFile!,
+        file,
         folder: 'surat/pengajuan/$id',
       );
 
@@ -76,23 +50,65 @@ class SuratViewModel extends ChangeNotifier {
       final body = {
         "status": "Disetujui",
         "doc_referensi": url,
+        "is_signed": false,
         "disetujui_oleh": authVm.currentUser?.id,
       };
 
       await suratRepo.updateStatusSurat(id, body);
 
       final index = _allData.indexWhere((e) => e.id == id);
+
       if (index != -1) {
         _allData[index] = _allData[index].copyWith(
           status: SuratStatus.disetujui,
           docRef: url,
+          isSigned: false,
         );
       }
 
-      clearFile();
       return true;
     } catch (e) {
-      debugPrint("ERROR UPLOAD SURAT: $e");
+      debugPrint("ERROR RT UPLOAD: $e");
+      return false;
+    } finally {
+      isUploading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> uploadSignedByRw({required int id, required File file}) async {
+    isUploading = true;
+    notifyListeners();
+
+    try {
+      final url = await cloudinaryService.uploadFile(
+        file,
+        folder: 'surat/pengajuan/$id',
+      );
+
+      if (url == null) return false;
+
+      final body = {
+        "status": "Selesai",
+        "doc_referensi": url,
+        "is_signed": true,
+      };
+
+      await suratRepo.updateStatusSurat(id, body);
+
+      final index = _allData.indexWhere((e) => e.id == id);
+
+      if (index != -1) {
+        _allData[index] = _allData[index].copyWith(
+          status: SuratStatus.selesai,
+          docRef: url,
+          isSigned: true,
+        );
+      }
+
+      return true;
+    } catch (e) {
+      debugPrint("ERROR RW UPLOAD: $e");
       return false;
     } finally {
       isUploading = false;

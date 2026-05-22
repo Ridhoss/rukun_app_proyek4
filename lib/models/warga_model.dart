@@ -303,7 +303,7 @@ class Warga {
       namaAyah: json['nama_ayah'],
       namaIbu: json['nama_ibu'],
 
-      keluarga: json['keluarga'],
+      keluarga: json['keluarga'] != null ? Keluarga.fromJson(json['keluarga']) : null,
 
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])

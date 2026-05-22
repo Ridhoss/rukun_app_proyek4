@@ -7,6 +7,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/surat/widgets/tindak_lanjut_modal.dart';
 import 'package:rukun_app_proyek4/views/pages/surat/widgets/tindak_lanjut_rt_modal.dart';
 
 class SuratPage extends StatefulWidget {
@@ -280,6 +281,16 @@ class _SuratPageState extends State<SuratPage> {
     final status = surat.status.ui;
     final namaWarga = vm.getNamaWarga(surat.wargaId ?? 0);
     final avatar = vm.getAvatarInitial(surat.wargaId ?? 0);
+    final level = vm.authVm.currentUser?.pengurus?.level;
+
+    final canProcess =
+        (level == "RT" && surat.status == SuratStatus.diajukan) ||
+        (level == "RW" && surat.status == SuratStatus.disetujui);
+        
+    final canView =
+        (level == "RT" && surat.status == SuratStatus.diajukan) ||
+        (level == "RW" && surat.status == SuratStatus.disetujui) ||
+        surat.status == SuratStatus.selesai;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -357,9 +368,7 @@ class _SuratPageState extends State<SuratPage> {
           const SizedBox(height: 14),
           _detailRow("Keterangan", surat.keterangan ?? '-'),
 
-          if (surat.status == SuratStatus.diajukan ||
-              surat.status == SuratStatus.disetujui ||
-              surat.status == SuratStatus.selesai) ...[
+          if (canView) ...[
             const SizedBox(height: 24),
 
             SizedBox(
@@ -378,6 +387,17 @@ class _SuratPageState extends State<SuratPage> {
                       ),
                     ),
                     builder: (_) {
+                      if (level == "RW") {
+                        return FractionallySizedBox(
+                          heightFactor: 0.8,
+                          child: TindakLanjutModal(
+                            surat: surat,
+                            namaWarga: namaWarga,
+                            readOnly: surat.status != SuratStatus.disetujui,
+                          ),
+                        );
+                      }
+
                       return FractionallySizedBox(
                         heightFactor: 0.8,
                         child: TindakLanjutRtModal(
@@ -400,11 +420,7 @@ class _SuratPageState extends State<SuratPage> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
 
-                child: Text(
-                  surat.status == SuratStatus.diajukan
-                      ? "Tindak Lanjut"
-                      : "Lihat Detail",
-                ),
+                child: Text(canProcess ? "Tindak Lanjut" : "Lihat Detail"),
               ),
             ),
           ],
