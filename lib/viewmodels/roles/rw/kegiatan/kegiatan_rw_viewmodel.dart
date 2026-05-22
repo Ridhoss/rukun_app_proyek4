@@ -263,6 +263,117 @@ class KegiatanRwViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void createKegiatan({
+    required String nama,
+    required String deskripsi,
+    required DateTime tanggalMulai,
+    DateTime? tanggalSelesai,
+  }) {
+    final kegiatan = Kegiatan(
+      id: _allData.length + 1,
+
+      nama: nama,
+
+      deskripsi: deskripsi,
+
+      tanggalMulai: tanggalMulai,
+
+      tanggalSelesai: tanggalSelesai,
+
+      level: KegiatanLevel.rw,
+
+      rwId: 2,
+
+      status: KegiatanStatus.dibuat,
+
+      docReferensi: dokumenFile?.path.split("/").last,
+
+      imgReferensi: buktiImage?.path.split("/").last,
+
+      waktuDibuat: DateTime.now(),
+    );
+
+    _allData.insert(0, kegiatan);
+
+    notifyListeners();
+  }
+
+  String? validateCreateKegiatan({
+    required String nama,
+    required String deskripsi,
+    required DateTime? tanggalMulai,
+    required DateTime? tanggalSelesai,
+  }) {
+    if (nama.trim().isEmpty) {
+      return "Nama kegiatan wajib diisi";
+    }
+
+    if (deskripsi.trim().isEmpty) {
+      return "Deskripsi wajib diisi";
+    }
+
+    if (tanggalMulai == null) {
+      return "Tanggal mulai wajib diisi";
+    }
+
+    if (tanggalSelesai == null) {
+      return "Tanggal selesai wajib diisi";
+    }
+
+    if (dokumenFile == null) {
+      return "Dokumen pendukung wajib diupload";
+    }
+
+    if (tanggalSelesai.isBefore(tanggalMulai)) {
+      return "Tanggal selesai tidak boleh sebelum tanggal mulai";
+    }
+
+    return null;
+  }
+
+  String? validateEditKegiatan({
+    required Kegiatan kegiatan,
+    required String nama,
+    required String deskripsi,
+    required DateTime? tanggalMulai,
+    required DateTime? tanggalSelesai,
+    required bool wajibFoto,
+  }) {
+    if (nama.trim().isEmpty) {
+      return "Nama kegiatan wajib diisi";
+    }
+
+    if (deskripsi.trim().isEmpty) {
+      return "Deskripsi wajib diisi";
+    }
+
+    if (tanggalMulai == null) {
+      return "Tanggal mulai wajib diisi";
+    }
+
+    if (tanggalSelesai == null) {
+      return "Tanggal selesai wajib diisi";
+    }
+
+    final hasDokumen = dokumenFile != null || kegiatan.docReferensi != null;
+
+    if (!hasDokumen) {
+      return "Dokumen pendukung wajib diupload";
+    }
+
+    if (tanggalSelesai.isBefore(tanggalMulai)) {
+      return "Tanggal selesai tidak boleh sebelum tanggal mulai";
+    }
+
+    final hasFoto = buktiImage != null || kegiatan.imgReferensi != null;
+
+    if (wajibFoto && !hasFoto) {
+      return "Foto kegiatan wajib diupload";
+    }
+
+    return null;
+  }
+
   String formatTanggalRange(Kegiatan kegiatan) {
     final mulai = DateFormat("dd MMM yyyy").format(kegiatan.tanggalMulai);
 

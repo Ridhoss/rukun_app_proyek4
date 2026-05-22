@@ -7,6 +7,7 @@ import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rw/kegiatan/widgets/detail_kegiatan_modal.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rw/kegiatan/widgets/tambah_kegiatan_modal.dart';
 
 class RwKegiatanPage extends StatelessWidget {
   const RwKegiatanPage({super.key});
@@ -42,7 +43,7 @@ class RwKegiatanPage extends StatelessWidget {
                 _statusFilter(vm),
 
                 _buildSearch(vm),
-                
+
                 const SizedBox(height: 16),
                 _headerKegiatan(context, vm),
 
@@ -123,21 +124,27 @@ class RwKegiatanPage extends StatelessWidget {
                 _openCreate(context);
               },
 
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorsUtils.lightgray,
-                foregroundColor: ColorsUtils.black,
+              style:
+                  ElevatedButton.styleFrom(
+                    backgroundColor: ColorsUtils.lightgray,
+                    foregroundColor: ColorsUtils.black,
 
-                elevation: 0,
+                    elevation: 0,
 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                    shadowColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
 
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ).copyWith(
+                    overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                  ),
 
               child: const Text(
                 "+ Tambah",
@@ -642,8 +649,7 @@ class RwKegiatanPage extends StatelessWidget {
       builder: (_) {
         return const FractionallySizedBox(
           heightFactor: 0.92,
-
-          child: Center(child: Text("Form Tambah Kegiatan")),
+          child: TambahKegiatanModal(),
         );
       },
     );

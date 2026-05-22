@@ -24,4 +24,5 @@ class ColorsUtils {
   static const slateGray = Color(0xFF54555A);
   static const lightred = Color(0xFFFCEBEB);
   static const red = Color(0xFFBA1414);
+  static const transparent = Colors.transparent;
 }

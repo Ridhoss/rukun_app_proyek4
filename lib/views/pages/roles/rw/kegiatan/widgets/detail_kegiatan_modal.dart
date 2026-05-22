@@ -18,12 +18,10 @@ class DetailKegiatanModal extends StatefulWidget {
   });
 
   @override
-  State<DetailKegiatanModal> createState() =>
-      _DetailKegiatanModalState();
+  State<DetailKegiatanModal> createState() => _DetailKegiatanModalState();
 }
 
-class _DetailKegiatanModalState
-    extends State<DetailKegiatanModal> {
+class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
   late TextEditingController namaController;
   late TextEditingController deskripsiController;
 
@@ -34,8 +32,7 @@ class _DetailKegiatanModalState
   void initState() {
     super.initState();
 
-    namaController =
-        TextEditingController(text: widget.kegiatan.nama);
+    namaController = TextEditingController(text: widget.kegiatan.nama);
 
     deskripsiController = TextEditingController(
       text: widget.kegiatan.deskripsi ?? "",
@@ -76,10 +73,7 @@ class _DetailKegiatanModalState
                 const Expanded(
                   child: Text(
                     "Detail Kegiatan",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                 ),
 
@@ -145,8 +139,7 @@ class _DetailKegiatanModalState
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
-                        initialDate:
-                            tanggalSelesai ?? tanggalMulai,
+                        initialDate: tanggalSelesai ?? tanggalMulai,
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2035),
                       );
@@ -171,11 +164,7 @@ class _DetailKegiatanModalState
 
             const SizedBox(height: 12),
 
-            _documentBox(
-              context,
-              vm,
-              widget.kegiatan.docReferensi,
-            ),
+            _documentBox(context, vm, widget.kegiatan.docReferensi),
 
             const SizedBox(height: 24),
 
@@ -186,11 +175,7 @@ class _DetailKegiatanModalState
 
             const SizedBox(height: 12),
 
-            _imageBox(
-              context,
-              vm,
-              widget.kegiatan.imgReferensi,
-            ),
+            _imageBox(context, vm, widget.kegiatan.imgReferensi),
 
             const SizedBox(height: 32),
 
@@ -210,21 +195,16 @@ class _DetailKegiatanModalState
                           color: ColorsUtils.red.withOpacity(0.4),
                         ),
 
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
 
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
 
                       child: const Text(
                         "Batal",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
@@ -236,19 +216,39 @@ class _DetailKegiatanModalState
                       onPressed: vm.isUploading
                           ? null
                           : () async {
-                              vm.updateKegiatan(
-                                id: widget.kegiatan.id!,
-                                nama: namaController.text,
-                                deskripsi:
-                                    deskripsiController.text,
+                              final error = vm.validateEditKegiatan(
+                                kegiatan: widget.kegiatan,
+                                nama: namaController.text.trim(),
+                                deskripsi: deskripsiController.text.trim(),
                                 tanggalMulai: tanggalMulai,
-                                tanggalSelesai:
-                                    tanggalSelesai,
+                                tanggalSelesai: tanggalSelesai,
+
+                                wajibFoto:
+                                    widget.kegiatan.status ==
+                                        KegiatanStatus.selesai &&
+                                    widget.kegiatan.imgReferensi == null,
                               );
 
-                              await vm.uploadDummyBukti(
-                                widget.kegiatan.id!,
+                              if (error != null) {
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(SnackBar(content: Text(error)));
+
+                                return;
+                              }
+
+                              vm.updateKegiatan(
+                                id: widget.kegiatan.id!,
+                                nama: namaController.text.trim(),
+                                deskripsi: deskripsiController.text.trim(),
+                                tanggalMulai: tanggalMulai,
+                                tanggalSelesai: tanggalSelesai,
                               );
+
+                              // upload foto hanya jika ada foto baru
+                              if (vm.buktiImage != null) {
+                                await vm.uploadDummyBukti(widget.kegiatan.id!);
+                              }
 
                               if (context.mounted) {
                                 Navigator.pop(context);
@@ -256,19 +256,13 @@ class _DetailKegiatanModalState
                             },
 
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            ColorsUtils.green,
-
+                        backgroundColor: ColorsUtils.green,
                         foregroundColor: Colors.white,
 
-                        padding:
-                            const EdgeInsets.symmetric(
-                          vertical: 14,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
 
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
 
@@ -277,11 +271,9 @@ class _DetailKegiatanModalState
                               height: 18,
                               width: 18,
 
-                              child:
-                                  CircularProgressIndicator(
+                              child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color:
-                                    ColorsUtils.white,
+                                color: ColorsUtils.white,
                               ),
                             )
                           : const Text("Simpan"),
@@ -305,12 +297,7 @@ class _DetailKegiatanModalState
       crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
 
         const SizedBox(height: 8),
 
@@ -320,9 +307,7 @@ class _DetailKegiatanModalState
           maxLines: maxLines,
 
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ],
@@ -339,12 +324,7 @@ class _DetailKegiatanModalState
       crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
 
         const SizedBox(height: 8),
 
@@ -353,16 +333,13 @@ class _DetailKegiatanModalState
 
           child: AbsorbPointer(
             child: TextFormField(
-              controller:
-                  TextEditingController(text: value),
+              controller: TextEditingController(text: value),
 
               decoration: InputDecoration(
-                suffixIcon:
-                    const Icon(Icons.calendar_today),
+                suffixIcon: const Icon(Icons.calendar_today),
 
                 border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -378,13 +355,10 @@ class _DetailKegiatanModalState
     String? fileName,
   ) {
     final currentFile =
-        vm.dokumenFile?.path.split("/").last ??
-            fileName ??
-            "Belum ada dokumen";
+        vm.dokumenFile?.path.split("/").last ?? fileName ?? "Belum ada dokumen";
 
     return GestureDetector(
-      onTap:
-          widget.readonly ? null : vm.pickDokumenFile,
+      onTap: widget.readonly ? null : vm.pickDokumenFile,
 
       child: Container(
         width: double.infinity,
@@ -404,14 +378,11 @@ class _DetailKegiatanModalState
             Expanded(
               child: Text(
                 currentFile,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ),
 
-            if (!widget.readonly)
-              const Icon(Icons.upload_file_rounded),
+            if (!widget.readonly) const Icon(Icons.upload_file_rounded),
           ],
         ),
       ),
@@ -424,8 +395,7 @@ class _DetailKegiatanModalState
     String? imageName,
   ) {
     return GestureDetector(
-      onTap:
-          widget.readonly ? null : vm.pickBuktiImage,
+      onTap: widget.readonly ? null : vm.pickBuktiImage,
 
       child: Container(
         width: double.infinity,
@@ -434,15 +404,12 @@ class _DetailKegiatanModalState
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
 
-          border: Border.all(
-            color: ColorsUtils.gray,
-          ),
+          border: Border.all(color: ColorsUtils.gray),
         ),
 
         child: vm.buktiImage != null
             ? ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(14),
 
                 child: Image.file(
                   File(vm.buktiImage!.path),
@@ -451,20 +418,15 @@ class _DetailKegiatanModalState
                 ),
               )
             : Column(
-                mainAxisAlignment:
-                    MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
 
                 children: [
-                  const Icon(
-                    Icons.image_outlined,
-                    size: 42,
-                  ),
+                  const Icon(Icons.image_outlined, size: 42),
 
                   const SizedBox(height: 10),
 
                   Text(
-                    imageName ??
-                        "Belum ada foto kegiatan",
+                    imageName ?? "Belum ada foto kegiatan",
 
                     textAlign: TextAlign.center,
                   ),
@@ -474,10 +436,7 @@ class _DetailKegiatanModalState
 
                     const Text(
                       "Tap untuk upload foto",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: ColorsUtils.gray,
-                      ),
+                      style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
                     ),
                   ],
                 ],
@@ -490,10 +449,7 @@ class _DetailKegiatanModalState
     final ui = widget.kegiatan.status.ui;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
 
       decoration: BoxDecoration(
         color: ui.color.withOpacity(0.12),
