@@ -1,8 +1,11 @@
+import 'package:rukun_app_proyek4/models/rt_model.dart';
+
 enum SuratStatus { diajukan, disetujui, ditolak, selesai }
 
 class PengajuanSurat {
   final int? id;
   final int? wargaId;
+  final int? rtId;
   final String keperluan;
   final String? keterangan;
   final SuratStatus status;
@@ -13,10 +16,12 @@ class PengajuanSurat {
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
+  final RtModel? rt;
 
   const PengajuanSurat({
     this.id,
     this.wargaId,
+    this.rtId,
     required this.keperluan,
     this.keterangan,
     this.status = SuratStatus.diajukan,
@@ -27,11 +32,13 @@ class PengajuanSurat {
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
+    this.rt,
   });
 
   PengajuanSurat copyWith({
     int? id,
     int? wargaId,
+    int? rtId,
     String? keperluan,
     String? keterangan,
     SuratStatus? status,
@@ -42,10 +49,12 @@ class PengajuanSurat {
     DateTime? waktuDibuat,
     DateTime? waktuDiubah,
     DateTime? waktuDihapus,
+    RtModel? rt,
   }) {
     return PengajuanSurat(
       id: id ?? this.id,
       wargaId: wargaId ?? this.wargaId,
+      rtId: rtId ?? this.rtId,
       keperluan: keperluan ?? this.keperluan,
       keterangan: keterangan ?? this.keterangan,
       status: status ?? this.status,
@@ -56,6 +65,7 @@ class PengajuanSurat {
       waktuDibuat: waktuDibuat ?? this.waktuDibuat,
       waktuDiubah: waktuDiubah ?? this.waktuDiubah,
       waktuDihapus: waktuDihapus ?? this.waktuDihapus,
+      rt: rt ?? this.rt,
     );
   }
 
@@ -63,6 +73,7 @@ class PengajuanSurat {
     return PengajuanSurat(
       id: json['id'],
       wargaId: json['warga_id'],
+      rtId: json['rt_id'],
       keperluan: json['keperluan'],
       keterangan: json['keterangan'],
       status: _status(json['status']),
@@ -81,6 +92,7 @@ class PengajuanSurat {
       waktuDihapus: json['waktu_dihapus'] != null
           ? DateTime.parse(json['waktu_dihapus'])
           : null,
+      rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
     );
   }
 
@@ -88,6 +100,7 @@ class PengajuanSurat {
     return {
       'id': id,
       'warga_id': wargaId,
+      'rt_id': rtId,
       'keperluan': keperluan,
       'keterangan': keterangan,
       'status': _statusToString(status),
