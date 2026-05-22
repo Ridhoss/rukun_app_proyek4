@@ -7,26 +7,29 @@ import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/surat/utils/surat_permission.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart' as fp;
 
-class TindakLanjutRtModal extends StatefulWidget {
+class TindakLanjutModal extends StatefulWidget {
   final PengajuanSurat surat;
   final String namaWarga;
   final bool readOnly;
+  final SuratPermission permission;
 
-  const TindakLanjutRtModal({
+  const TindakLanjutModal({
     super.key,
     required this.surat,
     required this.namaWarga,
     this.readOnly = false,
+    required this.permission,
   });
 
   @override
-  State<TindakLanjutRtModal> createState() => _TindakLanjutRtModalState();
+  State<TindakLanjutModal> createState() => _TindakLanjutModalState();
 }
 
-class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
+class _TindakLanjutModalState extends State<TindakLanjutModal> {
   File? selectedFile;
 
   Future<void> pickFile() async {
@@ -55,15 +58,10 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
         top: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
-
       child: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-
           children: [
             _header(),
-
             const SizedBox(height: 24),
 
             _userHeader(),
@@ -71,109 +69,13 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
             const SizedBox(height: 24),
 
             _detail("Keperluan", widget.surat.keperluan),
-
             _detail("Keterangan", widget.surat.keterangan ?? '-'),
 
             const SizedBox(height: 20),
 
-            const Text(
-              "Informasi Pengajuan",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 10),
-
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-
-              children: [
-                _infoChip("Dibuat", vm.formatDate(widget.surat.waktuDibuat)),
-
-                _infoChip("Status", widget.surat.status.ui.label),
-              ],
-            ),
-
-            const SizedBox(height: 28),
-
-            if (!widget.readOnly) ...[
-              const Text(
-                "Upload Draft Surat",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                "Upload draft surat yang sudah dibuat sesuai keperluan warga.",
-                style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
-              ),
-
-              const SizedBox(height: 14),
-
-              _uploadBox(context, vm),
-
-              const SizedBox(height: 28),
-            ],
-
-            if (widget.surat.docRef != null) ...[
-              const SizedBox(height: 24),
-
-              const Text(
-                "Dokumen Surat",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-
-              const SizedBox(height: 12),
-
-              InkWell(
-                onTap: () async {
-                  final uri = Uri.parse(widget.surat.docRef!);
-
-                  final success = await launchUrl(
-                    uri,
-                    mode: LaunchMode.inAppBrowserView,
-                  );
-
-                  if (!success && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Gagal membuka dokumen")),
-                    );
-                  }
-                },
-
-                borderRadius: BorderRadius.circular(14),
-
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-
-                  child: Row(
-                    children: [
-                      const Icon(Icons.description),
-
-                      const SizedBox(width: 12),
-
-                      Expanded(
-                        child: Text(
-                          widget.surat.docRef!.split('/').last,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-
-                      const Icon(Icons.open_in_new, size: 18),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-
-            if (!widget.readOnly) _actionButtons(context, vm),
+            _buildUploadSection(widget.permission, vm),
+            _buildDocumentSection(),
+            _buildActionButtons(widget.permission, vm),
           ],
         ),
       ),
@@ -274,22 +176,6 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
     );
   }
 
-  Widget _infoChip(String title, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-
-        borderRadius: BorderRadius.circular(12),
-
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-
-      child: Text("$title: $value", style: const TextStyle(fontSize: 11)),
-    );
-  }
-
   Widget _uploadBox(BuildContext context, SuratViewModel vm) {
     return GestureDetector(
       onTap: pickFile,
@@ -335,34 +221,77 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
     );
   }
 
-  Widget _actionButtons(BuildContext context, SuratViewModel vm) {
-    return Row(
+  Widget _buildUploadSection(SuratPermission permission, SuratViewModel vm) {
+    if (permission.canUploadDraft || permission.canUploadSigned) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            permission.canUploadDraft
+                ? "Upload Draft Surat"
+                : "Upload Surat Bertanda Tangan",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+
+          _uploadBox(context, vm),
+          const SizedBox(height: 28),
+        ],
+      );
+    }
+
+    return const SizedBox();
+  }
+
+  Widget _buildDocumentSection() {
+    if (widget.surat.docRef == null) return const SizedBox();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+        const Text(
+          "Dokumen Surat",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
 
-            style: OutlinedButton.styleFrom(
-              foregroundColor: ColorsUtils.red,
+        InkWell(
+          onTap: () async {
+            final uri = Uri.parse(widget.surat.docRef!);
 
-              side: BorderSide(color: ColorsUtils.red.withOpacity(0.4)),
-
-              padding: const EdgeInsets.symmetric(vertical: 14),
-
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
+            await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+          },
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.grey.shade300),
             ),
-
-            child: const Text(
-              "Batal",
-              style: TextStyle(fontWeight: FontWeight.w600),
+            child: Row(
+              children: [
+                const Icon(Icons.description),
+                const SizedBox(width: 12),
+                Expanded(child: Text(widget.surat.docRef!.split('/').last)),
+                const Icon(Icons.open_in_new, size: 18),
+              ],
             ),
           ),
         ),
 
+        const SizedBox(height: 28),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(SuratPermission permission, SuratViewModel vm) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
+          ),
+        ),
         const SizedBox(width: 10),
 
         Expanded(
@@ -370,50 +299,27 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
             onPressed: vm.isUploading
                 ? null
                 : () async {
-                    if (selectedFile == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Pilih file terlebih dahulu"),
-                        ),
+                    if (selectedFile == null) return;
+
+                    if (permission.canUploadDraft) {
+                      await vm.uploadDraftByRt(
+                        id: widget.surat.id!,
+                        file: selectedFile!,
                       );
-                      return;
                     }
 
-                    final success = await vm.uploadDraftByRt(
-                      id: widget.surat.id!,
-                      file: selectedFile!,
-                    );
-
-                    if (success && context.mounted) {
-                      Navigator.pop(context);
+                    if (permission.canUploadSigned) {
+                      await vm.uploadSignedByRw(
+                        id: widget.surat.id!,
+                        file: selectedFile!,
+                      );
                     }
+
+                    if (context.mounted) Navigator.pop(context);
                   },
-
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorsUtils.b300,
-              foregroundColor: Colors.white,
-
-              padding: const EdgeInsets.symmetric(vertical: 14),
-
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
+            child: Text(
+              permission.canUploadDraft ? "Kirim ke RW" : "Selesaikan Surat",
             ),
-
-            child: vm.isUploading
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text(
-                    "Kirim ke RW",
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
           ),
         ),
       ],

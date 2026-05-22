@@ -87,11 +87,12 @@ class SuratViewModel extends ChangeNotifier {
       );
 
       if (url == null) return false;
-
+      
       final body = {
         "status": "Selesai",
         "doc_referensi": url,
         "is_signed": true,
+        "disetujui_oleh": authVm.currentUser?.id,
       };
 
       await suratRepo.updateStatusSurat(id, body);
