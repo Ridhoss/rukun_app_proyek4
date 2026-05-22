@@ -9,7 +9,7 @@ import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/views/pages/warga/surat/tambah_surat_page.dart';
-import 'package:rukun_app_proyek4/widgets/warga/detail_pengajuan_surat_modal.dart';
+import 'package:rukun_app_proyek4/views/pages/warga/surat/widgets/detail_pengajuan_surat_modal.dart';
 
 class PengajuanSuratPage extends StatefulWidget {
   final User user;

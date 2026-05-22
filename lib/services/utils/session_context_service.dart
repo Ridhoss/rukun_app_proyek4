@@ -1,4 +1,4 @@
-import 'package:rukun_app_proyek4/services/hive_service.dart';
+import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
 
 class SessionContext {
   const SessionContext({required this.rtId, required this.rtLabel});

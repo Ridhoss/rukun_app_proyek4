@@ -5,26 +5,39 @@ import 'package:flutter/material.dart';
 
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/models/warga_model.dart';
-import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 
-enum SuratRwFilterStatus { semua, disetujui, selesai }
+import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
+import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
+import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
+
+enum SuratFilterStatus { semua, diajukan, disetujui, selesai }
 
 class SuratRwViewModel extends ChangeNotifier {
   final WargaRepository wargaRepo;
+  final SuratRepository suratRepo;
+  final CloudinaryService cloudinaryService;
+  final AuthViewModel authVm;
 
-  SuratRwViewModel(this.wargaRepo);
+  SuratRwViewModel(
+    this.wargaRepo,
+    this.suratRepo,
+    this.cloudinaryService,
+    this.authVm,
+  );
 
   File? signedFile;
+
   bool isUploading = false;
   bool isLoading = false;
 
   String searchQuery = "";
-  SuratRwFilterStatus selectedStatus = SuratRwFilterStatus.semua;
+  SuratFilterStatus selectedStatus = SuratFilterStatus.semua;
 
   final List<PengajuanSurat> _allData = [];
   final Map<int, Warga> _wargaMap = {};
 
-  Future<void> pickSignedFile() async {
+  Future<void> pickFile() async {
     try {
       final result = await fp.FilePicker.pickFiles(
         type: fp.FileType.custom,
@@ -34,30 +47,53 @@ class SuratRwViewModel extends ChangeNotifier {
       if (result == null || result.files.single.path == null) return;
 
       signedFile = File(result.files.single.path!);
+
       notifyListeners();
     } catch (e) {
       debugPrint("ERROR PICK FILE: $e");
     }
   }
 
-  void clearSignedFile() {
+  void clearFile() {
     signedFile = null;
     notifyListeners();
   }
 
-  Future<void> uploadSignedSurat({required int id}) async {
-    if (signedFile == null) return;
+  Future<bool> uploadSurat({required int id}) async {
+    if (signedFile == null) return false;
 
     isUploading = true;
     notifyListeners();
 
     try {
-      //  sesuaikan
-      await selesaiSurat(id: id, signedDocument: signedFile!.path);
+      final url = await cloudinaryService.uploadFile(
+        signedFile!,
+        folder: 'surat/pengajuan/$id',
+      );
 
-      clearSignedFile();
+      if (url == null) return false;
+
+      final body = {
+        "status": "Disetujui",
+        "doc_referensi": url,
+        "disetujui_oleh": authVm.currentUser?.id,
+      };
+
+      await suratRepo.updateStatusSurat(id, body);
+
+      final index = _allData.indexWhere((e) => e.id == id);
+      if (index != -1) {
+        _allData[index] = _allData[index].copyWith(
+          status: SuratStatus.disetujui,
+          docRef: url,
+        );
+      }
+
+      clearFile();
+      return true;
     } catch (e) {
       debugPrint("ERROR UPLOAD SURAT: $e");
+      return false;
     } finally {
       isUploading = false;
       notifyListeners();
@@ -67,6 +103,7 @@ class SuratRwViewModel extends ChangeNotifier {
   List<PengajuanSurat> get data {
     var result = _filterByStatus(_allData);
     result = _filterBySearch(result);
+
     return result;
   }
 
@@ -76,17 +113,23 @@ class SuratRwViewModel extends ChangeNotifier {
   int get totalSelesai =>
       _allData.where((e) => e.status == SuratStatus.selesai).length;
 
+  int get totalDiajukan =>
+      _allData.where((e) => e.status == SuratStatus.diajukan).length;
+
   int get totalSemua => _allData.length;
 
   List<PengajuanSurat> _filterByStatus(List<PengajuanSurat> source) {
     switch (selectedStatus) {
-      case SuratRwFilterStatus.disetujui:
+      case SuratFilterStatus.diajukan:
+        return source.where((e) => e.status == SuratStatus.diajukan).toList();
+
+      case SuratFilterStatus.disetujui:
         return source.where((e) => e.status == SuratStatus.disetujui).toList();
 
-      case SuratRwFilterStatus.selesai:
+      case SuratFilterStatus.selesai:
         return source.where((e) => e.status == SuratStatus.selesai).toList();
 
-      case SuratRwFilterStatus.semua:
+      case SuratFilterStatus.semua:
         return source;
     }
   }
@@ -97,16 +140,15 @@ class SuratRwViewModel extends ChangeNotifier {
     final query = searchQuery.toLowerCase().trim();
 
     return source.where((e) {
-      final namaWarga = (getNamaWarga(e.wargaId ?? 0)).toLowerCase();
+      final namaWarga = getNamaWarga(e.wargaId ?? 0).toLowerCase();
 
-      final keperluan = (e.keperluan).toLowerCase();
+      final keperluan = (e.keperluan ?? '').toLowerCase();
+
       final keterangan = (e.keterangan ?? '').toLowerCase();
 
-      final q = query.toLowerCase();
-
-      return keperluan.contains(q) ||
-          keterangan.contains(q) ||
-          namaWarga.contains(q);
+      return keperluan.contains(query) ||
+          keterangan.contains(query) ||
+          namaWarga.contains(query);
     }).toList();
   }
 
@@ -134,60 +176,30 @@ class SuratRwViewModel extends ChangeNotifier {
 
   String getAvatarInitial(int wargaId) {
     final nama = getNamaWarga(wargaId);
+
     return nama.isNotEmpty ? nama[0].toUpperCase() : "?";
   }
 
-  Future<void> fetchSurat() async {
+  Future<void> fetchSurat({required int rtId}) async {
     try {
       isLoading = true;
       notifyListeners();
 
       await _loadWarga();
 
-      _loadDummySurat(); //dummy surat
+      final result = await suratRepo.getSuratByRt(rtId);
+
+      _allData.clear();
+      _allData.addAll(result);
     } catch (e) {
-      debugPrint("ERROR FETCH SURAT RW: $e");
+      debugPrint("ERROR FETCH SURAT RT: $e");
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  void _loadDummySurat() {
-    _allData.clear();
-
-    _allData.addAll([
-      PengajuanSurat(
-        id: 1,
-        wargaId: 1,
-        keperluan: "Surat Domisili",
-        keterangan: "Digunakan untuk keperluan kerja",
-        status: SuratStatus.disetujui,
-        docRef: "https://example.com/surat-domisili.pdf",
-        waktuDibuat: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      PengajuanSurat(
-        id: 2,
-        wargaId: 2,
-        keperluan: "Surat Pengantar Nikah",
-        keterangan: "Digunakan untuk syarat KUA",
-        status: SuratStatus.selesai,
-        docRef: "https://example.com/surat2.pdf",
-        waktuDibuat: DateTime.now().subtract(const Duration(days: 3)),
-      ),
-      PengajuanSurat(
-        id: 3,
-        wargaId: 3,
-        keperluan: "Surat Keterangan Usaha",
-        keterangan: "Untuk pengajuan UMKM",
-        status: SuratStatus.disetujui,
-        docRef: "https://example.com/surat3.pdf",
-        waktuDibuat: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-    ]);
-  }
-
-  void setStatus(SuratRwFilterStatus status) {
+  void setStatus(SuratFilterStatus status) {
     selectedStatus = status;
     notifyListeners();
   }
@@ -197,15 +209,16 @@ class SuratRwViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> selesaiSurat({
+  Future<void> setujuiSurat({
     required int id,
     required String signedDocument,
   }) async {
     final index = _allData.indexWhere((e) => e.id == id);
+
     if (index == -1) return;
 
     _allData[index] = _allData[index].copyWith(
-      status: SuratStatus.selesai,
+      status: SuratStatus.disetujui,
       docRef: signedDocument,
     );
 
@@ -220,7 +233,7 @@ class SuratRwViewModel extends ChangeNotifier {
         "${date.minute.toString().padLeft(2, '0')}";
   }
 
-  Future<void> refresh() async {
-    await fetchSurat();
+  Future<void> refresh({required int rtId}) async {
+    await fetchSurat(rtId: rtId);
   }
 }

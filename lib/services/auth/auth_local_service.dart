@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'hive_service.dart';
+import '../utils/hive_service.dart';
 
 class AuthLocalService {
   final HiveService _hiveService;

@@ -6,12 +6,11 @@ import 'package:rukun_app_proyek4/views/pages/rw/dashboard/dashboard_page.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/rw_kegiatan_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rw/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/surat/surat_page.dart';
 
 // pages RT
 import 'package:rukun_app_proyek4/views/pages/rt/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/penduduk/penduduk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rt/surat/surat_page.dart';
+import 'package:rukun_app_proyek4/views/pages/surat/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/rt/profile_page.dart';
 
 // pages Warga
@@ -44,11 +43,11 @@ class NavViewModel {
           label: "Iuran",
           page: PengurusIuranPage(user: user),
         ),
-        NavItem(
-          icon: Icons.description,
-          label: "Surat",
-          page: const RwSuratPage(),
-        ),
+        // NavItem(
+        //   icon: Icons.description,
+        //   label: "Surat",
+        //   page: const RwSuratPage(),
+        // ),
         NavItem(
           icon: Icons.event,
           label: "Kegiatan",

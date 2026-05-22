@@ -6,7 +6,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rw/kegiatan/kegiatan_rw_viewmodel.dart';
-import 'package:rukun_app_proyek4/widgets/rw/kegiatan/detail_kegiatan_modal.dart';
+import 'package:rukun_app_proyek4/views/pages/rw/kegiatan/widgets/detail_kegiatan_modal.dart';
 
 class RwKegiatanPage extends StatelessWidget {
   const RwKegiatanPage({super.key});

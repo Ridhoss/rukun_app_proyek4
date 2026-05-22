@@ -216,7 +216,7 @@ class TindakLanjutModal extends StatelessWidget {
 
   Widget _uploadBox(BuildContext context, SuratRwViewModel vm) {
     return GestureDetector(
-      onTap: vm.pickSignedFile,
+      onTap: vm.pickFile,
 
       child: Container(
         width: double.infinity,
@@ -280,7 +280,7 @@ class TindakLanjutModal extends StatelessWidget {
             onPressed: vm.isUploading
                 ? null
                 : () async {
-                    await vm.uploadSignedSurat(id: surat.id!);
+                    await vm.uploadSurat(id: surat.id!);
 
                     Navigator.pop(context);
                   },

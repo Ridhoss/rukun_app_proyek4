@@ -14,14 +14,14 @@ import 'package:rukun_app_proyek4/repositories/rtrw_repository.dart';
 import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/services/api/dio_client.dart';
-import 'package:rukun_app_proyek4/services/auth_local_service.dart';
+import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_auth_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_rtrw_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_surat_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
-import 'package:rukun_app_proyek4/services/hive_service.dart';
+import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/add_iuran_viewmodel.dart';
@@ -164,9 +164,14 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) =>
-              SuratRwViewModel(context.read<WargaRepository>()),
+          create: (context) => SuratRwViewModel(
+            context.read<WargaRepository>(),
+            context.read<SuratRepository>(),
+            context.read<CloudinaryService>(),
+            context.read<AuthViewModel>(),
+          ),
         ),
+        
         ChangeNotifierProvider(create: (_) => KegiatanRwViewModel()),
 
         ChangeNotifierProvider(
@@ -174,7 +179,7 @@ void main() async {
             context.read<WargaRepository>(),
             context.read<SuratRepository>(),
             context.read<CloudinaryService>(),
-            context.read<AuthViewModel>()
+            context.read<AuthViewModel>(),
           ),
         ),
       ],
