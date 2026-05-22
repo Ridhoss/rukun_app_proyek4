@@ -79,7 +79,7 @@ class _DetailKKView extends StatelessWidget {
               const SizedBox(height: 16),
               _buildInfoCard(context, kk, vm),
               const SizedBox(height: 16),
-              _buildAnggotaCard(context, vm),
+              _buildAnggotaCard(context, kk, vm),
             ],
           );
         },
@@ -352,7 +352,11 @@ class _DetailKKView extends StatelessWidget {
     );
   }
 
-  Widget _buildAnggotaCard(BuildContext context, DetailKKViewModel vm) {
+  Widget _buildAnggotaCard(
+    BuildContext context,
+    Keluarga kk,
+    DetailKKViewModel vm,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -374,7 +378,7 @@ class _DetailKKView extends StatelessWidget {
           else if (vm.anggotaError != null)
             Text(vm.anggotaError!)
           else if (vm.anggota.isEmpty)
-            _buildEmptyState(context, vm)
+            _buildEmptyState(context, kk, vm)
           else
             ListView.builder(
               shrinkWrap: true,
@@ -434,7 +438,7 @@ class _DetailKKView extends StatelessWidget {
                         repo: context.read<WargaRepository>(),
                         kkId: vm.kkId,
                       ),
-                      child: const AddWargaPage(),
+                      child: AddWargaPage(keluarga: kk),
                     ),
                   ),
                 );
@@ -466,7 +470,11 @@ class _DetailKKView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, DetailKKViewModel vm) {
+  Widget _buildEmptyState(
+    BuildContext context,
+    Keluarga kk,
+    DetailKKViewModel vm,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -519,7 +527,7 @@ class _DetailKKView extends StatelessWidget {
                         repo: context.read<WargaRepository>(),
                         kkId: vm.kkId,
                       ),
-                      child: const AddWargaPage(),
+                      child: AddWargaPage(keluarga: kk),
                     ),
                   ),
                 );

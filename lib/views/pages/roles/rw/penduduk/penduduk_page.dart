@@ -1,70 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rukun_app_proyek4/core/route_observer.dart';
-import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/models/rt_model.dart';
-import 'package:rukun_app_proyek4/models/rw_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
-import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
-import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/penduduk/kartukeluarga/add_kk_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/penduduk/detail_rt_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/penduduk/crudkk/add_kk_page.dart';
-import 'package:rukun_app_proyek4/views/pages/penduduk/detail_kk_page.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/penduduk/penduduk_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/penduduk/detail_rt_page.dart';
 
-class DetailRTPage extends StatefulWidget {
-  final RtModel rt;
-  final RwModel rw;
-  final User currentUser;
+class RWPendudukPage extends StatefulWidget {
+  final User user;
 
-  const DetailRTPage({
-    super.key,
-    required this.rt,
-    required this.rw,
-    required this.currentUser,
-  });
+  const RWPendudukPage({super.key, required this.user});
 
   @override
-  State<DetailRTPage> createState() => _DetailRTPageState();
+  State<RWPendudukPage> createState() => _RWPendudukPageState();
 }
 
-class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
+class _RWPendudukPageState extends State<RWPendudukPage> {
   bool _isInitialized = false;
-
-  @override
-  void didPopNext() {
-    final rtId = widget.rt.id;
-    context.read<DetailRTViewmodel>().loadKK(rtId);
-  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    routeObserver.subscribe(this, ModalRoute.of(context)!);
-
     if (!_isInitialized) {
       _isInitialized = true;
 
-      final rtId = widget.rt.id;
-      context.read<DetailRTViewmodel>().init(rtId!);
+      final rwId = widget.user.rw?.id;
+
+      if (rwId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<RWPendudukViewmodel>().init(rwId);
+        });
+      }
     }
   }
 
   @override
-  void dispose() {
-    routeObserver.unsubscribe(this);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final user = widget.currentUser;
-
-    final rt = widget.rt.noRt;
-    final rw = widget.rw.noRw;
+    final rw = widget.user.rw?.noRw ?? '-';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -72,8 +46,8 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
       appBar: AppBarUtils.buildAppBar(
         context: context,
         name: "",
-        title: "Dashboard Kependudukan",
-        subtitle: "Ringkasan data kependudukan",
+        title: "Dashboard Kependudukan RW",
+        subtitle: "Daftar RT dalam wilayah RW",
         showName: false,
         showAvatar: false,
         showGreeting: false,
@@ -107,14 +81,14 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Wilayah Aktif',
                         style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        'RT $rt / RW $rw',
-                        style: TextStyle(
+                        'RW $rw',
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: ColorsUtils.b400,
@@ -129,7 +103,7 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
             const SizedBox(height: 20),
 
             const Text(
-              'Daftar Kartu Keluarga',
+              'Daftar RT',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -139,12 +113,8 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
 
             const SizedBox(height: 12),
 
-            _buildAddButton(context, user),
-
-            const SizedBox(height: 12),
-
             Expanded(
-              child: Consumer<DetailRTViewmodel>(
+              child: Consumer<RWPendudukViewmodel>(
                 builder: (context, vm, _) {
                   if (vm.isLoading) {
                     return const Center(child: CircularProgressIndicator());
@@ -154,25 +124,16 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
                     return Center(child: Text(vm.errorMessage!));
                   }
 
-                  if (vm.kkList.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text("Belum ada data KK"),
-                          SizedBox(height: 8),
-                          Text("Tekan + untuk menambah"),
-                        ],
-                      ),
-                    );
+                  if (vm.rtList.isEmpty) {
+                    return const Center(child: Text('Belum ada data RT'));
                   }
 
                   return ListView.separated(
-                    itemCount: vm.kkList.length,
+                    itemCount: vm.rtList.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final kk = vm.kkList[index];
-                      return _buildKKCard(kk);
+                      final rt = vm.rtList[index];
+                      return _buildRTCard(rt);
                     },
                   );
                 },
@@ -184,17 +145,17 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
     );
   }
 
-  Widget _buildKKCard(Keluarga kk) {
+  Widget _buildRTCard(RtModel rt) {
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => DetailKKPage(
-              kkId: kk.id!,
-              currentUserKKId: widget.currentUser.warga?.keluarga?.id,
-              currentUserWargaId: widget.currentUser.wargaId,
+            builder: (_) => DetailRTPage(
+              rt: rt,
+              rw: widget.user.rw!,
+              currentUser: widget.user,
             ),
           ),
         );
@@ -208,7 +169,7 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
         ),
         child: Row(
           children: [
-            const Icon(Icons.credit_card, size: 28, color: ColorsUtils.gray),
+            const Icon(Icons.groups, size: 28, color: ColorsUtils.gray),
             const SizedBox(width: 16),
 
             Expanded(
@@ -216,7 +177,7 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'No. KK: ${kk.noKK}',
+                    'RT ${rt.noRt}',
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -225,7 +186,7 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    kk.alamat ?? '-',
+                    'RT ${rt.noRt}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: ColorsUtils.gray,
@@ -237,42 +198,6 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
 
             const Icon(Icons.chevron_right, color: ColorsUtils.gray),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddButton(BuildContext context, User user) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChangeNotifierProvider(
-                create: (_) => AddKKViewModel(
-                  kkRepository: context.read<KKRepository>(),
-                  cloudinaryService: context.read<CloudinaryService>(),
-                  rtId: widget.rt.id!,
-                ),
-                child: const AddKKPage(),
-              ),
-            ),
-          ).then((_) {
-            final rtId = widget.rt.id;
-            context.read<DetailRTViewmodel>().init(rtId!);
-          });
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Tambah Kartu Keluarga"),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: ColorsUtils.b500,
-          side: BorderSide(color: ColorsUtils.b500, width: 1.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 14),
         ),
       ),
     );

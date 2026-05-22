@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
-import 'package:rukun_app_proyek4/services/auth_local_service.dart';
+import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_surat_service.dart';
 
 class SuratRepository {
