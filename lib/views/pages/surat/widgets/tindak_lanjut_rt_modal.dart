@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,8 +8,9 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:file_picker/file_picker.dart' as fp;
 
-class TindakLanjutRtModal extends StatelessWidget {
+class TindakLanjutRtModal extends StatefulWidget {
   final PengajuanSurat surat;
   final String namaWarga;
   final bool readOnly;
@@ -18,6 +21,28 @@ class TindakLanjutRtModal extends StatelessWidget {
     required this.namaWarga,
     this.readOnly = false,
   });
+
+  @override
+  State<TindakLanjutRtModal> createState() => _TindakLanjutRtModalState();
+}
+
+class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
+  File? selectedFile;
+
+  Future<void> pickFile() async {
+    final result = await fp.FilePicker.pickFiles(
+      type: fp.FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx'],
+    );
+
+    if (result == null || result.files.single.path == null) {
+      return;
+    }
+
+    setState(() {
+      selectedFile = File(result.files.single.path!);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +70,9 @@ class TindakLanjutRtModal extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            _detail("Keperluan", surat.keperluan),
+            _detail("Keperluan", widget.surat.keperluan),
 
-            _detail("Keterangan", surat.keterangan ?? '-'),
+            _detail("Keterangan", widget.surat.keterangan ?? '-'),
 
             const SizedBox(height: 20),
 
@@ -63,15 +88,15 @@ class TindakLanjutRtModal extends StatelessWidget {
               runSpacing: 8,
 
               children: [
-                _infoChip("Dibuat", vm.formatDate(surat.waktuDibuat)),
+                _infoChip("Dibuat", vm.formatDate(widget.surat.waktuDibuat)),
 
-                _infoChip("Status", surat.status.ui.label),
+                _infoChip("Status", widget.surat.status.ui.label),
               ],
             ),
 
             const SizedBox(height: 28),
 
-            if (!readOnly) ...[
+            if (!widget.readOnly) ...[
               const Text(
                 "Upload Draft Surat",
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -91,7 +116,7 @@ class TindakLanjutRtModal extends StatelessWidget {
               const SizedBox(height: 28),
             ],
 
-            if (surat.docRef != null) ...[
+            if (widget.surat.docRef != null) ...[
               const SizedBox(height: 24),
 
               const Text(
@@ -103,7 +128,7 @@ class TindakLanjutRtModal extends StatelessWidget {
 
               InkWell(
                 onTap: () async {
-                  final uri = Uri.parse(surat.docRef!);
+                  final uri = Uri.parse(widget.surat.docRef!);
 
                   final success = await launchUrl(
                     uri,
@@ -135,7 +160,7 @@ class TindakLanjutRtModal extends StatelessWidget {
 
                       Expanded(
                         child: Text(
-                          surat.docRef!.split('/').last,
+                          widget.surat.docRef!.split('/').last,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -148,7 +173,7 @@ class TindakLanjutRtModal extends StatelessWidget {
               ),
             ],
 
-            if (!readOnly) _actionButtons(context, vm),
+            if (!widget.readOnly) _actionButtons(context, vm),
           ],
         ),
       ),
@@ -156,7 +181,7 @@ class TindakLanjutRtModal extends StatelessWidget {
   }
 
   Widget _header() {
-    final status = surat.status.ui;
+    final status = widget.surat.status.ui;
 
     return Row(
       children: [
@@ -203,7 +228,7 @@ class TindakLanjutRtModal extends StatelessWidget {
 
             children: [
               Text(
-                namaWarga,
+                widget.namaWarga,
 
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
@@ -267,7 +292,7 @@ class TindakLanjutRtModal extends StatelessWidget {
 
   Widget _uploadBox(BuildContext context, SuratViewModel vm) {
     return GestureDetector(
-      onTap: vm.pickFile,
+      onTap: pickFile,
 
       child: Container(
         width: double.infinity,
@@ -288,9 +313,9 @@ class TindakLanjutRtModal extends StatelessWidget {
             const SizedBox(height: 10),
 
             Text(
-              vm.signedFile == null
+              selectedFile == null
                   ? "Pilih File Draft Surat"
-                  : vm.signedFile!.path.split("/").last,
+                  : selectedFile!.path.split("/").last,
 
               textAlign: TextAlign.center,
 
@@ -345,7 +370,20 @@ class TindakLanjutRtModal extends StatelessWidget {
             onPressed: vm.isUploading
                 ? null
                 : () async {
-                    final success = await vm.uploadSurat(id: surat.id!);
+                    if (selectedFile == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Pilih file terlebih dahulu"),
+                        ),
+                      );
+                      return;
+                    }
+
+                    final success = await vm.uploadDraftByRt(
+                      id: widget.surat.id!,
+                      file: selectedFile!,
+                    );
+
                     if (success && context.mounted) {
                       Navigator.pop(context);
                     }

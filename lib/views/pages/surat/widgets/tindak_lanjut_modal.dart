@@ -8,11 +8,13 @@ import 'package:rukun_app_proyek4/viewmodels/roles/rw/surat/surat_rw_viewmodel.d
 class TindakLanjutModal extends StatelessWidget {
   final PengajuanSurat surat;
   final String namaWarga;
+  final bool readOnly;
 
   const TindakLanjutModal({
     super.key,
     required this.surat,
     required this.namaWarga,
+    this.readOnly = false,
   });
 
   @override

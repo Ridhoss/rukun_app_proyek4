@@ -13,6 +13,7 @@ class PengajuanSurat {
   final String? catatan;
   final int? disetujuiOleh;
   final DateTime? waktuDisetujui;
+  final bool isSigned;
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
@@ -29,6 +30,7 @@ class PengajuanSurat {
     this.docRef,
     this.catatan,
     this.waktuDisetujui,
+    this.isSigned = false,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
@@ -46,6 +48,7 @@ class PengajuanSurat {
     String? catatan,
     int? disetujuiOleh,
     DateTime? waktuDisetujui,
+    bool? isSigned,
     DateTime? waktuDibuat,
     DateTime? waktuDiubah,
     DateTime? waktuDihapus,
@@ -62,6 +65,7 @@ class PengajuanSurat {
       catatan: catatan ?? this.catatan,
       disetujuiOleh: disetujuiOleh ?? this.disetujuiOleh,
       waktuDisetujui: waktuDisetujui ?? this.waktuDisetujui,
+      isSigned: isSigned ?? this.isSigned,
       waktuDibuat: waktuDibuat ?? this.waktuDibuat,
       waktuDiubah: waktuDiubah ?? this.waktuDiubah,
       waktuDihapus: waktuDihapus ?? this.waktuDihapus,
@@ -83,6 +87,7 @@ class PengajuanSurat {
       waktuDisetujui: json['waktu_disetujui'] != null
           ? DateTime.parse(json['waktu_disetujui'])
           : null,
+      isSigned: json['is_signed'] ?? false,
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
@@ -108,6 +113,7 @@ class PengajuanSurat {
       'catatan': catatan,
       'disetujui_oleh': disetujuiOleh,
       'waktu_disetujui': waktuDisetujui?.toIso8601String(),
+      'is_signed': isSigned,
       'waktu_dibuat': waktuDibuat?.toIso8601String(),
       'waktu_diubah': waktuDiubah?.toIso8601String(),
       'waktu_dihapus': waktuDihapus?.toIso8601String(),
