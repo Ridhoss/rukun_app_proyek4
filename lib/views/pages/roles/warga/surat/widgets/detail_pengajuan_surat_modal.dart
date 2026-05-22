@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailPengajuanSuratModal extends StatelessWidget {
   final PengajuanSurat item;
 
   const DetailPengajuanSuratModal({super.key, required this.item});
+  String _getFileName(String? url) {
+    if (url == null || url.isEmpty) return "-";
+    return Uri.parse(url).pathSegments.last;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,11 @@ class DetailPengajuanSuratModal extends StatelessWidget {
             _field(title: "Keperluan", value: item.keperluan),
 
             const SizedBox(height: 16),
-            _field(title: "Keterangan", value: item.keterangan ?? '-', maxLines: 4),
+            _field(
+              title: "Keterangan",
+              value: item.keterangan ?? '-',
+              maxLines: 4,
+            ),
 
             const SizedBox(height: 16),
             Row(
@@ -87,7 +96,6 @@ class DetailPengajuanSuratModal extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
 
-
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(14),
@@ -102,10 +110,10 @@ class DetailPengajuanSuratModal extends StatelessWidget {
 
                   const SizedBox(width: 12),
 
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      "surat_pengajuan.pdf",
-                      style: TextStyle(
+                      _getFileName(item.docRef),
+                      style: const TextStyle(
                         color: ColorsUtils.white,
                         fontWeight: FontWeight.w500,
                       ),
@@ -113,8 +121,14 @@ class DetailPengajuanSuratModal extends StatelessWidget {
                   ),
 
                   ElevatedButton.icon(
-                    onPressed: () {
-                      /// dummy download/open
+                    onPressed: () async {
+                      final url = item.docRef;
+                      if (url == null || url.isEmpty) return;
+
+                      await launchUrl(
+                        Uri.parse(url),
+                        mode: LaunchMode.externalApplication,
+                      );
                     },
 
                     style: ElevatedButton.styleFrom(
