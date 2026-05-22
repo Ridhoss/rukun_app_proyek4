@@ -24,9 +24,7 @@ class _SuratPageState extends State<SuratPage> {
     super.initState();
 
     Future.microtask(() {
-      context.read<SuratViewModel>().fetchSurat(
-        rwId: widget.user.rw?.id ?? 0,
-      );
+      context.read<SuratViewModel>().fetchSurat(rwId: widget.user.rw?.id ?? 0);
     });
   }
 
@@ -35,7 +33,7 @@ class _SuratPageState extends State<SuratPage> {
     final nama = context.watch<AuthViewModel>().currentUser?.warga?.nama ?? "-";
 
     return Scaffold(
-      // backgroundColor: ColorsUtils.lightgray,
+      backgroundColor: ColorsUtils.lightgray,
 
       appBar: AppBarUtils.buildAppBar(
         context: context,
@@ -61,10 +59,6 @@ class _SuratPageState extends State<SuratPage> {
                 _buildSummary(vm),
 
                 _buildSearch(vm),
-                
-                _buildFilter(vm),
-
-                const SizedBox(height: 4),
 
                 _buildFilter(vm),
 
@@ -89,12 +83,11 @@ class _SuratPageState extends State<SuratPage> {
             child: _summaryCard(
               total: vm.totalDiajukan,
               title: "Diajukan",
-              color: ColorsUtils.b300,
+              color: ColorsUtils.skyblue,
             ),
           ),
 
           const SizedBox(width: 12),
-
           Expanded(
             child: _summaryCard(
               total: vm.totalDisetujui,
@@ -104,7 +97,6 @@ class _SuratPageState extends State<SuratPage> {
           ),
 
           const SizedBox(width: 12),
-
           Expanded(
             child: _summaryCard(
               total: vm.totalSelesai,
@@ -114,7 +106,15 @@ class _SuratPageState extends State<SuratPage> {
           ),
 
           const SizedBox(width: 12),
+          Expanded(
+            child: _summaryCard(
+              total: vm.totalDitolak,
+              title: "Ditolak",
+              color: ColorsUtils.red,
+            ),
+          ),
 
+          const SizedBox(width: 12),
           Expanded(
             child: _summaryCard(
               total: vm.totalSemua,
@@ -137,7 +137,7 @@ class _SuratPageState extends State<SuratPage> {
 
       decoration: BoxDecoration(
         color: ColorsUtils.white,
-        borderRadius: BorderRadius.circular(18), 
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
             color: ColorsUtils.black.withOpacity(0.05),
@@ -185,6 +185,8 @@ class _SuratPageState extends State<SuratPage> {
             _filterChip(vm, "Diajukan", SuratFilterStatus.diajukan),
 
             _filterChip(vm, "Disetujui", SuratFilterStatus.disetujui),
+
+            _filterChip(vm, "Ditolak", SuratFilterStatus.ditolak),
 
             _filterChip(vm, "Selesai", SuratFilterStatus.selesai),
           ],
