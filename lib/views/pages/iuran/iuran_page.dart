@@ -5,10 +5,10 @@ import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/iuran/iuran_page_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/iuran/iuran_page_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/crud/add_iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_rt_page.dart';
-import 'package:rukun_app_proyek4/views/pages/rw/iuran/detail_iuran_rw_page.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rw/iuran/detail_iuran_rw_page.dart';
 
 class PengurusIuranPage extends StatefulWidget {
   final User user;

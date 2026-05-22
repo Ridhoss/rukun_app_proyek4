@@ -1,6 +1,6 @@
 import 'package:rukun_app_proyek4/models/user_model.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/surat_rt_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/kegiatan/kegiatan_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -28,12 +28,12 @@ import 'package:rukun_app_proyek4/viewmodels/iuran/add_iuran_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_bulanan_detail_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_rt_detail_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/detail_rt_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/iuran/detail_iuran_rw_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/iuran/iuran_page_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/penduduk/penduduk_rw_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/warga/surat/pengajuan_surat_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/surat/surat_rw_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/warga/profile/data_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/iuran/detail_iuran_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/iuran/iuran_page_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/penduduk/penduduk_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/warga/surat/pengajuan_surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/surat/surat_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/warga/profile/data_kk_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -171,11 +171,11 @@ void main() async {
             context.read<AuthViewModel>(),
           ),
         ),
-        
+
         ChangeNotifierProvider(create: (_) => KegiatanRwViewModel()),
 
         ChangeNotifierProvider(
-          create: (context) => SuratRtViewModel(
+          create: (context) => SuratViewModel(
             context.read<WargaRepository>(),
             context.read<SuratRepository>(),
             context.read<CloudinaryService>(),

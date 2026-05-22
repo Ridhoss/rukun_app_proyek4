@@ -4,9 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/surat_rt_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class TindakLanjutRtModal extends StatelessWidget {
   final PengajuanSurat surat;
@@ -22,7 +21,7 @@ class TindakLanjutRtModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<SuratRtViewModel>();
+    final vm = context.watch<SuratViewModel>();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -266,7 +265,7 @@ class TindakLanjutRtModal extends StatelessWidget {
     );
   }
 
-  Widget _uploadBox(BuildContext context, SuratRtViewModel vm) {
+  Widget _uploadBox(BuildContext context, SuratViewModel vm) {
     return GestureDetector(
       onTap: vm.pickFile,
 
@@ -311,7 +310,7 @@ class TindakLanjutRtModal extends StatelessWidget {
     );
   }
 
-  Widget _actionButtons(BuildContext context, SuratRtViewModel vm) {
+  Widget _actionButtons(BuildContext context, SuratViewModel vm) {
     return Row(
       children: [
         Expanded(

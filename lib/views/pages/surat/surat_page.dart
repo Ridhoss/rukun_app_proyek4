@@ -6,26 +6,26 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/rt/surat_rt_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/surat/widgets/tindak_lanjut_rt_modal.dart';
 
-class RtSuratPage extends StatefulWidget {
+class SuratPage extends StatefulWidget {
   final User user;
 
-  const RtSuratPage({super.key, required this.user});
+  const SuratPage({super.key, required this.user});
 
   @override
-  State<RtSuratPage> createState() => _RtSuratPageState();
+  State<SuratPage> createState() => _SuratPageState();
 }
 
-class _RtSuratPageState extends State<RtSuratPage> {
+class _SuratPageState extends State<SuratPage> {
   @override
   void initState() {
     super.initState();
 
     Future.microtask(() {
-      context.read<SuratRtViewModel>().fetchSurat(
-        rtId: widget.user.rt?.id ?? 0,
+      context.read<SuratViewModel>().fetchSurat(
+        rwId: widget.user.rw?.id ?? 0,
       );
     });
   }
@@ -47,14 +47,14 @@ class _RtSuratPageState extends State<RtSuratPage> {
         showName: false,
       ),
 
-      body: Consumer<SuratRtViewModel>(
+      body: Consumer<SuratViewModel>(
         builder: (context, vm, _) {
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
           return RefreshIndicator(
-            onRefresh: () => vm.refresh(rtId: widget.user.rt?.id ?? 0),
+            onRefresh: () => vm.refresh(rwId: widget.user.rw?.id ?? 0),
 
             child: Column(
               children: [
@@ -77,7 +77,7 @@ class _RtSuratPageState extends State<RtSuratPage> {
     );
   }
 
-  Widget _buildSummary(SuratRtViewModel vm) {
+  Widget _buildSummary(SuratViewModel vm) {
     return Padding(
       padding: const EdgeInsets.all(16),
 
@@ -171,7 +171,7 @@ class _RtSuratPageState extends State<RtSuratPage> {
     );
   }
 
-  Widget _buildFilter(SuratRtViewModel vm) {
+  Widget _buildFilter(SuratViewModel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
 
@@ -194,7 +194,7 @@ class _RtSuratPageState extends State<RtSuratPage> {
   }
 
   Widget _filterChip(
-    SuratRtViewModel vm,
+    SuratViewModel vm,
     String label,
     SuratFilterStatus status,
   ) {
@@ -233,7 +233,7 @@ class _RtSuratPageState extends State<RtSuratPage> {
     );
   }
 
-  Widget _buildSearch(SuratRtViewModel vm) {
+  Widget _buildSearch(SuratViewModel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
 
@@ -259,7 +259,7 @@ class _RtSuratPageState extends State<RtSuratPage> {
     );
   }
 
-  Widget _buildList(SuratRtViewModel vm) {
+  Widget _buildList(SuratViewModel vm) {
     if (vm.data.isEmpty) {
       return const Center(child: Text("Tidak ada surat"));
     }
@@ -274,7 +274,7 @@ class _RtSuratPageState extends State<RtSuratPage> {
     );
   }
 
-  Widget _suratCard(SuratRtViewModel vm, PengajuanSurat surat) {
+  Widget _suratCard(SuratViewModel vm, PengajuanSurat surat) {
     final status = surat.status.ui;
     final namaWarga = vm.getNamaWarga(surat.wargaId ?? 0);
     final avatar = vm.getAvatarInitial(surat.wargaId ?? 0);

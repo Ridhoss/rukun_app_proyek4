@@ -1,3 +1,5 @@
+import 'package:rukun_app_proyek4/models/keluarga_model.dart';
+
 enum JenisKelamin {
   lakiLaki,
   perempuan;
@@ -238,7 +240,7 @@ class Warga {
   final String? namaAyah;
   final String? namaIbu;
 
-  final int? keluargaId;
+  final Keluarga? keluarga;
 
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
@@ -264,7 +266,7 @@ class Warga {
     this.noKitap,
     this.namaAyah,
     this.namaIbu,
-    this.keluargaId,
+    this.keluarga,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
@@ -301,7 +303,7 @@ class Warga {
       namaAyah: json['nama_ayah'],
       namaIbu: json['nama_ibu'],
 
-      keluargaId: json['keluarga_id'],
+      keluarga: json['keluarga'],
 
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
@@ -346,7 +348,7 @@ class Warga {
       'nama_ayah': namaAyah,
       'nama_ibu': namaIbu,
 
-      'keluarga_id': keluargaId,
+      'keluarga_id': keluarga?.id,
     };
   }
 

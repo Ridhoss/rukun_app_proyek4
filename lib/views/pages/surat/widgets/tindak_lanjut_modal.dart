@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/rw/surat/surat_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/surat/surat_rw_viewmodel.dart';
 
 class TindakLanjutModal extends StatelessWidget {
   final PengajuanSurat surat;
