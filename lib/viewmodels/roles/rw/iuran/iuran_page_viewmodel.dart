@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
-import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
+import 'package:rukun_app_proyek4/repositories/iuran_repository.dart';
 
 enum IuranFilter { semua, rutin, khusus }
 

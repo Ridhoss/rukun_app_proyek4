@@ -8,6 +8,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_rt_detail_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_bulanan_page.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rt/iuran/rt_setoran_rw_page.dart';
 
 class IuranRTDetailPage extends StatefulWidget {
   final int iuranId;
@@ -90,7 +91,32 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                 if (rt != null) _buildRtInfo(rt),
 
                 const SizedBox(height: 16),
+                if (widget.user.pengurus?.level.toLowerCase() == "rt")
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.upload),
+                      label: const Text("Setoran RT ke RW"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RTSetoranRWPage(
+                              iuranId: widget.iuranId,
+                              rtId: widget.rtId,
+                              user: widget.user,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
 
+                const SizedBox(height: 16),
                 _buildMonthlyList(
                   months,
                   transaksi,
@@ -111,7 +137,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:  ColorsUtils.white,
+        color: ColorsUtils.white,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -409,7 +435,10 @@ class _MiniStat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 12, color: ColorsUtils.gray)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 12, color: ColorsUtils.gray),
+        ),
 
         const SizedBox(height: 4),
 

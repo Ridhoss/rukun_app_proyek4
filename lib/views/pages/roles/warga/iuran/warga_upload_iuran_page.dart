@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
-import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
+import 'package:rukun_app_proyek4/repositories/iuran_repository.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';

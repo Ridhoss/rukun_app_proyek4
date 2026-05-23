@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
     final vm = context.watch<AuthViewModel>();
 
     return Scaffold(
-      backgroundColor: ColorsUtils.white,
+      backgroundColor: ColorsUtils.lightgray,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -227,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
             : null,
 
         filled: true,
-        fillColor: ColorsUtils.slateGray,
+        fillColor: ColorsUtils.white,
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

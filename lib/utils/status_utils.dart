@@ -9,10 +9,13 @@ extension PembayaranUiStatus on StatusPembayaran {
     switch (this) {
       case StatusPembayaran.belumDibayar:
         return "Belum Dibayar";
+
       case StatusPembayaran.diproses:
         return "Diproses";
+
       case StatusPembayaran.dibayar:
         return "Dibayar";
+
       case StatusPembayaran.ditolak:
         return "Ditolak";
     }
@@ -22,12 +25,48 @@ extension PembayaranUiStatus on StatusPembayaran {
     switch (this) {
       case StatusPembayaran.belumDibayar:
         return ColorsUtils.yellow;
+
       case StatusPembayaran.diproses:
         return Colors.blue;
+
       case StatusPembayaran.dibayar:
         return ColorsUtils.g100;
+
       case StatusPembayaran.ditolak:
         return ColorsUtils.red;
+    }
+  }
+
+  String get value {
+    switch (this) {
+      case StatusPembayaran.belumDibayar:
+        return "Belum Dibayar";
+
+      case StatusPembayaran.diproses:
+        return "Diproses";
+
+      case StatusPembayaran.dibayar:
+        return "Dibayar";
+
+      case StatusPembayaran.ditolak:
+        return "Ditolak";
+    }
+  }
+
+  static StatusPembayaran fromString(String? value) {
+    switch (value) {
+      case "Diproses":
+        return StatusPembayaran.diproses;
+
+      case "Dibayar":
+        return StatusPembayaran.dibayar;
+
+      case "Ditolak":
+        return StatusPembayaran.ditolak;
+
+      case "Belum Dibayar":
+      default:
+        return StatusPembayaran.belumDibayar;
     }
   }
 }
@@ -57,13 +96,7 @@ extension SuratStatusExtention on SuratStatus {
   }
 }
 
-enum FilterKegiatanStatus {
-  semua,
-  berlangsung,
-  segera,
-  selesai,
-  dibatalkan,
-}
+enum FilterKegiatanStatus { semua, berlangsung, segera, selesai, dibatalkan }
 
 class KegiatanUiStatus {
   final String label;

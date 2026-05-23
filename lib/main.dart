@@ -1,5 +1,9 @@
+// import 'package:rukun_app_proyek4/models/dashboard_rw_model.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rt/rt_upload_setoran_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rw/dashboard/rw_dashboard.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -7,7 +11,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:rukun_app_proyek4/core/route_observer.dart';
 import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
-import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
+import 'package:rukun_app_proyek4/repositories/iuran_repository.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
 import 'package:rukun_app_proyek4/repositories/rtrw_repository.dart';
 import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
@@ -179,6 +183,15 @@ void main() async {
             context.read<SuratRepository>(),
             context.read<CloudinaryService>(),
             context.read<AuthViewModel>(),
+          ),
+        ),
+
+        ChangeNotifierProvider(create: (_) => DashboardRwViewModel()),
+
+        ChangeNotifierProvider(
+          create: (context) => RTUploadSetoranRWViewModel(
+            repository: context.read<IuranRepository>(),
+            cloudinaryService: context.read<CloudinaryService>(),
           ),
         ),
       ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/rt_model.dart';
 import 'package:rukun_app_proyek4/models/rw_model.dart';
-import 'package:rukun_app_proyek4/repositories/iuran_repostiory.dart';
+import 'package:rukun_app_proyek4/repositories/iuran_repository.dart';
 
 class AddIuranViewModel extends ChangeNotifier {
   final IuranRepository repository;

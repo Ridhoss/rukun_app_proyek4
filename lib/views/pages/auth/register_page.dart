@@ -46,7 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final vm = context.watch<AuthViewModel>();
 
     return Scaffold(
-      backgroundColor: ColorsUtils.white,
+      backgroundColor: ColorsUtils.lightgray,
       resizeToAvoidBottomInset: true,
 
       body: SafeArea(
@@ -270,7 +270,7 @@ class _RegisterPageState extends State<RegisterPage> {
             : null,
 
         filled: true,
-        fillColor: ColorsUtils.slateGray,
+        fillColor: ColorsUtils.white,
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
