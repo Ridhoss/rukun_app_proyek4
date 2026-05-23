@@ -31,6 +31,7 @@ import 'package:rukun_app_proyek4/viewmodels/roles/rw/penduduk/penduduk_rw_viewm
 import 'package:rukun_app_proyek4/viewmodels/roles/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/warga/profile/data_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_list_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_action_viewmodel.dart';
@@ -164,6 +165,7 @@ void main() async {
           ),
         ),
         ChangeNotifierProvider(create: (_) => KegiatanRwViewModel()),
+        ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),
         ChangeNotifierProvider(create: (_) => RtDashboardViewModel()),
         ChangeNotifierProvider(
           create: (context) => SuratListViewModel(
