@@ -5,12 +5,12 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/roles/rw/kegiatan/widgets/detail_kegiatan_modal.dart';
-import 'package:rukun_app_proyek4/views/pages/roles/rw/kegiatan/widgets/tambah_kegiatan_modal.dart';
+import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/detail_kegiatan_modal.dart';
+import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/tambah_kegiatan_modal.dart';
 
-class RwKegiatanPage extends StatelessWidget {
-  const RwKegiatanPage({super.key});
+class KegiatanPage extends StatelessWidget {
+  const KegiatanPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class RwKegiatanPage extends StatelessWidget {
         showGreeting: false,
       ),
 
-      body: Consumer<KegiatanRwViewModel>(
+      body: Consumer<KegiatanViewModel>(
         builder: (context, vm, _) {
           return RefreshIndicator(
             onRefresh: vm.refresh,
@@ -79,7 +79,7 @@ class RwKegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSearch(KegiatanRwViewModel vm) {
+  Widget _buildSearch(KegiatanViewModel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
 
@@ -105,7 +105,7 @@ class RwKegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _headerKegiatan(BuildContext context, KegiatanRwViewModel vm) {
+  Widget _headerKegiatan(BuildContext context, KegiatanViewModel vm) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
 
@@ -156,7 +156,7 @@ class RwKegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _summary(KegiatanRwViewModel vm) {
+  Widget _summary(KegiatanViewModel vm) {
     return Padding(
       padding: const EdgeInsets.all(16),
 
@@ -250,7 +250,7 @@ class RwKegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _levelSwitcher(KegiatanRwViewModel vm) {
+  Widget _levelSwitcher(KegiatanViewModel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
 
@@ -309,7 +309,7 @@ class RwKegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _statusFilter(KegiatanRwViewModel vm) {
+  Widget _statusFilter(KegiatanViewModel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
 
@@ -332,7 +332,7 @@ class RwKegiatanPage extends StatelessWidget {
   }
 
   Widget _chip(
-    KegiatanRwViewModel vm,
+    KegiatanViewModel vm,
     String label,
     KegiatanFilterStatus status,
   ) {
@@ -381,7 +381,7 @@ class RwKegiatanPage extends StatelessWidget {
 
   Widget _card(
     BuildContext context,
-    KegiatanRwViewModel vm,
+    KegiatanViewModel vm,
     Kegiatan kegiatan,
   ) {
     return Container(

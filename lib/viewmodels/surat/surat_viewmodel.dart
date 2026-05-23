@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/material.dart';
 
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
@@ -54,7 +53,7 @@ class SuratViewModel extends ChangeNotifier {
         "disetujui_oleh": authVm.currentUser?.id,
       };
 
-      await suratRepo.updateStatusSurat(id, body);
+      await suratRepo.updateSurat(id, body);
 
       final index = _allData.indexWhere((e) => e.id == id);
 
@@ -87,14 +86,15 @@ class SuratViewModel extends ChangeNotifier {
       );
 
       if (url == null) return false;
-
+      
       final body = {
         "status": "Selesai",
         "doc_referensi": url,
         "is_signed": true,
+        "disetujui_oleh": authVm.currentUser?.id,
       };
 
-      await suratRepo.updateStatusSurat(id, body);
+      await suratRepo.updateSurat(id, body);
 
       final index = _allData.indexWhere((e) => e.id == id);
 
@@ -164,7 +164,7 @@ class SuratViewModel extends ChangeNotifier {
     return source.where((e) {
       final namaWarga = getNamaWarga(e.wargaId ?? 0).toLowerCase();
 
-      final keperluan = (e.keperluan ?? '').toLowerCase();
+      final keperluan = (e.keperluan).toLowerCase();
 
       final keterangan = (e.keterangan ?? '').toLowerCase();
 

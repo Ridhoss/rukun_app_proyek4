@@ -1,3 +1,6 @@
+import 'package:rukun_app_proyek4/models/rt_model.dart';
+import 'package:rukun_app_proyek4/models/rw_model.dart';
+
 enum KegiatanLevel { rt, rw }
 
 enum KegiatanStatus { dibuat, dibatalkan, selesai }
@@ -17,6 +20,8 @@ class Kegiatan {
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
+  final RtModel? rt;
+  final RwModel? rw;
 
   Kegiatan({
     this.id,
@@ -33,6 +38,8 @@ class Kegiatan {
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
+    this.rt,
+    this.rw,
   });
 
   factory Kegiatan.fromJson(Map<String, dynamic> json) {
@@ -59,6 +66,8 @@ class Kegiatan {
       waktuDihapus: json['waktu_dihapus'] != null
           ? DateTime.parse(json['waktu_dihapus'])
           : null,
+      rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
+      rw: json['rw'] != null ? RwModel.fromJson(json['rw']) : null,
     );
   }
 

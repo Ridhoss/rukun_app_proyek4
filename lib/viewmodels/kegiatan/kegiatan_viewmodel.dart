@@ -7,7 +7,7 @@ import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 
 enum KegiatanFilterStatus { semua, dibuat, dibatalkan, selesai }
 
-class KegiatanRwViewModel extends ChangeNotifier {
+class KegiatanViewModel extends ChangeNotifier {
   File? buktiImage;
   File? dokumenFile;
 
@@ -15,7 +15,6 @@ class KegiatanRwViewModel extends ChangeNotifier {
   KegiatanLevel selectedLevel = KegiatanLevel.rw;
   KegiatanFilterStatus selectedStatus = KegiatanFilterStatus.semua;
 
-  //dummy data kegiatan
   final List<Kegiatan> _allData = [
     Kegiatan(
       id: 1,
