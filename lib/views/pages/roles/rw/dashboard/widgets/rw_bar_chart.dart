@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 class RwBarChart extends StatelessWidget {
   const RwBarChart({super.key});
 
@@ -76,9 +76,9 @@ class RwBarChart extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
 
           rodStackItems: [
-            BarChartRodStackItem(0, 40, Colors.amber),
-            BarChartRodStackItem(40, 100, Colors.green),
-            BarChartRodStackItem(100, y, Colors.blue),
+            BarChartRodStackItem(0, 40, ColorsUtils.yellow),
+            BarChartRodStackItem(40, 100, ColorsUtils.green),
+            BarChartRodStackItem(100, y, ColorsUtils.b200),
           ],
         ),
       ],

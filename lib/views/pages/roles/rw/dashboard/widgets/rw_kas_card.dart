@@ -32,8 +32,8 @@ class RwKasCard extends StatelessWidget {
 
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF2F80ED),
-            Color(0xFF3F6EF6),
+            ColorsUtils.b200,
+            ColorsUtils.b300,
           ],
         ),
       ),
@@ -45,7 +45,7 @@ class RwKasCard extends StatelessWidget {
           const Text(
             "Saldo Kas RW 002",
             style: TextStyle(
-              color: Colors.white70,
+              color: ColorsUtils.white,
               fontSize: 13,
             ),
           ),
@@ -55,7 +55,7 @@ class RwKasCard extends StatelessWidget {
           Text(
             rupiah(saldo),
             style: const TextStyle(
-              color: Colors.white,
+              color: ColorsUtils.white,
               fontSize: 34,
               fontWeight: FontWeight.bold,
             ),
@@ -67,11 +67,11 @@ class RwKasCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
             children: [
-              _item("Kas Masuk", rupiah(masuk), Colors.greenAccent),
+              _item("Kas Masuk", rupiah(masuk), ColorsUtils.green),
 
-              _item("Kas Keluar", "- ${rupiah(keluar)}", Colors.redAccent),
+              _item("Kas Keluar", "- ${rupiah(keluar)}", ColorsUtils.red),
 
-              _item("Diperbarui", "20 Apr 2026", Colors.white70),
+              _item("Diperbarui", "20 Apr 2026", ColorsUtils.white),
             ],
           ),
         ],
@@ -87,7 +87,7 @@ class RwKasCard extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color: Colors.white70,
+            color: ColorsUtils.white,
             fontSize: 11,
           ),
         ),

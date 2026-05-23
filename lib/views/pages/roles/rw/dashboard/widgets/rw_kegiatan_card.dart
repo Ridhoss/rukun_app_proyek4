@@ -10,7 +10,7 @@ class RwKegiatanCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ColorsUtils.white,
         borderRadius: BorderRadius.circular(24),
       ),
 
@@ -22,7 +22,7 @@ class RwKegiatanCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
 
             decoration: BoxDecoration(
-              color: const Color(0xFFCDEFE5),
+              color: ColorsUtils.white,
               borderRadius: BorderRadius.circular(30),
             ),
 

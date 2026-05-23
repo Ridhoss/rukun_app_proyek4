@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 
 class RwPieChart extends StatefulWidget {
   const RwPieChart({super.key});
@@ -36,11 +37,11 @@ class _RwPieChartState extends State<RwPieChart> {
 
           sections: List.generate(5, (i) {
             final colors = [
-              Colors.teal,
-              Colors.orange,
-              Colors.purple,
-              Colors.blue,
-              Colors.red,
+              ColorsUtils.green,
+              ColorsUtils.o100,
+              ColorsUtils.skyblue,
+              ColorsUtils.b200,
+              ColorsUtils.red,
             ];
 
             final values = <double>[120, 90, 110, 140, 80];
@@ -56,7 +57,7 @@ class _RwPieChartState extends State<RwPieChart> {
               titleStyle: TextStyle(
                 fontSize: isTouched ? 16 : 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: ColorsUtils.white,
               ),
             );
           }),

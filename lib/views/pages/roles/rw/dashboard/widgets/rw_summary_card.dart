@@ -21,7 +21,7 @@ class RwSummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ColorsUtils.white,
         borderRadius: BorderRadius.circular(18),
       ),
 
@@ -59,7 +59,6 @@ class RwSummaryCard extends StatelessWidget {
           ),
 
           const SizedBox(height: 10),
-
           Text(
             value,
             style: const TextStyle(
