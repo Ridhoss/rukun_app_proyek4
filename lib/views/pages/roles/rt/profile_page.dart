@@ -28,24 +28,40 @@ class RtProfilePage extends StatelessWidget {
               color: ColorsUtils.b400,
               borderRadius: BorderRadius.vertical(),
             ),
-            child: Column(
+            child: Stack(
               children: [
-                buildAvatar(nama),
-
-                const SizedBox(height: 12),
-                Text(
-                  nama,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: ColorsUtils.white,
+                if (Navigator.canPop(context))
+                  Positioned(
+                    left: 10,
+                    top: 0,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
                   ),
-                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Column(
+                    children: [
+                      buildAvatar(nama),
 
-                const SizedBox(height: 4),
-                Text(
-                  "NIK. $nik",
-                  style: const TextStyle(color: ColorsUtils.white),
+                      const SizedBox(height: 12),
+                      Text(
+                        nama,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: ColorsUtils.white,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+                      Text(
+                        "NIK. $nik",
+                        style: const TextStyle(color: ColorsUtils.white),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

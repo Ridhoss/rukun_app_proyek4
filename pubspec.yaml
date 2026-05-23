@@ -55,6 +55,8 @@ dependencies:
   dropdown_button2: ^3.1.0
   url_launcher: ^6.3.0
   fl_chart: ^1.2.0
+  pdf: ^3.12.0
+  printing: ^5.14.3
 
 
 dev_dependencies:
@@ -67,13 +69,30 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.7
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+
+
+
+# Konfigurasi untuk ganti ikon di layar depan HP
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/icon_rukun.png"
+
+  adaptive_icon_background: "#003E9C"
+  adaptive_icon_foreground: "assets/images/icon_rukun.png"
+
+
 flutter:
   assets:
+    - assets/images/logo_base.png
+    - assets/images/logo_orbit.png
     - assets/images/
     - assets/animation/
     - .env

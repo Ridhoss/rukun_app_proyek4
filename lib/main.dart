@@ -1,15 +1,15 @@
 import 'package:rukun_app_proyek4/repositories/kegiatan_repository.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kegiatan_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/rt_upload_setoran_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:rukun_app_proyek4/core/route_observer.dart';
-import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repository.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
@@ -36,6 +36,9 @@ import 'package:rukun_app_proyek4/viewmodels/roles/rw/iuran/iuran_page_viewmodel
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/penduduk/penduduk_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/warga/surat/pengajuan_surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/warga/profile/data_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/surat/surat_list_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/surat/surat_action_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/splash_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -182,8 +185,14 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) => SuratViewModel(
+          create: (context) => SuratListViewModel(
             context.read<WargaRepository>(),
+            context.read<SuratRepository>(),
+            context.read<AuthViewModel>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => SuratActionViewModel(
             context.read<SuratRepository>(),
             context.read<CloudinaryService>(),
             context.read<AuthViewModel>(),
@@ -198,6 +207,10 @@ void main() async {
             cloudinaryService: context.read<CloudinaryService>(),
           ),
         ),
+
+        ChangeNotifierProvider(create: (_) => RtDashboardViewModel()),
+
+        ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),
       ],
       child: const MyApp(),
     ),
@@ -213,7 +226,7 @@ class MyApp extends StatelessWidget {
       title: 'RukunApp',
       debugShowCheckedModeBanner: false,
       navigatorObservers: [routeObserver],
-      home: const AuthGate(),
+      home: const SplashPage(),
     );
   }
 }

@@ -6,7 +6,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/surat/surat_list_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/surat/utils/surat_permission.dart';
 import 'package:rukun_app_proyek4/views/pages/surat/widgets/tindak_lanjut_rt_modal.dart';
 
@@ -36,7 +36,7 @@ class _SuratPageState extends State<SuratPage> {
     super.initState();
 
     Future.microtask(() {
-      context.read<SuratViewModel>().fetchSurat(rwId: widget.user.rw?.id ?? 0);
+      context.read<SuratListViewModel>().fetchSurat(rwId: widget.user.rw?.id ?? 0);
     });
   }
 
@@ -57,14 +57,16 @@ class _SuratPageState extends State<SuratPage> {
         showName: false,
       ),
 
-      body: Consumer<SuratViewModel>(
+      body: Consumer<SuratListViewModel>(
         builder: (context, vm, _) {
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
           return RefreshIndicator(
-            onRefresh: () => vm.refresh(rwId: widget.user.rw?.id ?? 0),
+            onRefresh: () {
+              return vm.refresh(rwId: widget.user.rw?.id ?? 0);
+            },
 
             child: Column(
               children: [
@@ -85,7 +87,7 @@ class _SuratPageState extends State<SuratPage> {
     );
   }
 
-  Widget _buildSummary(SuratViewModel vm) {
+  Widget _buildSummary(SuratListViewModel vm) {
     return Padding(
       padding: const EdgeInsets.all(16),
 
@@ -183,7 +185,7 @@ class _SuratPageState extends State<SuratPage> {
     );
   }
 
-  Widget _buildFilter(SuratViewModel vm) {
+  Widget _buildFilter(SuratListViewModel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
 
@@ -208,7 +210,7 @@ class _SuratPageState extends State<SuratPage> {
   }
 
   Widget _filterChip(
-    SuratViewModel vm,
+    SuratListViewModel vm,
     String label,
     SuratFilterStatus status,
   ) {
@@ -247,7 +249,7 @@ class _SuratPageState extends State<SuratPage> {
     );
   }
 
-  Widget _buildSearch(SuratViewModel vm) {
+  Widget _buildSearch(SuratListViewModel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
 
@@ -273,7 +275,7 @@ class _SuratPageState extends State<SuratPage> {
     );
   }
 
-  Widget _buildList(SuratViewModel vm) {
+  Widget _buildList(SuratListViewModel vm) {
     if (vm.data.isEmpty) {
       return const Center(child: Text("Tidak ada surat"));
     }
@@ -288,7 +290,7 @@ class _SuratPageState extends State<SuratPage> {
     );
   }
 
-  Widget _suratCard(SuratViewModel vm, PengajuanSurat surat) {
+  Widget _suratCard(SuratListViewModel vm, PengajuanSurat surat) {
     final status = surat.status.ui;
     final namaWarga = vm.getNamaWarga(surat.wargaId ?? 0);
     final avatar = vm.getAvatarInitial(surat.wargaId ?? 0);
@@ -297,6 +299,9 @@ class _SuratPageState extends State<SuratPage> {
     final permission = SuratPermission(_mapRole(level), surat.status);
 
     final isAct = permission.canAct;
+
+    debugPrint("=== SURAT CARD DEBUG id=${surat.id} ===");
+    debugPrint("level: $level | status: ${surat.status} | canAct: $isAct | permission: ${permission.canViewDetail}");
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -398,9 +403,10 @@ class _SuratPageState extends State<SuratPage> {
                     builder: (_) {
                       return FractionallySizedBox(
                         heightFactor: 0.8,
-                        child: TindakLanjutModal(
+                        child: TindakLanjutRtModal(
                           surat: surat,
                           namaWarga: namaWarga,
+                          readOnly: !permission.canOpenModal,
                           permission: permission,
                         ),
                       );

@@ -12,6 +12,7 @@ import 'package:rukun_app_proyek4/views/pages/roles/rt/home_page.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rt/penduduk/penduduk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/surat/surat_page.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rt/profile_page.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rt/kegiatan/rt_kegiatan_page.dart';
 
 // pages Warga
 import 'package:rukun_app_proyek4/views/pages/roles/warga/home_page.dart';
@@ -76,9 +77,9 @@ class NavViewModel {
           page: SuratPage(user: user),
         ),
         NavItem(
-          icon: Icons.person,
-          label: "Profile",
-          page: const RtProfilePage(),
+          icon: Icons.event,
+          label: "Kegiatan",
+          page: const RtKegiatanPage(),
         ),
       ];
     }
