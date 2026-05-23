@@ -177,7 +177,11 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
                               ),
                             ),
 
-                            child: const Text("Ajukan Surat"),
+                            child: Text(
+                              widget.isEdit
+                                  ? "Simpan Perubahan"
+                                  : "Ajukan Surat",
+                            ),
                           ),
                         ),
                       ],
@@ -197,6 +201,8 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
       return;
     }
 
+    final vm = context.read<PengajuanSuratViewModel>();
+
     final data = PengajuanSurat(
       wargaId: widget.user.wargaId,
       rtId: widget.user.rt?.id,
@@ -205,7 +211,13 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
       status: SuratStatus.diajukan,
     );
 
-    final success = await context.read<PengajuanSuratViewModel>().submit(data);
+    bool success;
+
+    if (widget.isEdit && widget.surat?.id != null) {
+      success = await vm.updateSurat(widget.surat!.id!, data);
+    } else {
+      success = await vm.submit(data);
+    }
 
     if (!mounted) return;
 

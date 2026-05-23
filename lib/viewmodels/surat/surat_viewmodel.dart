@@ -54,7 +54,7 @@ class SuratViewModel extends ChangeNotifier {
         "disetujui_oleh": authVm.currentUser?.id,
       };
 
-      await suratRepo.updateStatusSurat(id, body);
+      await suratRepo.updateSurat(id, body);
 
       final index = _allData.indexWhere((e) => e.id == id);
 
@@ -95,7 +95,7 @@ class SuratViewModel extends ChangeNotifier {
         "disetujui_oleh": authVm.currentUser?.id,
       };
 
-      await suratRepo.updateStatusSurat(id, body);
+      await suratRepo.updateSurat(id, body);
 
       final index = _allData.indexWhere((e) => e.id == id);
 

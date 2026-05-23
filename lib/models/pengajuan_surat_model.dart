@@ -2,6 +2,21 @@ import 'package:rukun_app_proyek4/models/rt_model.dart';
 
 enum SuratStatus { diajukan, disetujui, ditolak, selesai }
 
+extension SuratStatusX on SuratStatus {
+  String get value {
+    switch (this) {
+      case SuratStatus.diajukan:
+        return "Diajukan";
+      case SuratStatus.disetujui:
+        return "Disetujui";
+      case SuratStatus.ditolak:
+        return "Ditolak";
+      case SuratStatus.selesai:
+        return "Selesai";
+    }
+  }
+}
+
 class PengajuanSurat {
   final int? id;
   final int? wargaId;

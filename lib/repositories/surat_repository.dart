@@ -83,7 +83,7 @@ class SuratRepository {
     return true;
   }
 
-  Future<void> updateStatusSurat(int id, Map<String, dynamic> data) async {
+  Future<void> updateSurat(int id, Map<String, dynamic> data) async {
     final token = await _requireToken();
 
     final result = await _safeCall(() => service.updateSurat(id, data, token));
