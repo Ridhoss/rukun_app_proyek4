@@ -48,23 +48,23 @@ class KegiatanPage extends StatelessWidget {
                 _headerKegiatan(context, vm),
 
                 Expanded(
-                  child: vm.data.isEmpty
+                  child: vm.kegiatanList.isEmpty
                       ? const Center(child: Text("Belum ada kegiatan"))
                       : ListView.builder(
                           physics: const BouncingScrollPhysics(),
 
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
 
-                          itemCount: vm.data.length,
+                          itemCount: vm.kegiatanList.length,
 
                           itemBuilder: (_, i) {
-                            final kegiatan = vm.data[i];
+                            final kegiatan = vm.kegiatanList[i];
 
                             return Column(
                               children: [
                                 _card(context, vm, kegiatan),
 
-                                if (i == vm.data.length - 1)
+                                if (i == vm.kegiatanList.length - 1)
                                   const SizedBox(height: 40),
                               ],
                             );
@@ -379,11 +379,7 @@ class KegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _card(
-    BuildContext context,
-    KegiatanViewModel vm,
-    Kegiatan kegiatan,
-  ) {
+  Widget _card(BuildContext context, KegiatanViewModel vm, Kegiatan kegiatan) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
 
@@ -434,7 +430,7 @@ class KegiatanPage extends StatelessWidget {
 
               const SizedBox(width: 8),
               Text(
-                vm.formatTanggalRange(kegiatan),
+                vm.formatTanggal(kegiatan),
                 style: TextStyle(
                   color: ColorsUtils.slateGray,
                   fontWeight: FontWeight.w500,
@@ -465,7 +461,7 @@ class KegiatanPage extends StatelessWidget {
             _fullButton(
               label: "Upload Bukti Kegiatan",
               onTap: () {
-                vm.uploadDummyBukti(kegiatan.id!);
+                vm.uploadBuktiKegiatan(kegiatan.id!);
               },
             ),
           ] else if (vm.isOngoing(kegiatan)) ...[

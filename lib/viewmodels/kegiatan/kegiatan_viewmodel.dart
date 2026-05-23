@@ -1,114 +1,82 @@
-import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'dart:io';
+
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
+import 'package:rukun_app_proyek4/repositories/kegiatan_repository.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 
 enum KegiatanFilterStatus { semua, dibuat, dibatalkan, selesai }
 
-class KegiatanViewModel extends ChangeNotifier {
-  File? buktiImage;
-  File? dokumenFile;
+enum KegiatanValidationMode { create, uploadBukti, edit }
 
+class KegiatanViewModel extends ChangeNotifier {
+  final KegiatanRepository repository;
+  final CloudinaryService cloudinaryService;
+
+  KegiatanViewModel(this.repository, this.cloudinaryService);
+
+  List<Kegiatan> _allKegiatan = [];
+
+  bool isLoading = false;
   bool isUploading = false;
+  String? errorMessage;
+
+  File? selectedImage;
+  File? selectedDocument;
+
   KegiatanLevel selectedLevel = KegiatanLevel.rw;
   KegiatanFilterStatus selectedStatus = KegiatanFilterStatus.semua;
 
-  final List<Kegiatan> _allData = [
-    Kegiatan(
-      id: 1,
-      nama: "Pelatihan UMKM Warga Cermat",
-      deskripsi:
-          "Pelatihan pengembangan usaha warga RW untuk meningkatkan pemasukan UMKM lokal",
-      tanggalMulai: DateTime.now().add(const Duration(days: 3)),
-      tanggalSelesai: DateTime.now().add(const Duration(days: 5)),
-      level: KegiatanLevel.rw,
-      rwId: 2,
-      status: KegiatanStatus.dibuat,
-      docReferensi: "proposal_umkm.pdf",
-    ),
+  String _searchQuery = "";
 
-    Kegiatan(
-      id: 2,
-      nama: "Pembagian Sembako",
-      deskripsi:
-          "Pembagian sembako kepada warga terdampak ekonomi di lingkungan RW",
-      tanggalMulai: DateTime.now().subtract(const Duration(days: 7)),
-      tanggalSelesai: DateTime.now().subtract(const Duration(days: 2)),
-      level: KegiatanLevel.rw,
-      rwId: 2,
-      status: KegiatanStatus.selesai,
-      docReferensi: "laporan_sembako.pdf",
-      imgReferensi: "foto_kegiatan.png",
-    ),
+  Future<void> fetchKegiatan() async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
 
-    Kegiatan(
-      id: 3,
-      nama: "Kerja Bakti RT 04",
-      deskripsi: "Pembersihan saluran air dan lingkungan sekitar RT 04",
-      tanggalMulai: DateTime.now().add(const Duration(days: 1)),
-      tanggalSelesai: DateTime.now().add(const Duration(days: 1)),
-      level: KegiatanLevel.rt,
-      rtId: 4,
-      rwId: 2,
-      status: KegiatanStatus.dibuat,
-      docReferensi: "proposal_rt04.pdf",
-    ),
+    try {
+      _allKegiatan = await repository.getAllKegiatan();
+    } catch (e) {
+      errorMessage = e.toString();
+    }
 
-    Kegiatan(
-      id: 4,
-      nama: "Posyandu RT 01",
-      deskripsi: "Pemeriksaan kesehatan lansia dan balita RT 01",
-      tanggalMulai: DateTime.now().subtract(const Duration(days: 4)),
-      tanggalSelesai: DateTime.now().subtract(const Duration(days: 4)),
-      level: KegiatanLevel.rt,
-      rtId: 1,
-      rwId: 2,
-      status: KegiatanStatus.dibatalkan,
-      docReferensi: "proposal_posyandu.pdf",
-    ),
-  ];
+    isLoading = false;
+    notifyListeners();
+  }
 
-  List<Kegiatan> get data {
-    return _allData.where((e) {
-      final sameLevel = e.level == selectedLevel;
+  Future<void> refresh() async {
+    await fetchKegiatan();
+  }
 
-      bool sameStatus = true;
+  List<Kegiatan> get kegiatanList {
+    return _allKegiatan.where((kegiatan) {
+      final matchLevel = kegiatan.level == selectedLevel;
 
-      switch (selectedStatus) {
-        case KegiatanFilterStatus.semua:
-          sameStatus = true;
-          break;
+      final matchStatus = switch (selectedStatus) {
+        KegiatanFilterStatus.semua => true,
+        KegiatanFilterStatus.dibuat => kegiatan.status == KegiatanStatus.dibuat,
+        KegiatanFilterStatus.dibatalkan =>
+          kegiatan.status == KegiatanStatus.dibatalkan,
+        KegiatanFilterStatus.selesai =>
+          kegiatan.status == KegiatanStatus.selesai,
+      };
 
-        case KegiatanFilterStatus.dibuat:
-          sameStatus = e.status == KegiatanStatus.dibuat;
-          break;
+      final query = _searchQuery.toLowerCase();
+      final matchSearch =
+          kegiatan.nama.toLowerCase().contains(query) ||
+          (kegiatan.deskripsi ?? "").toLowerCase().contains(query);
 
-        case KegiatanFilterStatus.dibatalkan:
-          sameStatus = e.status == KegiatanStatus.dibatalkan;
-          break;
-
-        case KegiatanFilterStatus.selesai:
-          sameStatus = e.status == KegiatanStatus.selesai;
-          break;
-      }
-
-      final nama = e.nama.toLowerCase();
-
-      final deskripsi = (e.deskripsi ?? "").toLowerCase();
-
-      final q = _search.toLowerCase();
-
-      final matchSearch = nama.contains(q) || deskripsi.contains(q);
-
-      return sameLevel && sameStatus && matchSearch;
+      return matchLevel && matchStatus && matchSearch;
     }).toList();
   }
 
   void setLevel(KegiatanLevel level) {
     selectedLevel = level;
-    notifyListeners();
+    fetchKegiatan();
   }
 
   void setStatus(KegiatanFilterStatus status) {
@@ -116,278 +84,176 @@ class KegiatanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isReadonly(Kegiatan kegiatan) {
-    return kegiatan.level == KegiatanLevel.rt;
-  }
-
-  bool canEdit(Kegiatan kegiatan) {
-    if (isReadonly(kegiatan)) return false;
-
-    return kegiatan.status == KegiatanStatus.dibuat &&
-        kegiatan.tanggalMulai.isAfter(DateTime.now());
-  }
-
-  bool canCancel(Kegiatan kegiatan) {
-    return canEdit(kegiatan);
-  }
-
-  bool canUploadBukti(Kegiatan kegiatan) {
-    if (isReadonly(kegiatan)) return false;
-
-    final selesai = kegiatan.tanggalSelesai ?? kegiatan.tanggalMulai;
-
-    final sudahSelesai = DateTime.now().isAfter(selesai);
-
-    return sudahSelesai &&
-        kegiatan.status == KegiatanStatus.selesai &&
-        kegiatan.imgReferensi == null;
-  }
-
-  bool isFinished(Kegiatan kegiatan) {
-    return kegiatan.status == KegiatanStatus.selesai;
-  }
-
-  int get totalSemua => _allData.length;
-
-  int get totalDibuat =>
-      data.where((e) => e.status == KegiatanStatus.dibuat).length;
-
-  int get totalDibatalkan =>
-      data.where((e) => e.status == KegiatanStatus.dibatalkan).length;
-
-  int get totalSelesai =>
-      data.where((e) => e.status == KegiatanStatus.selesai).length;
-
-  Future<void> refresh() async {
-    await Future.delayed(const Duration(milliseconds: 700));
-
-    notifyListeners();
-  }
-
-  String _search = "";
-
   void setSearch(String value) {
-    _search = value;
+    _searchQuery = value;
     notifyListeners();
   }
 
-  bool isOngoing(Kegiatan kegiatan) {
-    final now = DateTime.now();
-
-    final selesai = kegiatan.tanggalSelesai ?? kegiatan.tanggalMulai;
-
-    return kegiatan.status == KegiatanStatus.dibuat &&
-        now.isAfter(kegiatan.tanggalMulai) &&
-        now.isBefore(selesai);
-  }
-
-  void updateKegiatan({
-    required int id,
+  Future<void> createKegiatan({
     required String nama,
     required String deskripsi,
     required DateTime tanggalMulai,
-    DateTime? tanggalSelesai,
-  }) {
-    final index = _allData.indexWhere((e) => e.id == id);
-
-    if (index == -1) return;
-
-    final old = _allData[index];
-
-    _allData[index] = Kegiatan(
-      id: old.id,
-
-      nama: nama,
-
-      deskripsi: deskripsi,
-
-      tanggalMulai: tanggalMulai,
-
-      tanggalSelesai: tanggalSelesai,
-
-      level: old.level,
-
-      rtId: old.rtId,
-
-      rwId: old.rwId,
-
-      status: old.status,
-
-      docReferensi: dokumenFile?.path.split("/").last ?? old.docReferensi,
-
-      imgReferensi: buktiImage?.path.split("/").last ?? old.imgReferensi,
-    );
-
-    notifyListeners();
-  }
-
-  Future<void> uploadDummyBukti(int id) async {
-    if (buktiImage == null) return;
-
-    isUploading = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1));
-
-    final index = _allData.indexWhere((e) => e.id == id);
-
-    if (index == -1) {
-      isUploading = false;
+    required DateTime tanggalSelesai,
+  }) async {
+    if (selectedDocument == null) {
+      errorMessage = "Dokumen wajib diupload";
       notifyListeners();
       return;
     }
 
-    final kegiatan = _allData[index];
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
 
-    _allData[index] = Kegiatan(
-      id: kegiatan.id,
-      nama: kegiatan.nama,
-      deskripsi: kegiatan.deskripsi,
-      tanggalMulai: kegiatan.tanggalMulai,
-      tanggalSelesai: kegiatan.tanggalSelesai,
-      level: kegiatan.level,
-      rtId: kegiatan.rtId,
-      rwId: kegiatan.rwId,
-      status: kegiatan.status,
+    try {
+      final kegiatan = Kegiatan(
+        id: 0,
+        nama: nama,
+        deskripsi: deskripsi,
+        tanggalMulai: tanggalMulai,
+        tanggalSelesai: tanggalSelesai,
+        level: KegiatanLevel.rw,
+        rwId: 2,
+        status: KegiatanStatus.dibuat,
 
-      docReferensi: dokumenFile?.path.split("/").last ?? kegiatan.docReferensi,
+        // DOC wajib
+        docReferensi: selectedDocument?.path.split("/").last,
 
-      imgReferensi: buktiImage?.path.split("/").last ?? kegiatan.imgReferensi,
-    );
+        // IMAGE tidak dikirim saat create
+        imgReferensi: null,
 
-    clearUpload();
+        waktuDibuat: DateTime.now(),
+      );
+
+      await repository.createKegiatan(kegiatan);
+
+      _clearFile();
+      await fetchKegiatan();
+    } catch (e) {
+      errorMessage = e.toString();
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> updateKegiatan({
+    required int id,
+    required Map<String, dynamic> data,
+  }) async {
+    try {
+      await repository.updateKegiatan(id, data);
+      await fetchKegiatan();
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteKegiatan(int id) async {
+    try {
+      await repository.deleteKegiatan(id);
+      await fetchKegiatan();
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> uploadBuktiKegiatan(int id) async {
+    if (selectedImage == null) {
+      errorMessage = "Foto bukti wajib diupload";
+      notifyListeners();
+      return;
+    }
+
+    isUploading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final url = await cloudinaryService.uploadFile(
+        selectedImage!,
+        folder: 'kegiatan/$id',
+      );
+
+      if (url == null) {
+        errorMessage = "Upload gambar gagal";
+        return;
+      }
+
+      await repository.updateKegiatan(id, {
+        "img_referensi": url,
+        "status": "selesai",
+      });
+
+      clearUpload();
+      await fetchKegiatan();
+    } catch (e) {
+      errorMessage = e.toString();
+    }
 
     isUploading = false;
-
     notifyListeners();
   }
 
-  void createKegiatan({
-    required String nama,
-    required String deskripsi,
-    required DateTime tanggalMulai,
-    DateTime? tanggalSelesai,
-  }) {
-    final kegiatan = Kegiatan(
-      id: _allData.length + 1,
-
-      nama: nama,
-
-      deskripsi: deskripsi,
-
-      tanggalMulai: tanggalMulai,
-
-      tanggalSelesai: tanggalSelesai,
-
-      level: KegiatanLevel.rw,
-
-      rwId: 2,
-
-      status: KegiatanStatus.dibuat,
-
-      docReferensi: dokumenFile?.path.split("/").last,
-
-      imgReferensi: buktiImage?.path.split("/").last,
-
-      waktuDibuat: DateTime.now(),
-    );
-
-    _allData.insert(0, kegiatan);
-
+  void clearUpload() {
+    selectedImage = null;
+    selectedDocument = null;
     notifyListeners();
   }
 
-  String? validateCreateKegiatan({
-    required String nama,
-    required String deskripsi,
-    required DateTime? tanggalMulai,
-    required DateTime? tanggalSelesai,
-  }) {
-    if (nama.trim().isEmpty) {
-      return "Nama kegiatan wajib diisi";
-    }
+  bool isReadonly(Kegiatan k) => k.level == KegiatanLevel.rt;
 
-    if (deskripsi.trim().isEmpty) {
-      return "Deskripsi wajib diisi";
-    }
-
-    if (tanggalMulai == null) {
-      return "Tanggal mulai wajib diisi";
-    }
-
-    if (tanggalSelesai == null) {
-      return "Tanggal selesai wajib diisi";
-    }
-
-    if (dokumenFile == null) {
-      return "Dokumen pendukung wajib diupload";
-    }
-
-    if (tanggalSelesai.isBefore(tanggalMulai)) {
-      return "Tanggal selesai tidak boleh sebelum tanggal mulai";
-    }
-
-    return null;
+  bool canEdit(Kegiatan k) {
+    return !isReadonly(k) &&
+        k.status == KegiatanStatus.dibuat &&
+        k.tanggalMulai.isAfter(DateTime.now());
   }
 
-  String? validateEditKegiatan({
-    required Kegiatan kegiatan,
-    required String nama,
-    required String deskripsi,
-    required DateTime? tanggalMulai,
-    required DateTime? tanggalSelesai,
-    required bool wajibFoto,
-  }) {
-    if (nama.trim().isEmpty) {
-      return "Nama kegiatan wajib diisi";
-    }
+  bool canCancel(Kegiatan k) => canEdit(k);
 
-    if (deskripsi.trim().isEmpty) {
-      return "Deskripsi wajib diisi";
-    }
+  bool canUploadBukti(Kegiatan k) {
+    final selesai = k.tanggalSelesai ?? k.tanggalMulai;
+    final isDone = DateTime.now().isAfter(selesai);
 
-    if (tanggalMulai == null) {
-      return "Tanggal mulai wajib diisi";
-    }
-
-    if (tanggalSelesai == null) {
-      return "Tanggal selesai wajib diisi";
-    }
-
-    final hasDokumen = dokumenFile != null || kegiatan.docReferensi != null;
-
-    if (!hasDokumen) {
-      return "Dokumen pendukung wajib diupload";
-    }
-
-    if (tanggalSelesai.isBefore(tanggalMulai)) {
-      return "Tanggal selesai tidak boleh sebelum tanggal mulai";
-    }
-
-    final hasFoto = buktiImage != null || kegiatan.imgReferensi != null;
-
-    if (wajibFoto && !hasFoto) {
-      return "Foto kegiatan wajib diupload";
-    }
-
-    return null;
+    return !isReadonly(k) &&
+        isDone &&
+        k.status == KegiatanStatus.selesai &&
+        k.imgReferensi == null;
   }
 
-  String formatTanggalRange(Kegiatan kegiatan) {
-    final mulai = DateFormat("dd MMM yyyy").format(kegiatan.tanggalMulai);
+  bool isOngoing(Kegiatan k) {
+    final now = DateTime.now();
+    final end = k.tanggalSelesai ?? k.tanggalMulai;
 
-    final selesai = kegiatan.tanggalSelesai != null
-        ? DateFormat("dd MMM yyyy").format(kegiatan.tanggalSelesai!)
+    return k.status == KegiatanStatus.dibuat &&
+        now.isAfter(k.tanggalMulai) &&
+        now.isBefore(end);
+  }
+
+  int get totalSemua => _allKegiatan.length;
+
+  int get totalDibuat =>
+      _allKegiatan.where((e) => e.status == KegiatanStatus.dibuat).length;
+
+  int get totalSelesai =>
+      _allKegiatan.where((e) => e.status == KegiatanStatus.selesai).length;
+
+  int get totalDibatalkan =>
+      _allKegiatan.where((e) => e.status == KegiatanStatus.dibatalkan).length;
+
+  String formatTanggal(Kegiatan k) {
+    final start = DateFormat("dd MMM yyyy").format(k.tanggalMulai);
+
+    final end = k.tanggalSelesai != null
+        ? DateFormat("dd MMM yyyy").format(k.tanggalSelesai!)
         : null;
 
-    if (selesai == null) {
-      return mulai;
-    }
-
-    return "$mulai - $selesai";
+    return end == null ? start : "$start - $end";
   }
 
-  Future<void> pickBuktiImage() async {
+  Future<void> pickImage() async {
     final picker = ImagePicker();
 
     final picked = await picker.pickImage(
@@ -397,12 +263,11 @@ class KegiatanViewModel extends ChangeNotifier {
 
     if (picked == null) return;
 
-    buktiImage = File(picked.path);
-
+    selectedImage = File(picked.path);
     notifyListeners();
   }
 
-  Future<void> pickDokumenFile() async {
+  Future<void> pickDocument() async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'doc', 'docx'],
@@ -410,15 +275,74 @@ class KegiatanViewModel extends ChangeNotifier {
 
     if (result == null) return;
 
-    dokumenFile = File(result.files.single.path!);
-
+    selectedDocument = File(result.files.single.path!);
     notifyListeners();
   }
 
-  void clearUpload() {
-    buktiImage = null;
-    dokumenFile = null;
-
+  void _clearFile() {
+    selectedImage = null;
+    selectedDocument = null;
     notifyListeners();
+  }
+
+  String? validateKegiatan({
+    required KegiatanValidationMode mode,
+    required String nama,
+    required String deskripsi,
+    required DateTime? tanggalMulai,
+    required DateTime? tanggalSelesai,
+
+    Kegiatan? kegiatan,
+  }) {
+    if (nama.trim().isEmpty) {
+      return "Nama kegiatan wajib diisi";
+    }
+
+    if (deskripsi.trim().isEmpty) {
+      return "Deskripsi wajib diisi";
+    }
+
+    if (mode == KegiatanValidationMode.create ||
+        mode == KegiatanValidationMode.edit) {
+      if (tanggalMulai == null) {
+        return "Tanggal mulai wajib diisi";
+      }
+
+      if (tanggalSelesai == null) {
+        return "Tanggal selesai wajib diisi";
+      }
+
+      if (tanggalSelesai.isBefore(tanggalMulai)) {
+        return "Tanggal selesai tidak boleh sebelum tanggal mulai";
+      }
+    }
+
+    if (mode == KegiatanValidationMode.create) {
+      if (selectedDocument == null) {
+        return "Dokumen pendukung wajib diupload";
+      }
+    }
+
+    if (mode == KegiatanValidationMode.uploadBukti) {
+      if (kegiatan == null) {
+        return "Data kegiatan tidak valid";
+      }
+
+      final selesai = kegiatan.tanggalSelesai ?? kegiatan.tanggalMulai;
+
+      if (!DateTime.now().isAfter(selesai)) {
+        return "Kegiatan belum selesai";
+      }
+
+      if (selectedImage == null) {
+        return "Foto bukti wajib diupload";
+      }
+
+      if (kegiatan.imgReferensi != null) {
+        return "Bukti sudah pernah diupload";
+      }
+    }
+
+    return null;
   }
 }

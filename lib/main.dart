@@ -1,3 +1,5 @@
+import 'package:rukun_app_proyek4/repositories/kegiatan_repository.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_kegiatan_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/rt_upload_setoran_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
@@ -72,6 +74,8 @@ void main() async {
 
         Provider(create: (_) => CloudRtRwService()),
 
+        Provider(create: (_) => CloudKegiatanService()),
+
         Provider(
           create: (context) => IuranRepository(
             context.read<CloudIuranService>(),
@@ -103,6 +107,13 @@ void main() async {
         Provider(
           create: (context) => RTRWRepository(
             context.read<CloudRtRwService>(),
+            context.read<AuthLocalService>(),
+          ),
+        ),
+
+        Provider(
+          create: (context) => KegiatanRepository(
+            context.read<CloudKegiatanService>(),
             context.read<AuthLocalService>(),
           ),
         ),
@@ -163,7 +174,12 @@ void main() async {
           ),
         ),
 
-        ChangeNotifierProvider(create: (_) => KegiatanViewModel()),
+        ChangeNotifierProvider(
+          create: (context) => KegiatanViewModel(
+            context.read<KegiatanRepository>(),
+            context.read<CloudinaryService>(),
+          ),
+        ),
 
         ChangeNotifierProvider(
           create: (context) => SuratViewModel(

@@ -215,12 +215,13 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                         setState(() {
                           tanggalMulaiError = tanggalMulai == null;
                           tanggalSelesaiError = tanggalSelesai == null;
-                          dokumenError = vm.dokumenFile == null;
+                          dokumenError = vm.selectedDocument == null;
                         });
 
                         if (!isValid) return;
 
-                        final error = vm.validateCreateKegiatan(
+                        final error = vm.validateKegiatan(
+                          mode: KegiatanValidationMode.create,
                           nama: namaController.text,
                           deskripsi: deskripsiController.text,
                           tanggalMulai: tanggalMulai,
@@ -239,7 +240,7 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                           nama: namaController.text.trim(),
                           deskripsi: deskripsiController.text.trim(),
                           tanggalMulai: tanggalMulai!,
-                          tanggalSelesai: tanggalSelesai,
+                          tanggalSelesai: tanggalSelesai!,
                         );
 
                         vm.clearUpload();
@@ -340,10 +341,10 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
   Widget _documentBox(KegiatanViewModel vm) {
     final fileName =
-        vm.dokumenFile?.path.split("/").last ?? "Upload dokumen kegiatan";
+        vm.selectedDocument?.path.split("/").last ?? "Upload dokumen kegiatan";
 
     return GestureDetector(
-      onTap: vm.pickDokumenFile,
+      onTap: vm.pickDocument,
 
       child: Container(
         width: double.infinity,
@@ -379,7 +380,7 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
   Widget _imageBox(KegiatanViewModel vm) {
     return GestureDetector(
-      onTap: vm.pickBuktiImage,
+      onTap: vm.pickImage,
 
       child: Container(
         width: double.infinity,
@@ -391,12 +392,12 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
           border: Border.all(color: ColorsUtils.gray),
         ),
 
-        child: vm.buktiImage != null
+        child: vm.selectedImage != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(14),
 
                 child: Image.file(
-                  File(vm.buktiImage!.path),
+                  File(vm.selectedImage!.path),
                   fit: BoxFit.cover,
                   width: double.infinity,
                 ),

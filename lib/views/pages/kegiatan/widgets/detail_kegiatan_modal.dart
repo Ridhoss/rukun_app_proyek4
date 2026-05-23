@@ -216,43 +216,58 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
                       onPressed: vm.isUploading
                           ? null
                           : () async {
-                              final error = vm.validateEditKegiatan(
+                              final error = vm.validateKegiatan(
+                                mode: KegiatanValidationMode.edit,
                                 kegiatan: widget.kegiatan,
                                 nama: namaController.text.trim(),
                                 deskripsi: deskripsiController.text.trim(),
                                 tanggalMulai: tanggalMulai,
                                 tanggalSelesai: tanggalSelesai,
-
-                                wajibFoto:
-                                    widget.kegiatan.status ==
-                                        KegiatanStatus.selesai &&
-                                    widget.kegiatan.imgReferensi == null,
                               );
 
                               if (error != null) {
                                 ScaffoldMessenger.of(
                                   context,
                                 ).showSnackBar(SnackBar(content: Text(error)));
-
                                 return;
                               }
 
-                              vm.updateKegiatan(
+                              await vm.updateKegiatan(
                                 id: widget.kegiatan.id!,
-                                nama: namaController.text.trim(),
-                                deskripsi: deskripsiController.text.trim(),
-                                tanggalMulai: tanggalMulai,
-                                tanggalSelesai: tanggalSelesai,
+                                data: {
+                                  "nama": namaController.text.trim(),
+                                  "deskripsi": deskripsiController.text.trim(),
+                                  "tanggal_mulai": tanggalMulai
+                                      .toIso8601String(),
+                                  "tanggal_selesai": tanggalSelesai
+                                      ?.toIso8601String(),
+                                },
                               );
 
-                              // upload foto hanya jika ada foto baru
-                              if (vm.buktiImage != null) {
-                                await vm.uploadDummyBukti(widget.kegiatan.id!);
+                              if (vm.selectedImage != null) {
+                                final error = vm.validateKegiatan(
+                                  mode: KegiatanValidationMode.uploadBukti,
+                                  nama: widget.kegiatan.nama,
+                                  deskripsi: widget.kegiatan.deskripsi ?? "",
+                                  tanggalMulai: widget.kegiatan.tanggalMulai,
+                                  tanggalSelesai:
+                                      widget.kegiatan.tanggalSelesai,
+                                  kegiatan: widget.kegiatan,
+                                );
+
+                                if (error != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(error)),
+                                  );
+                                  return;
+                                }
+
+                                await vm.uploadBuktiKegiatan(
+                                  widget.kegiatan.id!,
+                                );
                               }
 
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
+                              if (context.mounted) Navigator.pop(context);
                             },
 
                       style: ElevatedButton.styleFrom(
@@ -355,10 +370,12 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
     String? fileName,
   ) {
     final currentFile =
-        vm.dokumenFile?.path.split("/").last ?? fileName ?? "Belum ada dokumen";
+        vm.selectedDocument?.path.split("/").last ??
+        fileName ??
+        "Belum ada dokumen";
 
     return GestureDetector(
-      onTap: widget.readonly ? null : vm.pickDokumenFile,
+      onTap: widget.readonly ? null : vm.pickDocument,
 
       child: Container(
         width: double.infinity,
@@ -395,7 +412,7 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
     String? imageName,
   ) {
     return GestureDetector(
-      onTap: widget.readonly ? null : vm.pickBuktiImage,
+      onTap: widget.readonly ? null : vm.pickImage,
 
       child: Container(
         width: double.infinity,
@@ -407,12 +424,12 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
           border: Border.all(color: ColorsUtils.gray),
         ),
 
-        child: vm.buktiImage != null
+        child: vm.selectedImage != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(14),
 
                 child: Image.file(
-                  File(vm.buktiImage!.path),
+                  File(vm.selectedImage!.path),
                   fit: BoxFit.cover,
                   width: double.infinity,
                 ),
