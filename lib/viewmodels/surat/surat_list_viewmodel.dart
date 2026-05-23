@@ -1,34 +1,24 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/material.dart';
 
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/models/warga_model.dart';
-
 import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
-import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 
-enum SuratFilterStatus { semua, diajukan, disetujui, selesai }
+enum SuratFilterStatus { semua, diajukan, disetujui, ditolak, selesai }
 
-class SuratRwViewModel extends ChangeNotifier {
+class SuratListViewModel extends ChangeNotifier {
   final WargaRepository wargaRepo;
   final SuratRepository suratRepo;
-  final CloudinaryService cloudinaryService;
   final AuthViewModel authVm;
 
-  SuratRwViewModel(
+  SuratListViewModel(
     this.wargaRepo,
     this.suratRepo,
-    this.cloudinaryService,
     this.authVm,
   );
 
-  File? signedFile;
-
-  bool isUploading = false;
   bool isLoading = false;
 
   String searchQuery = "";
@@ -37,75 +27,15 @@ class SuratRwViewModel extends ChangeNotifier {
   final List<PengajuanSurat> _allData = [];
   final Map<int, Warga> _wargaMap = {};
 
-  Future<void> pickFile() async {
-    try {
-      final result = await fp.FilePicker.pickFiles(
-        type: fp.FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx'],
-      );
-
-      if (result == null || result.files.single.path == null) return;
-
-      signedFile = File(result.files.single.path!);
-
-      notifyListeners();
-    } catch (e) {
-      debugPrint("ERROR PICK FILE: $e");
-    }
-  }
-
-  void clearFile() {
-    signedFile = null;
-    notifyListeners();
-  }
-
-  Future<bool> uploadSurat({required int id}) async {
-    if (signedFile == null) return false;
-
-    isUploading = true;
-    notifyListeners();
-
-    try {
-      final url = await cloudinaryService.uploadFile(
-        signedFile!,
-        folder: 'surat/pengajuan/$id',
-      );
-
-      if (url == null) return false;
-
-      final body = {
-        "status": "Disetujui",
-        "doc_referensi": url,
-        "disetujui_oleh": authVm.currentUser?.id,
-      };
-
-      await suratRepo.updateStatusSurat(id, body);
-
-      final index = _allData.indexWhere((e) => e.id == id);
-      if (index != -1) {
-        _allData[index] = _allData[index].copyWith(
-          status: SuratStatus.disetujui,
-          docRef: url,
-        );
-      }
-
-      clearFile();
-      return true;
-    } catch (e) {
-      debugPrint("ERROR UPLOAD SURAT: $e");
-      return false;
-    } finally {
-      isUploading = false;
-      notifyListeners();
-    }
-  }
-
   List<PengajuanSurat> get data {
-    var result = _filterByStatus(_allData);
+    var result = _filterByStatus(accessibleData);
     result = _filterBySearch(result);
 
     return result;
   }
+
+  int get totalDitolak =>
+      _allData.where((e) => e.status == SuratStatus.ditolak).length;
 
   int get totalDisetujui =>
       _allData.where((e) => e.status == SuratStatus.disetujui).length;
@@ -129,6 +59,9 @@ class SuratRwViewModel extends ChangeNotifier {
       case SuratFilterStatus.selesai:
         return source.where((e) => e.status == SuratStatus.selesai).toList();
 
+      case SuratFilterStatus.ditolak:
+        return source.where((e) => e.status == SuratStatus.ditolak).toList();
+
       case SuratFilterStatus.semua:
         return source;
     }
@@ -141,9 +74,7 @@ class SuratRwViewModel extends ChangeNotifier {
 
     return source.where((e) {
       final namaWarga = getNamaWarga(e.wargaId ?? 0).toLowerCase();
-
-      final keperluan = (e.keperluan ?? '').toLowerCase();
-
+      final keperluan = e.keperluan.toLowerCase();
       final keterangan = (e.keterangan ?? '').toLowerCase();
 
       return keperluan.contains(query) ||
@@ -180,23 +111,61 @@ class SuratRwViewModel extends ChangeNotifier {
     return nama.isNotEmpty ? nama[0].toUpperCase() : "?";
   }
 
-  Future<void> fetchSurat({required int rtId}) async {
+  /// Mencari URL template dari surat yang sudah Selesai (is_signed = true).
+  /// Template ini bisa diunduh oleh RT sebagai referensi pembuatan surat baru.
+  String? getTemplateUrl() {
+    final selesai = _allData
+        .where((e) => e.status == SuratStatus.selesai && e.docRef != null)
+        .toList();
+
+    if (selesai.isEmpty) return null;
+
+    // Ambil yang paling baru (waktu diubah terbaru)
+    selesai.sort((a, b) {
+      final aTime = a.waktuDiubah ?? DateTime(0);
+      final bTime = b.waktuDiubah ?? DateTime(0);
+      return bTime.compareTo(aTime);
+    });
+
+    return selesai.first.docRef;
+  }
+
+  Future<void> fetchSurat({required int rwId}) async {
     try {
       isLoading = true;
       notifyListeners();
 
       await _loadWarga();
 
-      final result = await suratRepo.getSuratByRt(rtId);
+      final result = await suratRepo.getSuratByRw(rwId);
 
       _allData.clear();
       _allData.addAll(result);
     } catch (e) {
-      debugPrint("ERROR FETCH SURAT RT: $e");
+      debugPrint("ERROR FETCH SURAT: $e");
     } finally {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  List<PengajuanSurat> get accessibleData {
+    final user = authVm.currentUser;
+
+    if (user?.pengurus?.level == "RW") {
+      return _allData;
+    }
+
+    if (user?.pengurus?.level == "RT") {
+      final rtId = user?.rt?.id ?? user?.pengurus?.rtId;
+
+      return _allData.where((e) {
+        final wRtId = e.rtId ?? getWarga(e.wargaId ?? 0)?.keluarga?.rtId;
+        return wRtId == rtId;
+      }).toList();
+    }
+
+    return [];
   }
 
   void setStatus(SuratFilterStatus status) {
@@ -209,17 +178,23 @@ class SuratRwViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setujuiSurat({
+  /// Diperbarui agar bisa dipanggil dari Action ViewModel
+  void updateSuratLocal({
     required int id,
-    required String signedDocument,
-  }) async {
+    SuratStatus? status,
+    String? docRef,
+    bool? isSigned,
+    String? catatan,
+  }) {
     final index = _allData.indexWhere((e) => e.id == id);
 
     if (index == -1) return;
 
     _allData[index] = _allData[index].copyWith(
-      status: SuratStatus.disetujui,
-      docRef: signedDocument,
+      status: status,
+      docRef: docRef ?? _allData[index].docRef,
+      isSigned: isSigned ?? _allData[index].isSigned,
+      catatan: catatan ?? _allData[index].catatan,
     );
 
     notifyListeners();
@@ -233,7 +208,7 @@ class SuratRwViewModel extends ChangeNotifier {
         "${date.minute.toString().padLeft(2, '0')}";
   }
 
-  Future<void> refresh({required int rtId}) async {
-    await fetchSurat(rtId: rtId);
+  Future<void> refresh({required int rwId}) async {
+    await fetchSurat(rwId: rwId);
   }
 }

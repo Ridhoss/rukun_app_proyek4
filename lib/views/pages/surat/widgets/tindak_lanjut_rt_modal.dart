@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/surat/surat_list_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/surat/surat_action_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/surat/pdf_preview_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart' as fp;
 
@@ -44,9 +46,58 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
     });
   }
 
+  void _showRejectDialog(BuildContext context, SuratActionViewModel actionVm, SuratListViewModel listVm) {
+    final TextEditingController alasanController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text("Tolak Pengajuan"),
+          content: TextField(
+            controller: alasanController,
+            decoration: const InputDecoration(
+              hintText: "Masukkan alasan penolakan",
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Batal"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: ColorsUtils.red),
+              onPressed: () async {
+                if (alasanController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Alasan wajib diisi")),
+                  );
+                  return;
+                }
+                Navigator.pop(ctx); // Close dialog
+                final success = await actionVm.tolakSurat(
+                  id: widget.surat.id!,
+                  catatan: alasanController.text.trim(),
+                  listVm: listVm,
+                );
+                if (success && mounted) {
+                  Navigator.pop(context); // Close modal
+                }
+              },
+              child: const Text("Tolak", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<SuratViewModel>();
+    final listVm = context.watch<SuratListViewModel>();
+    final actionVm = context.watch<SuratActionViewModel>();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -55,109 +106,169 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
         top: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
-
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-
           children: [
             _header(),
-
             const SizedBox(height: 24),
-
             _userHeader(),
-
             const SizedBox(height: 24),
-
             _detail("Keperluan", widget.surat.keperluan),
-
             _detail("Keterangan", widget.surat.keterangan ?? '-'),
-
             const SizedBox(height: 20),
-
             const Text(
               "Informasi Pengajuan",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 10),
-
             Wrap(
               spacing: 8,
               runSpacing: 8,
-
               children: [
-                _infoChip("Dibuat", vm.formatDate(widget.surat.waktuDibuat)),
-
+                _infoChip("Dibuat", listVm.formatDate(widget.surat.waktuDibuat)),
                 _infoChip("Status", widget.surat.status.ui.label),
               ],
             ),
-
             const SizedBox(height: 28),
-
             if (!widget.readOnly) ...[
               const Text(
-                "Upload Draft Surat",
+                "Langkah 1. Buat Draft Surat",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 8),
-
               Text(
-                "Upload draft surat yang sudah dibuat sesuai keperluan warga.",
+                "Pilih salah satu cara membuat draft surat:",
                 style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
               ),
-
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  // Tombol Generate PDF
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        final wargaData = listVm.getWarga(widget.surat.wargaId ?? 0);
+                        if (wargaData != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PdfPreviewPage(
+                                surat: widget.surat,
+                                warga: wargaData,
+                              ),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Data warga tidak ditemukan")),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.picture_as_pdf, size: 18),
+                      label: const Text("Generate\nPDF", textAlign: TextAlign.center),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Tombol Download Template
+                  Expanded(
+                    child: Builder(builder: (context) {
+                      final templateUrl = listVm.getTemplateUrl();
+                      return OutlinedButton.icon(
+                        onPressed: templateUrl == null
+                            ? null
+                            : () async {
+                                String finalUrl = templateUrl;
+                                if (finalUrl.contains("res.cloudinary.com") && !finalUrl.contains("fl_attachment")) {
+                                  finalUrl = finalUrl.replaceFirst("/upload/", "/upload/fl_attachment/");
+                                }
+                                final uri = Uri.parse(finalUrl);
+                                if (!await launchUrl(uri)) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Gagal membuka template")),
+                                    );
+                                  }
+                                }
+                              },
+                        icon: Icon(
+                          Icons.download,
+                          size: 18,
+                          color: templateUrl == null ? Colors.grey : ColorsUtils.b300,
+                        ),
+                        label: Text(
+                          templateUrl == null ? "Belum ada\nTemplate" : "Download\nTemplate",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: templateUrl == null ? Colors.grey : ColorsUtils.b300,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          side: BorderSide(
+                            color: templateUrl == null ? Colors.grey.shade300 : ColorsUtils.b300,
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              const Text(
+                "Langkah 2. Upload Draft Surat",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Upload draft surat yang sudah digenerate dan disimpan ke perangkat.",
+                style: TextStyle(fontSize: 12, color: ColorsUtils.gray),
+              ),
               const SizedBox(height: 14),
-
-              _uploadBox(context, vm),
-
+              _uploadBox(context),
               const SizedBox(height: 28),
             ],
-
             if (widget.surat.docRef != null) ...[
               const SizedBox(height: 24),
-
               const Text(
                 "Dokumen Surat",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 12),
-
               InkWell(
                 onTap: () async {
                   final uri = Uri.parse(widget.surat.docRef!);
-
                   final success = await launchUrl(
                     uri,
                     mode: LaunchMode.inAppBrowserView,
                   );
-
                   if (!success && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Gagal membuka dokumen")),
                     );
                   }
                 },
-
                 borderRadius: BorderRadius.circular(14),
-
                 child: Container(
                   padding: const EdgeInsets.all(14),
-
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
-
                   child: Row(
                     children: [
                       const Icon(Icons.description),
-
                       const SizedBox(width: 12),
-
                       Expanded(
                         child: Text(
                           widget.surat.docRef!.split('/').last,
@@ -165,15 +276,13 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-
                       const Icon(Icons.open_in_new, size: 18),
                     ],
                   ),
                 ),
               ),
             ],
-
-            if (!widget.readOnly) _actionButtons(context, vm),
+            if (!widget.readOnly) _actionButtons(context, actionVm, listVm),
           ],
         ),
       ),
@@ -182,7 +291,6 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
 
   Widget _header() {
     final status = widget.surat.status.ui;
-
     return Row(
       children: [
         const Expanded(
@@ -191,19 +299,14 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
-
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-
           decoration: BoxDecoration(
             color: status.color.withOpacity(0.12),
-
             borderRadius: BorderRadius.circular(20),
           ),
-
           child: Text(
             status.label,
-
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
@@ -219,20 +322,15 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
     return Row(
       children: [
         const CircleAvatar(radius: 22, child: Icon(Icons.person)),
-
         const SizedBox(width: 12),
-
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-
             children: [
               Text(
                 widget.namaWarga,
-
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-
               const Text(
                 "Warga Pengaju",
                 style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -247,25 +345,19 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
   Widget _detail(String title, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-
         children: [
           SizedBox(
             width: 100,
-
             child: Text(
               title,
-
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ),
-
           Expanded(
             child: Text(
               value,
-
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
@@ -277,56 +369,40 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
   Widget _infoChip(String title, String value) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
-
         borderRadius: BorderRadius.circular(12),
-
         border: Border.all(color: Colors.grey.shade200),
       ),
-
       child: Text("$title: $value", style: const TextStyle(fontSize: 11)),
     );
   }
 
-  Widget _uploadBox(BuildContext context, SuratViewModel vm) {
+  Widget _uploadBox(BuildContext context) {
     return GestureDetector(
       onTap: pickFile,
-
       child: Container(
         width: double.infinity,
         height: 130,
-
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-
           border: Border.all(color: Colors.grey.shade300),
         ),
-
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-
           children: [
             const Icon(Icons.upload_file, size: 38),
-
             const SizedBox(height: 10),
-
             Text(
               selectedFile == null
                   ? "Pilih File Draft Surat"
                   : selectedFile!.path.split("/").last,
-
               textAlign: TextAlign.center,
-
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
-
             const SizedBox(height: 6),
-
             Text(
               "PDF / DOC / DOCX",
-
               style: TextStyle(fontSize: 11, color: ColorsUtils.gray),
             ),
           ],
@@ -335,39 +411,31 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
     );
   }
 
-  Widget _actionButtons(BuildContext context, SuratViewModel vm) {
+  Widget _actionButtons(BuildContext context, SuratActionViewModel actionVm, SuratListViewModel listVm) {
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-
+            onPressed: () => _showRejectDialog(context, actionVm, listVm),
             style: OutlinedButton.styleFrom(
               foregroundColor: ColorsUtils.red,
-
               side: BorderSide(color: ColorsUtils.red.withOpacity(0.4)),
-
               padding: const EdgeInsets.symmetric(vertical: 14),
-
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
-
             child: const Text(
-              "Batal",
+              "Tolak",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
         ),
-
         const SizedBox(width: 10),
-
         Expanded(
+          flex: 2,
           child: ElevatedButton(
-            onPressed: vm.isUploading
+            onPressed: actionVm.isUploading
                 ? null
                 : () async {
                     if (selectedFile == null) {
@@ -379,32 +447,28 @@ class _TindakLanjutRtModalState extends State<TindakLanjutRtModal> {
                       return;
                     }
 
-                    final success = await vm.uploadDraftByRt(
+                    final success = await actionVm.uploadDraftByRt(
                       id: widget.surat.id!,
                       file: selectedFile!,
+                      listVm: listVm,
                     );
 
                     if (success && context.mounted) {
                       Navigator.pop(context);
                     }
                   },
-
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorsUtils.b300,
               foregroundColor: Colors.white,
-
               padding: const EdgeInsets.symmetric(vertical: 14),
-
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
-
-            child: vm.isUploading
+            child: actionVm.isUploading
                 ? const SizedBox(
                     height: 18,
                     width: 18,
-
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: Colors.white,

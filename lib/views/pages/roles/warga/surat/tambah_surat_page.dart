@@ -199,10 +199,14 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
 
     final data = PengajuanSurat(
       wargaId: widget.user.wargaId,
+      rtId: widget.user.rt?.id ?? widget.user.keluarga?.rtId,
       keperluan: keperluanController.text.trim(),
       keterangan: keteranganController.text.trim(),
       status: SuratStatus.diajukan,
     );
+
+    debugPrint("=== SUBMIT SURAT PAYLOAD ===");
+    debugPrint(data.toJson().toString());
 
     final success = await context.read<PengajuanSuratViewModel>().submit(data);
 
