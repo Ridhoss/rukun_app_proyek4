@@ -164,7 +164,7 @@ class SuratViewModel extends ChangeNotifier {
     return source.where((e) {
       final namaWarga = getNamaWarga(e.wargaId ?? 0).toLowerCase();
 
-      final keperluan = (e.keperluan ?? '').toLowerCase();
+      final keperluan = (e.keperluan).toLowerCase();
 
       final keterangan = (e.keterangan ?? '').toLowerCase();
 

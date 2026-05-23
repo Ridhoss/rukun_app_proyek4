@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_rw_viewmodel.dart';
 
 class TambahKegiatanModal extends StatefulWidget {
   const TambahKegiatanModal({super.key});
@@ -34,7 +34,7 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<KegiatanRwViewModel>();
+    final vm = context.watch<KegiatanViewModel>();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -338,7 +338,7 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
     );
   }
 
-  Widget _documentBox(KegiatanRwViewModel vm) {
+  Widget _documentBox(KegiatanViewModel vm) {
     final fileName =
         vm.dokumenFile?.path.split("/").last ?? "Upload dokumen kegiatan";
 
@@ -377,7 +377,7 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
     );
   }
 
-  Widget _imageBox(KegiatanRwViewModel vm) {
+  Widget _imageBox(KegiatanViewModel vm) {
     return GestureDetector(
       onTap: vm.pickBuktiImage,
 

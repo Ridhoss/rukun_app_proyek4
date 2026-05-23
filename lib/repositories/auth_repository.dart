@@ -15,13 +15,27 @@ class AuthRepository {
 
     _validateStatus(result);
 
-    final token = result['data']['token'];
+    final data = result['data'];
+
+    if (data is! Map<String, dynamic>) {
+      throw Exception("Format login response tidak valid");
+    }
+
+    final token = data['token'];
 
     await local.saveToken(token);
 
     final me = await service.getMe(token);
 
-    final user = User.fromJson(me['data']);
+    _validateStatus(me);
+
+    final userData = me['data'];
+
+    if (userData is! Map<String, dynamic>) {
+      throw Exception("Format user tidak valid");
+    }
+
+    final user = User.fromJson(userData);
 
     return AuthResponse(token: token, user: user);
   }
@@ -92,22 +106,34 @@ class AuthRepository {
     _validateStatus(result);
   }
 
-  Future<Map<String, dynamic>> _safeCall(
-    Future<Map<String, dynamic>> Function() fn,
-  ) async {
+  Future<Map<String, dynamic>> _safeCall(Future<dynamic> Function() fn) async {
     try {
-      return await fn();
+      final res = await fn();
+
+      if (res is Map<String, dynamic>) {
+        return res;
+      }
+
+      throw Exception("Response bukan Map: ${res.runtimeType}");
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? "Terjadi kesalahan";
+      final data = e.response?.data;
+
+      String message = "Terjadi kesalahan";
+
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ?? message;
+      } else if (data is String) {
+        message = data;
+      }
 
       throw Exception(message);
-    } catch (e) {
-      throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
   }
 
   void _validateStatus(Map<String, dynamic> result) {
-    if (result['status'] != 'success') {
+    final status = result['status'];
+
+    if (status != 'success') {
       throw Exception(result['message'] ?? "Unknown error");
     }
   }
