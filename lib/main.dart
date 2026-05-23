@@ -1,4 +1,3 @@
-import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';

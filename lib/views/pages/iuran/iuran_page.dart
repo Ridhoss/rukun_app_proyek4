@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
+import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/iuran/iuran_page_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/crud/add_iuran_page.dart';
@@ -61,7 +62,7 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
     return Consumer<RwIuranViewModel>(
       builder: (context, vm, _) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F6FA),
+          backgroundColor: ColorsUtils.lightgray,
 
           appBar: AppBarUtils.buildAppBar(
             context: context,

@@ -9,8 +9,15 @@ import 'package:rukun_app_proyek4/viewmodels/roles/warga/surat/pengajuan_surat_v
 
 class TambahSuratPage extends StatefulWidget {
   final User user;
+  final PengajuanSurat? surat;
+  final bool isEdit;
 
-  const TambahSuratPage({super.key, required this.user});
+  const TambahSuratPage({
+    super.key,
+    required this.user,
+    this.surat,
+    this.isEdit = false,
+  });
 
   @override
   State<TambahSuratPage> createState() => _TambahSuratPageState();
@@ -27,6 +34,17 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
     keperluanController.dispose();
     keteranganController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.isEdit && widget.surat != null) {
+      keperluanController.text = widget.surat!.keperluan;
+
+      keteranganController.text = widget.surat!.keterangan ?? '';
+    }
   }
 
   @override

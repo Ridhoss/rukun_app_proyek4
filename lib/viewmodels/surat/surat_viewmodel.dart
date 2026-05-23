@@ -11,7 +11,7 @@ import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 
-enum SuratFilterStatus { semua, diajukan, disetujui, selesai }
+enum SuratFilterStatus { semua, diajukan, disetujui, ditolak, selesai }
 
 class SuratViewModel extends ChangeNotifier {
   final WargaRepository wargaRepo;
@@ -124,6 +124,9 @@ class SuratViewModel extends ChangeNotifier {
     return result;
   }
 
+  int get totalDitolak =>
+      _allData.where((e) => e.status == SuratStatus.ditolak).length;
+
   int get totalDisetujui =>
       _allData.where((e) => e.status == SuratStatus.disetujui).length;
 
@@ -145,6 +148,9 @@ class SuratViewModel extends ChangeNotifier {
 
       case SuratFilterStatus.selesai:
         return source.where((e) => e.status == SuratStatus.selesai).toList();
+
+      case SuratFilterStatus.ditolak:
+        return source.where((e) => e.status == SuratStatus.ditolak).toList();
 
       case SuratFilterStatus.semua:
         return source;

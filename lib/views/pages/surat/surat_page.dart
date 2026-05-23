@@ -72,8 +72,6 @@ class _SuratPageState extends State<SuratPage> {
 
                 _buildSearch(vm),
 
-                const SizedBox(height: 4),
-
                 _buildFilter(vm),
 
                 const SizedBox(height: 8),
@@ -97,12 +95,11 @@ class _SuratPageState extends State<SuratPage> {
             child: _summaryCard(
               total: vm.totalDiajukan,
               title: "Diajukan",
-              color: ColorsUtils.b300,
+              color: ColorsUtils.skyblue,
             ),
           ),
 
           const SizedBox(width: 12),
-
           Expanded(
             child: _summaryCard(
               total: vm.totalDisetujui,
@@ -112,7 +109,6 @@ class _SuratPageState extends State<SuratPage> {
           ),
 
           const SizedBox(width: 12),
-
           Expanded(
             child: _summaryCard(
               total: vm.totalSelesai,
@@ -122,7 +118,15 @@ class _SuratPageState extends State<SuratPage> {
           ),
 
           const SizedBox(width: 12),
+          Expanded(
+            child: _summaryCard(
+              total: vm.totalDitolak,
+              title: "Ditolak",
+              color: ColorsUtils.red,
+            ),
+          ),
 
+          const SizedBox(width: 12),
           Expanded(
             child: _summaryCard(
               total: vm.totalSemua,
@@ -145,9 +149,7 @@ class _SuratPageState extends State<SuratPage> {
 
       decoration: BoxDecoration(
         color: ColorsUtils.white,
-
         borderRadius: BorderRadius.circular(18),
-
         boxShadow: [
           BoxShadow(
             color: ColorsUtils.black.withOpacity(0.05),
@@ -195,6 +197,8 @@ class _SuratPageState extends State<SuratPage> {
             _filterChip(vm, "Diajukan", SuratFilterStatus.diajukan),
 
             _filterChip(vm, "Disetujui", SuratFilterStatus.disetujui),
+
+            _filterChip(vm, "Ditolak", SuratFilterStatus.ditolak),
 
             _filterChip(vm, "Selesai", SuratFilterStatus.selesai),
           ],
@@ -364,7 +368,7 @@ class _SuratPageState extends State<SuratPage> {
             ],
           ),
 
-          const SizedBox(height: 22),
+          const SizedBox(height: 10),
           _detailRow("Keperluan", surat.keperluan),
 
           const SizedBox(height: 14),
