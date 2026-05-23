@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 
 class DetailKegiatanModal extends StatefulWidget {
   final Kegiatan kegiatan;

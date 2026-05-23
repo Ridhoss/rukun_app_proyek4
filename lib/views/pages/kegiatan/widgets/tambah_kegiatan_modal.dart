@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
-import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 
 class TambahKegiatanModal extends StatefulWidget {
   const TambahKegiatanModal({super.key});

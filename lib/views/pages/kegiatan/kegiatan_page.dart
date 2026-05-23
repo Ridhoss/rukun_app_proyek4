@@ -5,7 +5,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_rw_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/detail_kegiatan_modal.dart';
 import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/tambah_kegiatan_modal.dart';
 
