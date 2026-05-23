@@ -301,7 +301,7 @@ class _SuratPageState extends State<SuratPage> {
     final isAct = permission.canAct;
 
     debugPrint("=== SURAT CARD DEBUG id=${surat.id} ===");
-    debugPrint("level: $level | status: ${surat.status} | canView: $canView | canProcess: $canProcess");
+    debugPrint("level: $level | status: ${surat.status} | canAct: $isAct | permission: ${permission.canViewDetail}");
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -403,9 +403,10 @@ class _SuratPageState extends State<SuratPage> {
                     builder: (_) {
                       return FractionallySizedBox(
                         heightFactor: 0.8,
-                        child: TindakLanjutModal(
+                        child: TindakLanjutRtModal(
                           surat: surat,
                           namaWarga: namaWarga,
+                          readOnly: !permission.canOpenModal,
                           permission: permission,
                         ),
                       );

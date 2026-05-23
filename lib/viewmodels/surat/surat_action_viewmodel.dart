@@ -44,7 +44,7 @@ class SuratActionViewModel extends ChangeNotifier {
         "disetujui_oleh": authVm.currentUser?.id,
       };
 
-      await suratRepo.updateStatusSurat(id, body);
+      await suratRepo.updateSurat(id, body);
 
       listVm.updateSuratLocal(
         id: id,
@@ -85,7 +85,7 @@ class SuratActionViewModel extends ChangeNotifier {
         "is_signed": true,
       };
 
-      await suratRepo.updateStatusSurat(id, body);
+      await suratRepo.updateSurat(id, body);
 
       listVm.updateSuratLocal(
         id: id,
@@ -118,7 +118,7 @@ class SuratActionViewModel extends ChangeNotifier {
         "catatan": catatan,
       };
 
-      await suratRepo.updateStatusSurat(id, body);
+      await suratRepo.updateSurat(id, body);
 
       listVm.updateSuratLocal(
         id: id,
