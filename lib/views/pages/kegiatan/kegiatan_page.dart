@@ -458,11 +458,17 @@ class KegiatanPage extends StatelessWidget {
               ],
             ),
           ] else if (vm.canUploadBukti(kegiatan)) ...[
-            _fullButton(
-              label: "Upload Bukti Kegiatan",
-              onTap: () {
-                vm.uploadBuktiKegiatan(kegiatan.id!);
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: _fullButton(
+                    label: "Upload Bukti Kegiatan",
+                    onTap: () {
+                      _openDetail(context, kegiatan, false);
+                    },
+                  ),
+                ),
+              ],
             ),
           ] else if (vm.isOngoing(kegiatan)) ...[
             Container(
