@@ -199,6 +199,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
 
     final data = PengajuanSurat(
       wargaId: widget.user.wargaId,
+      rtId: widget.user.rt?.id,
       keperluan: keperluanController.text.trim(),
       keterangan: keteranganController.text.trim(),
       status: SuratStatus.diajukan,

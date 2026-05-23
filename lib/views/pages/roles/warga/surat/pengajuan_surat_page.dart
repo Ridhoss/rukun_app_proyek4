@@ -70,33 +70,6 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
           );
         },
       ),
-
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: () async {
-      //     final result = await Navigator.push(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (_) => TambahSuratPage(user: widget.user),
-      //       ),
-      //     );
-
-      //     if (result == true && context.mounted) {
-      //       await context.read<PengajuanSuratViewModel>().fetchSuratSaya();
-
-      //       NotificationUtils.showSuccess(context, "Pengajuan surat berhasil");
-      //     }
-      //   },
-      //   backgroundColor: ColorsUtils.b400,
-      //   foregroundColor: ColorsUtils.white,
-      //   elevation: 4,
-      //   icon: const Icon(Icons.add),
-      //   label: const Text(
-      //     "Ajukan Surat",
-      //     style: TextStyle(fontWeight: FontWeight.w600),
-      //   ),
-      //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      // ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -419,73 +392,6 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showActionModal(PengajuanSurat item) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.edit, color: Colors.orange),
-
-                  title: const Text("Edit Surat"),
-
-                  onTap: () async {
-                    Navigator.pop(context);
-
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => TambahSuratPage(
-                          user: widget.user,
-                          surat: item,
-                          isEdit: true,
-                        ),
-                      ),
-                    );
-
-                    if (result == true && mounted) {
-                      context.read<PengajuanSuratViewModel>().fetchSuratSaya();
-                    }
-                  },
-                ),
-
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-
-                  title: const Text("Hapus Surat"),
-
-                  onTap: () async {
-                    Navigator.pop(context);
-
-                    final success = await context
-                        .read<PengajuanSuratViewModel>()
-                        .deleteSurat(item.id!);
-
-                    if (success && mounted) {
-                      NotificationUtils.showSuccess(
-                        context,
-                        "Pengajuan surat berhasil dihapus",
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
