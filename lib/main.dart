@@ -1,3 +1,4 @@
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -178,6 +179,7 @@ void main() async {
             context.read<AuthViewModel>(),
           ),
         ),
+
       ],
       child: const MyApp(),
     ),

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
@@ -26,6 +27,7 @@ class SuratListViewModel extends ChangeNotifier {
 
   final List<PengajuanSurat> _allData = [];
   final Map<int, Warga> _wargaMap = {};
+
 
   List<PengajuanSurat> get data {
     var result = _filterByStatus(accessibleData);

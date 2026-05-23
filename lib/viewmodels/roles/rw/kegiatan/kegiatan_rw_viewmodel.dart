@@ -95,7 +95,15 @@ class KegiatanRwViewModel extends ChangeNotifier {
           break;
       }
 
-      return sameLevel && sameStatus;
+      final nama = e.nama.toLowerCase();
+
+      final deskripsi = (e.deskripsi ?? "").toLowerCase();
+
+      final q = _search.toLowerCase();
+
+      final matchSearch = nama.contains(q) || deskripsi.contains(q);
+
+      return sameLevel && sameStatus && matchSearch;
     }).toList();
   }
 
@@ -140,6 +148,8 @@ class KegiatanRwViewModel extends ChangeNotifier {
     return kegiatan.status == KegiatanStatus.selesai;
   }
 
+  int get totalSemua => _allData.length;
+
   int get totalDibuat =>
       data.where((e) => e.status == KegiatanStatus.dibuat).length;
 
@@ -155,6 +165,13 @@ class KegiatanRwViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  String _search = "";
+
+  void setSearch(String value) {
+    _search = value;
+    notifyListeners();
+  }
+
   bool isOngoing(Kegiatan kegiatan) {
     final now = DateTime.now();
 
@@ -165,25 +182,41 @@ class KegiatanRwViewModel extends ChangeNotifier {
         now.isBefore(selesai);
   }
 
-  void cancelKegiatan(int id) {
+  void updateKegiatan({
+    required int id,
+    required String nama,
+    required String deskripsi,
+    required DateTime tanggalMulai,
+    DateTime? tanggalSelesai,
+  }) {
     final index = _allData.indexWhere((e) => e.id == id);
 
     if (index == -1) return;
 
-    final kegiatan = _allData[index];
+    final old = _allData[index];
 
     _allData[index] = Kegiatan(
-      id: kegiatan.id,
-      nama: kegiatan.nama,
-      deskripsi: kegiatan.deskripsi,
-      tanggalMulai: kegiatan.tanggalMulai,
-      tanggalSelesai: kegiatan.tanggalSelesai,
-      level: kegiatan.level,
-      rtId: kegiatan.rtId,
-      rwId: kegiatan.rwId,
-      status: KegiatanStatus.dibatalkan,
-      docReferensi: kegiatan.docReferensi,
-      imgReferensi: kegiatan.imgReferensi,
+      id: old.id,
+
+      nama: nama,
+
+      deskripsi: deskripsi,
+
+      tanggalMulai: tanggalMulai,
+
+      tanggalSelesai: tanggalSelesai,
+
+      level: old.level,
+
+      rtId: old.rtId,
+
+      rwId: old.rwId,
+
+      status: old.status,
+
+      docReferensi: dokumenFile?.path.split("/").last ?? old.docReferensi,
+
+      imgReferensi: buktiImage?.path.split("/").last ?? old.imgReferensi,
     );
 
     notifyListeners();
@@ -228,6 +261,117 @@ class KegiatanRwViewModel extends ChangeNotifier {
     isUploading = false;
 
     notifyListeners();
+  }
+
+  void createKegiatan({
+    required String nama,
+    required String deskripsi,
+    required DateTime tanggalMulai,
+    DateTime? tanggalSelesai,
+  }) {
+    final kegiatan = Kegiatan(
+      id: _allData.length + 1,
+
+      nama: nama,
+
+      deskripsi: deskripsi,
+
+      tanggalMulai: tanggalMulai,
+
+      tanggalSelesai: tanggalSelesai,
+
+      level: KegiatanLevel.rw,
+
+      rwId: 2,
+
+      status: KegiatanStatus.dibuat,
+
+      docReferensi: dokumenFile?.path.split("/").last,
+
+      imgReferensi: buktiImage?.path.split("/").last,
+
+      waktuDibuat: DateTime.now(),
+    );
+
+    _allData.insert(0, kegiatan);
+
+    notifyListeners();
+  }
+
+  String? validateCreateKegiatan({
+    required String nama,
+    required String deskripsi,
+    required DateTime? tanggalMulai,
+    required DateTime? tanggalSelesai,
+  }) {
+    if (nama.trim().isEmpty) {
+      return "Nama kegiatan wajib diisi";
+    }
+
+    if (deskripsi.trim().isEmpty) {
+      return "Deskripsi wajib diisi";
+    }
+
+    if (tanggalMulai == null) {
+      return "Tanggal mulai wajib diisi";
+    }
+
+    if (tanggalSelesai == null) {
+      return "Tanggal selesai wajib diisi";
+    }
+
+    if (dokumenFile == null) {
+      return "Dokumen pendukung wajib diupload";
+    }
+
+    if (tanggalSelesai.isBefore(tanggalMulai)) {
+      return "Tanggal selesai tidak boleh sebelum tanggal mulai";
+    }
+
+    return null;
+  }
+
+  String? validateEditKegiatan({
+    required Kegiatan kegiatan,
+    required String nama,
+    required String deskripsi,
+    required DateTime? tanggalMulai,
+    required DateTime? tanggalSelesai,
+    required bool wajibFoto,
+  }) {
+    if (nama.trim().isEmpty) {
+      return "Nama kegiatan wajib diisi";
+    }
+
+    if (deskripsi.trim().isEmpty) {
+      return "Deskripsi wajib diisi";
+    }
+
+    if (tanggalMulai == null) {
+      return "Tanggal mulai wajib diisi";
+    }
+
+    if (tanggalSelesai == null) {
+      return "Tanggal selesai wajib diisi";
+    }
+
+    final hasDokumen = dokumenFile != null || kegiatan.docReferensi != null;
+
+    if (!hasDokumen) {
+      return "Dokumen pendukung wajib diupload";
+    }
+
+    if (tanggalSelesai.isBefore(tanggalMulai)) {
+      return "Tanggal selesai tidak boleh sebelum tanggal mulai";
+    }
+
+    final hasFoto = buktiImage != null || kegiatan.imgReferensi != null;
+
+    if (wajibFoto && !hasFoto) {
+      return "Foto kegiatan wajib diupload";
+    }
+
+    return null;
   }
 
   String formatTanggalRange(Kegiatan kegiatan) {

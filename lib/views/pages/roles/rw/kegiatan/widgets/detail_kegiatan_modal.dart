@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
@@ -5,7 +7,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 
-class DetailKegiatanModal extends StatelessWidget {
+class DetailKegiatanModal extends StatefulWidget {
   final Kegiatan kegiatan;
   final bool readonly;
 
@@ -14,6 +16,40 @@ class DetailKegiatanModal extends StatelessWidget {
     required this.kegiatan,
     required this.readonly,
   });
+
+  @override
+  State<DetailKegiatanModal> createState() => _DetailKegiatanModalState();
+}
+
+class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
+  late TextEditingController namaController;
+  late TextEditingController deskripsiController;
+
+  late DateTime tanggalMulai;
+  DateTime? tanggalSelesai;
+
+  @override
+  void initState() {
+    super.initState();
+
+    namaController = TextEditingController(text: widget.kegiatan.nama);
+
+    deskripsiController = TextEditingController(
+      text: widget.kegiatan.deskripsi ?? "",
+    );
+
+    tanggalMulai = widget.kegiatan.tanggalMulai;
+
+    tanggalSelesai = widget.kegiatan.tanggalSelesai;
+  }
+
+  @override
+  void dispose() {
+    namaController.dispose();
+    deskripsiController.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,40 +83,43 @@ class DetailKegiatanModal extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            _field(
+            _textField(
               label: "Nama Kegiatan",
-              value: kegiatan.nama,
-              readonly: readonly,
+              controller: namaController,
+              readonly: widget.readonly,
             ),
+
             const SizedBox(height: 16),
 
-            _field(
+            _textField(
               label: "Deskripsi Kegiatan",
-              value: kegiatan.deskripsi ?? "-",
-              readonly: readonly,
+              controller: deskripsiController,
+              readonly: widget.readonly,
               maxLines: 5,
             ),
 
             const SizedBox(height: 16),
+
             Row(
               children: [
                 Expanded(
                   child: _dateField(
-                    context: context,
                     label: "Tanggal Mulai",
-                    value: _date(kegiatan.tanggalMulai),
-                    readonly: readonly,
+                    value: _formatDate(tanggalMulai),
+                    readonly: widget.readonly,
 
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
-                        initialDate: kegiatan.tanggalMulai,
+                        initialDate: tanggalMulai,
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2035),
                       );
 
                       if (picked != null) {
-                        // update tanggal mulai
+                        setState(() {
+                          tanggalMulai = picked;
+                        });
                       }
                     },
                   ),
@@ -90,55 +129,64 @@ class DetailKegiatanModal extends StatelessWidget {
 
                 Expanded(
                   child: _dateField(
-                    context: context,
                     label: "Tanggal Selesai",
-                    value: kegiatan.tanggalSelesai != null
-                        ? _date(kegiatan.tanggalSelesai!)
+                    value: tanggalSelesai != null
+                        ? _formatDate(tanggalSelesai!)
                         : "-",
-                    readonly: readonly,
+
+                    readonly: widget.readonly,
 
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
-                        initialDate:
-                            kegiatan.tanggalSelesai ?? kegiatan.tanggalMulai,
+                        initialDate: tanggalSelesai ?? tanggalMulai,
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2035),
                       );
 
                       if (picked != null) {
-                        // update tanggal selesai
+                        setState(() {
+                          tanggalSelesai = picked;
+                        });
                       }
                     },
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 24),
+
             const Text(
               "Dokumen Pendukung Kegiatan",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 12),
-            _documentBox(context, vm, kegiatan.docReferensi),
+
+            _documentBox(context, vm, widget.kegiatan.docReferensi),
 
             const SizedBox(height: 24),
+
             const Text(
               "Foto Pendukung",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 12),
-            _imageBox(context, vm, kegiatan.imgReferensi),
+
+            _imageBox(context, vm, widget.kegiatan.imgReferensi),
 
             const SizedBox(height: 32),
-            if (!readonly)
+
+            if (!widget.readonly)
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
 
                       style: OutlinedButton.styleFrom(
                         foregroundColor: ColorsUtils.red,
@@ -168,7 +216,39 @@ class DetailKegiatanModal extends StatelessWidget {
                       onPressed: vm.isUploading
                           ? null
                           : () async {
-                              await vm.uploadDummyBukti(kegiatan.id!);
+                              final error = vm.validateEditKegiatan(
+                                kegiatan: widget.kegiatan,
+                                nama: namaController.text.trim(),
+                                deskripsi: deskripsiController.text.trim(),
+                                tanggalMulai: tanggalMulai,
+                                tanggalSelesai: tanggalSelesai,
+
+                                wajibFoto:
+                                    widget.kegiatan.status ==
+                                        KegiatanStatus.selesai &&
+                                    widget.kegiatan.imgReferensi == null,
+                              );
+
+                              if (error != null) {
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(SnackBar(content: Text(error)));
+
+                                return;
+                              }
+
+                              vm.updateKegiatan(
+                                id: widget.kegiatan.id!,
+                                nama: namaController.text.trim(),
+                                deskripsi: deskripsiController.text.trim(),
+                                tanggalMulai: tanggalMulai,
+                                tanggalSelesai: tanggalSelesai,
+                              );
+
+                              // upload foto hanya jika ada foto baru
+                              if (vm.buktiImage != null) {
+                                await vm.uploadDummyBukti(widget.kegiatan.id!);
+                              }
 
                               if (context.mounted) {
                                 Navigator.pop(context);
@@ -185,6 +265,7 @@ class DetailKegiatanModal extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
+
                       child: vm.isUploading
                           ? const SizedBox(
                               height: 18,
@@ -206,9 +287,9 @@ class DetailKegiatanModal extends StatelessWidget {
     );
   }
 
-  Widget _field({
+  Widget _textField({
     required String label,
-    required String value,
+    required TextEditingController controller,
     required bool readonly,
     int maxLines = 1,
   }) {
@@ -220,29 +301,50 @@ class DetailKegiatanModal extends StatelessWidget {
 
         const SizedBox(height: 8),
 
-        readonly
-            ? Container(
-                width: double.infinity,
+        TextFormField(
+          controller: controller,
+          readOnly: readonly,
+          maxLines: maxLines,
 
-                padding: const EdgeInsets.all(14),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+      ],
+    );
+  }
 
-                decoration: BoxDecoration(
-                  border: Border.all(color: ColorsUtils.gray),
+  Widget _dateField({
+    required String label,
+    required String value,
+    required bool readonly,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+
+        const SizedBox(height: 8),
+
+        GestureDetector(
+          onTap: readonly ? null : onTap,
+
+          child: AbsorbPointer(
+            child: TextFormField(
+              controller: TextEditingController(text: value),
+
+              decoration: InputDecoration(
+                suffixIcon: const Icon(Icons.calendar_today),
+
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-
-                child: Text(value, maxLines: maxLines),
-              )
-            : TextFormField(
-                initialValue: value,
-                maxLines: maxLines,
-
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
               ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -256,7 +358,7 @@ class DetailKegiatanModal extends StatelessWidget {
         vm.dokumenFile?.path.split("/").last ?? fileName ?? "Belum ada dokumen";
 
     return GestureDetector(
-      onTap: readonly ? null : vm.pickDokumenFile,
+      onTap: widget.readonly ? null : vm.pickDokumenFile,
 
       child: Container(
         width: double.infinity,
@@ -280,7 +382,7 @@ class DetailKegiatanModal extends StatelessWidget {
               ),
             ),
 
-            if (!readonly) const Icon(Icons.upload_file_rounded),
+            if (!widget.readonly) const Icon(Icons.upload_file_rounded),
           ],
         ),
       ),
@@ -293,7 +395,7 @@ class DetailKegiatanModal extends StatelessWidget {
     String? imageName,
   ) {
     return GestureDetector(
-      onTap: readonly ? null : vm.pickBuktiImage,
+      onTap: widget.readonly ? null : vm.pickBuktiImage,
 
       child: Container(
         width: double.infinity,
@@ -301,6 +403,7 @@ class DetailKegiatanModal extends StatelessWidget {
 
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
+
           border: Border.all(color: ColorsUtils.gray),
         ),
 
@@ -309,7 +412,7 @@ class DetailKegiatanModal extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
 
                 child: Image.file(
-                  vm.buktiImage!,
+                  File(vm.buktiImage!.path),
                   fit: BoxFit.cover,
                   width: double.infinity,
                 ),
@@ -324,10 +427,11 @@ class DetailKegiatanModal extends StatelessWidget {
 
                   Text(
                     imageName ?? "Belum ada foto kegiatan",
+
                     textAlign: TextAlign.center,
                   ),
 
-                  if (!readonly) ...[
+                  if (!widget.readonly) ...[
                     const SizedBox(height: 10),
 
                     const Text(
@@ -342,18 +446,20 @@ class DetailKegiatanModal extends StatelessWidget {
   }
 
   Widget _statusBadge() {
-    final ui = kegiatan.status.ui;
+    final ui = widget.kegiatan.status.ui;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
 
       decoration: BoxDecoration(
         color: ui.color.withOpacity(0.12),
+
         borderRadius: BorderRadius.circular(30),
       ),
 
       child: Text(
         ui.label,
+
         style: TextStyle(
           color: ui.color,
           fontWeight: FontWeight.bold,
@@ -363,42 +469,7 @@ class DetailKegiatanModal extends StatelessWidget {
     );
   }
 
-  Widget _dateField({
-    required BuildContext context,
-    required String label,
-    required String value,
-    required bool readonly,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-
-        const SizedBox(height: 8),
-
-        GestureDetector(
-          onTap: readonly ? null : onTap,
-
-          child: AbsorbPointer(
-            child: TextFormField(
-              initialValue: value,
-
-              decoration: InputDecoration(
-                suffixIcon: const Icon(Icons.calendar_today),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _date(DateTime date) {
+  String _formatDate(DateTime date) {
     return "${date.day}/${date.month}/${date.year}";
   }
 }

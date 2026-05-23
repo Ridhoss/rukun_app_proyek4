@@ -7,7 +7,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_list_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/surat/widgets/tindak_lanjut_modal.dart';
+import 'package:rukun_app_proyek4/views/pages/surat/utils/surat_permission.dart';
 import 'package:rukun_app_proyek4/views/pages/surat/widgets/tindak_lanjut_rt_modal.dart';
 
 class SuratPage extends StatefulWidget {
@@ -20,6 +20,17 @@ class SuratPage extends StatefulWidget {
 }
 
 class _SuratPageState extends State<SuratPage> {
+  UserRole _mapRole(String? level) {
+    switch (level) {
+      case "RT":
+        return UserRole.rt;
+      case "RW":
+        return UserRole.rw;
+      default:
+        return UserRole.rt;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -285,14 +296,9 @@ class _SuratPageState extends State<SuratPage> {
     final avatar = vm.getAvatarInitial(surat.wargaId ?? 0);
     final level = vm.authVm.currentUser?.pengurus?.level;
 
-    final canProcess =
-        (level == "RT" && surat.status == SuratStatus.diajukan) ||
-        (level == "RW" && surat.status == SuratStatus.disetujui);
-        
-    final canView =
-        (level == "RT" && surat.status == SuratStatus.diajukan) ||
-        (level == "RW" && surat.status == SuratStatus.disetujui) ||
-        surat.status == SuratStatus.selesai;
+    final permission = SuratPermission(_mapRole(level), surat.status);
+
+    final isAct = permission.canAct;
 
     debugPrint("=== SURAT CARD DEBUG id=${surat.id} ===");
     debugPrint("level: $level | status: ${surat.status} | canView: $canView | canProcess: $canProcess");
@@ -303,7 +309,7 @@ class _SuratPageState extends State<SuratPage> {
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: ColorsUtils.lightgray,
+        color: ColorsUtils.white,
 
         borderRadius: BorderRadius.circular(24),
 
@@ -373,7 +379,7 @@ class _SuratPageState extends State<SuratPage> {
           const SizedBox(height: 14),
           _detailRow("Keterangan", surat.keterangan ?? '-'),
 
-          if (canView) ...[
+          if (permission.showButton) ...[
             const SizedBox(height: 24),
 
             SizedBox(
@@ -382,6 +388,9 @@ class _SuratPageState extends State<SuratPage> {
               child: ElevatedButton(
                 onPressed: () {
                   final namaWarga = vm.getNamaWarga(surat.wargaId ?? 0);
+
+                  if (!permission.showButton) return;
+
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
@@ -392,31 +401,28 @@ class _SuratPageState extends State<SuratPage> {
                       ),
                     ),
                     builder: (_) {
-                      if (level == "RW") {
-                        return FractionallySizedBox(
-                          heightFactor: 0.8,
-                          child: TindakLanjutModal(
-                            surat: surat,
-                            namaWarga: namaWarga,
-                            readOnly: surat.status != SuratStatus.disetujui,
-                          ),
-                        );
-                      }
-
                       return FractionallySizedBox(
                         heightFactor: 0.8,
-                        child: TindakLanjutRtModal(
+                        child: TindakLanjutModal(
                           surat: surat,
                           namaWarga: namaWarga,
-                          readOnly: surat.status != SuratStatus.diajukan,
+                          permission: permission,
                         ),
                       );
                     },
                   );
                 },
+
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorsUtils.b300,
-                  foregroundColor: ColorsUtils.white,
+                  backgroundColor: isAct ? ColorsUtils.b300 : ColorsUtils.white,
+
+                  foregroundColor: isAct ? ColorsUtils.white : ColorsUtils.b300,
+
+                  side: isAct
+                      ? null
+                      : BorderSide(color: ColorsUtils.b300, width: 1.5),
+
+                  elevation: isAct ? 2 : 0,
 
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -425,7 +431,9 @@ class _SuratPageState extends State<SuratPage> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
 
-                child: Text(canProcess ? "Tindak Lanjut" : "Lihat Detail"),
+                child: Text(
+                  permission.canAct ? "Tindak Lanjut" : "Lihat Detail",
+                ),
               ),
             ),
           ],

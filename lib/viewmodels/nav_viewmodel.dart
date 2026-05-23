@@ -76,9 +76,9 @@ class NavViewModel {
           page: SuratPage(user: user),
         ),
         NavItem(
-          icon: Icons.person,
-          label: "Profile",
-          page: const RtProfilePage(),
+          icon: Icons.event,
+          label: "Kegiatan",
+          page: const RwKegiatanPage(),
         ),
       ];
     }

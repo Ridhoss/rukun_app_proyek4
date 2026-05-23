@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rt/profile_page.dart';
 
 class RtHomePage extends StatefulWidget {
   const RtHomePage({super.key});
@@ -89,9 +90,19 @@ class _RtHomePageState extends State<RtHomePage> {
                               ),
                             ],
                           ),
-                          const CircleAvatar(
-                            radius: 25,
-                            backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const RtProfilePage(),
+                                ),
+                              );
+                            },
+                            child: const CircleAvatar(
+                              radius: 25,
+                              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
+                            ),
                           )
                         ],
                       ),

@@ -98,32 +98,38 @@ class PengajuanSuratViewModel extends ChangeNotifier {
     }
   }
 
-  // Future<bool> updateSurat(int id, PengajuanSurat data) async {
-  //   isLoading = true;
-  //   errorMessage = null;
+  Future<bool> updateSurat(int id, PengajuanSurat data) async {
+    isLoading = true;
+    errorMessage = null;
 
-  //   notifyListeners();
+    notifyListeners();
 
-  //   try {
-  //     await repository.updateSurat(id, data);
+    try {
+      final body = {
+        "keperluan": data.keperluan,
+        "keterangan": data.keterangan,
+        "status": data.status.value
+      };
 
-  //     await fetchSuratSaya();
+      await repository.updateSurat(id, body);
 
-  //     isLoading = false;
+      await fetchSuratSaya();
 
-  //     notifyListeners();
+      isLoading = false;
 
-  //     return true;
-  //   } catch (e) {
-  //     errorMessage = e.toString().replaceAll("Exception: ", "");
+      notifyListeners();
 
-  //     isLoading = false;
+      return true;
+    } catch (e) {
+      errorMessage = e.toString().replaceAll("Exception: ", "");
 
-  //     notifyListeners();
+      isLoading = false;
 
-  //     return false;
-  //   }
-  // }
+      notifyListeners();
+
+      return false;
+    }
+  }
 
   Future<bool> deleteSurat(int id) async {
     try {

@@ -7,6 +7,7 @@ import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/kegiatan/kegiatan_rw_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rw/kegiatan/widgets/detail_kegiatan_modal.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rw/kegiatan/widgets/tambah_kegiatan_modal.dart';
 
 class RwKegiatanPage extends StatelessWidget {
   const RwKegiatanPage({super.key});
@@ -41,17 +42,32 @@ class RwKegiatanPage extends StatelessWidget {
 
                 _statusFilter(vm),
 
+                _buildSearch(vm),
+
+                const SizedBox(height: 16),
                 _headerKegiatan(context, vm),
 
                 Expanded(
                   child: vm.data.isEmpty
                       ? const Center(child: Text("Belum ada kegiatan"))
                       : ListView.builder(
-                          padding: const EdgeInsets.all(16),
+                          physics: const BouncingScrollPhysics(),
+
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+
                           itemCount: vm.data.length,
+
                           itemBuilder: (_, i) {
                             final kegiatan = vm.data[i];
-                            return _card(context, vm, kegiatan);
+
+                            return Column(
+                              children: [
+                                _card(context, vm, kegiatan),
+
+                                if (i == vm.data.length - 1)
+                                  const SizedBox(height: 40),
+                              ],
+                            );
                           },
                         ),
                 ),
@@ -59,6 +75,32 @@ class RwKegiatanPage extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildSearch(KegiatanRwViewModel vm) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+
+      child: TextField(
+        onChanged: vm.setSearch,
+
+        decoration: InputDecoration(
+          hintText: "Cari kegiatan...",
+
+          prefixIcon: const Icon(Icons.search),
+
+          filled: true,
+          fillColor: ColorsUtils.white,
+
+          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+        ),
       ),
     );
   }
@@ -72,7 +114,7 @@ class RwKegiatanPage extends StatelessWidget {
           const Expanded(
             child: Text(
               "Daftar Kegiatan",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
 
@@ -82,21 +124,27 @@ class RwKegiatanPage extends StatelessWidget {
                 _openCreate(context);
               },
 
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorsUtils.lightgray,
-                foregroundColor: ColorsUtils.black,
+              style:
+                  ElevatedButton.styleFrom(
+                    backgroundColor: ColorsUtils.lightgray,
+                    foregroundColor: ColorsUtils.black,
 
-                elevation: 0,
+                    elevation: 0,
 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                    shadowColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
 
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ).copyWith(
+                    overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                  ),
 
               child: const Text(
                 "+ Tambah",
@@ -115,42 +163,73 @@ class RwKegiatanPage extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _summaryCard(vm.totalDibuat, "Dibuat", ColorsUtils.b200),
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
             child: _summaryCard(
-              vm.totalDibatalkan,
-              "Dibatalkan",
-              ColorsUtils.red,
+              total: vm.totalDibuat,
+              title: "Dibuat",
+              color: ColorsUtils.skyblue,
             ),
           ),
 
           const SizedBox(width: 12),
 
           Expanded(
-            child: _summaryCard(vm.totalSelesai, "Selesai", ColorsUtils.green),
+            child: _summaryCard(
+              total: vm.totalSelesai,
+              title: "Selesai",
+              color: ColorsUtils.g100,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: _summaryCard(
+              total: vm.totalDibatalkan,
+              title: "Dibatalkan",
+              color: ColorsUtils.red,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: _summaryCard(
+              total: vm.totalSemua,
+              title: "Total",
+              color: ColorsUtils.o100,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _summaryCard(int total, String title, Color color) {
+  Widget _summaryCard({
+    required int total,
+    required String title,
+    required Color color,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 10),
 
       decoration: BoxDecoration(
         color: ColorsUtils.white,
         borderRadius: BorderRadius.circular(18),
+
+        boxShadow: [
+          BoxShadow(
+            color: ColorsUtils.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
 
       child: Column(
         children: [
           Text(
             "$total",
+
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -158,8 +237,14 @@ class RwKegiatanPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 6),
-          Text(title),
+          const SizedBox(height: 4),
+
+          Text(
+            title,
+            textAlign: TextAlign.center,
+
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
@@ -226,7 +311,7 @@ class RwKegiatanPage extends StatelessWidget {
 
   Widget _statusFilter(KegiatanRwViewModel vm) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
 
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -234,8 +319,11 @@ class RwKegiatanPage extends StatelessWidget {
         child: Row(
           children: [
             _chip(vm, "Semua", KegiatanFilterStatus.semua),
+
             _chip(vm, "Dibuat", KegiatanFilterStatus.dibuat),
+
             _chip(vm, "Dibatalkan", KegiatanFilterStatus.dibatalkan),
+
             _chip(vm, "Selesai", KegiatanFilterStatus.selesai),
           ],
         ),
@@ -256,20 +344,35 @@ class RwKegiatanPage extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
 
-        margin: const EdgeInsets.only(right: 10),
+        margin: const EdgeInsets.only(right: 10, top: 8, bottom: 8),
 
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
 
         decoration: BoxDecoration(
           color: selected ? ColorsUtils.b300 : ColorsUtils.white,
-          borderRadius: BorderRadius.circular(14),
+
+          borderRadius: BorderRadius.circular(30),
+
+          border: Border.all(
+            color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
+          ),
+
+          boxShadow: [
+            BoxShadow(
+              color: ColorsUtils.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
 
         child: Text(
           label,
+
           style: TextStyle(
             color: selected ? ColorsUtils.white : ColorsUtils.black,
-            fontWeight: FontWeight.w600,
+
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -310,11 +413,12 @@ class RwKegiatanPage extends StatelessWidget {
                   kegiatan.nama,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 16,
                   ),
                 ),
               ),
 
+              const SizedBox(width: 12),
               _badge(kegiatan.status),
             ],
           ),
@@ -325,7 +429,7 @@ class RwKegiatanPage extends StatelessWidget {
               Icon(
                 Icons.calendar_today_rounded,
                 size: 16,
-                color: Colors.grey.shade600,
+                color: ColorsUtils.slateGray,
               ),
 
               const SizedBox(width: 8),
@@ -545,8 +649,7 @@ class RwKegiatanPage extends StatelessWidget {
       builder: (_) {
         return const FractionallySizedBox(
           heightFactor: 0.92,
-
-          child: Center(child: Text("Form Tambah Kegiatan")),
+          child: TambahKegiatanModal(),
         );
       },
     );
