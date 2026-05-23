@@ -14,12 +14,14 @@ class IuranRTDetailPage extends StatefulWidget {
   final int iuranId;
   final int rtId;
   final User user;
+  final bool showSetoranButton;
 
   const IuranRTDetailPage({
     super.key,
     required this.iuranId,
     required this.rtId,
     required this.user,
+    this.showSetoranButton = false,
   });
 
   @override
@@ -43,7 +45,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorsUtils.lightgray,
-
       appBar: AppBarUtils.buildAppBar(
         context: context,
         name: "",
@@ -53,9 +54,15 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
         showAvatar: false,
         showGreeting: false,
       ),
-
       body: Consumer<IuranRTDetailViewModel>(
         builder: (context, vm, _) {
+          final iuran = vm.iuran;
+          final level = widget.user.pengurus?.level.toLowerCase();
+          final isRTUser = level == "rt";
+          final isIuranRT = iuran?.level == IuranLevel.rt;
+
+          final canShowSetoranButton = isRTUser && isIuranRT;
+
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -64,14 +71,13 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
             return Center(child: Text(vm.errorMessage!));
           }
 
-          final iuran = vm.iuran;
-          final transaksi = vm.transaksi;
-
           if (iuran == null) {
             return const Center(child: Text("Data tidak ditemukan"));
           }
 
           final rt = vm.rtDetail;
+
+          final transaksi = vm.transaksi;
 
           final startDate = iuran.waktuDibuat ?? DateTime.now();
           final months = generateMonths(startDate);
@@ -81,17 +87,13 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
             child: Column(
               children: [
                 _buildSummaryCard(iuran: iuran, terkumpul: vm.totalTerkumpul),
-
                 const SizedBox(height: 16),
-
                 _buildInfoGrid(iuran),
-
                 const SizedBox(height: 16),
-
                 if (rt != null) _buildRtInfo(rt),
-
                 const SizedBox(height: 16),
-                if (widget.user.pengurus?.level.toLowerCase() == "rt")
+
+                if (canShowSetoranButton)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -117,6 +119,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                   ),
 
                 const SizedBox(height: 16),
+
                 _buildMonthlyList(
                   months,
                   transaksi,
@@ -147,26 +150,19 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
             iuran.nama,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 12),
-
           Row(
             children: [
               _buildBadge(iuran.level.name.toUpperCase(), ColorsUtils.gray),
-
               const SizedBox(width: 8),
-
               _buildBadge(iuran.tipe.name.toUpperCase(), ColorsUtils.green),
             ],
           ),
-
           const SizedBox(height: 14),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _MiniStat(title: "Total Terkumpul", value: "Rp.$terkumpul"),
-
               _MiniStat(title: "Biaya Iuran", value: "Rp.${iuran.jumlah}"),
             ],
           ),
@@ -178,7 +174,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
   Widget _buildInfoGrid(Iuran iuran) {
     String waktuDibuatText() {
       if (iuran.waktuDibuat == null) return "-";
-
       return DateFormat('dd MMMM yyyy', 'id_ID').format(iuran.waktuDibuat!);
     }
 
@@ -186,7 +181,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
       if (iuran.tipe == IuranType.insidentil) {
         return "Iuran bersifat insidentil, sekali bayar dan seikhlasnya";
       }
-
       return "Iuran bersifat reguler dan dibayarkan secara berkala";
     }
 
@@ -204,11 +198,8 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
             "Informasi Iuran",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 12),
-
           _InfoRow(icon: Icons.event, text: "Dibuat: ${waktuDibuatText()}"),
-
           _InfoRow(icon: Icons.info, text: tipeText()),
         ],
       ),
@@ -230,21 +221,16 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
             "Informasi RT",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 12),
-
           _InfoRow(
             icon: Icons.home_work_outlined,
             text: "RT ${rt.noRt ?? '-'}",
           ),
-
           _InfoRow(icon: Icons.person, text: "Ketua: ${rt.ketua ?? '-'}"),
-
           _InfoRow(
             icon: Icons.account_balance_wallet_outlined,
             text: "Bendahara: ${rt.bendahara ?? '-'}",
           ),
-
           _InfoRow(
             icon: Icons.groups_outlined,
             text: "Total Keluarga: ${rt.totalKeluarga ?? 0}",
@@ -269,7 +255,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-
         ...months.map((month) {
           final label = DateFormat('MMMM yyyy', 'id_ID').format(month);
 
@@ -288,20 +273,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
             0,
             (sum, item) => sum + (item.jumlah ?? 0),
           );
-
-          final transaksiPending = transaksi.where((t) {
-            final tDate = t.waktuBayar;
-
-            if (tDate == null) return false;
-
-            return tDate.year == month.year &&
-                tDate.month == month.month &&
-                t.status == StatusPembayaran.diproses;
-          }).toList();
-
-          final totalPending = transaksiPending.length;
-
-          final hasPending = totalPending > 0;
 
           final progress = "$jumlahPembayar/$totalKeluarga";
 
@@ -336,45 +307,15 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          label,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-
-                      if (hasPending)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ColorsUtils.o100,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            "$totalPending diproses",
-                            style: TextStyle(
-                              color: ColorsUtils.o100,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
+                  Text(
+                    label,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-
                   const SizedBox(height: 10),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("Progress: $progress"),
-
                       Text(
                         "Rp $totalPendapatan",
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -416,7 +357,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
 
     while (current.isBefore(DateTime(now.year, now.month + 1))) {
       months.add(current);
-
       current = DateTime(current.year, current.month + 1);
     }
 
@@ -435,13 +375,7 @@ class _MiniStat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 12, color: ColorsUtils.gray),
-        ),
-
-        const SizedBox(height: 4),
-
+        Text(title, style: const TextStyle(fontSize: 12)),
         Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
     );
@@ -459,15 +393,10 @@ class _InfoRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 16, color: ColorsUtils.b200),
-
           const SizedBox(width: 8),
-
-          Expanded(
-            child: Text(text, softWrap: true, overflow: TextOverflow.visible),
-          ),
+          Expanded(child: Text(text)),
         ],
       ),
     );

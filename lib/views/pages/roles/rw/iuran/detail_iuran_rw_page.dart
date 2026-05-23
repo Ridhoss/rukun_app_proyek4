@@ -188,6 +188,7 @@ class _IuranRWDetailPageState extends State<IuranRWDetailPage> {
                     iuranId: widget.id,
                     rtId: rt.rtId,
                     user: widget.user,
+                    showSetoranButton: false,
                   ),
                 ),
               );
