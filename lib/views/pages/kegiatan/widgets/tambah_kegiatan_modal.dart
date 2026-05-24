@@ -1,18 +1,34 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 
 class TambahKegiatanModal extends StatefulWidget {
-  const TambahKegiatanModal({super.key});
+  final Kegiatan? kegiatan;
+
+  const TambahKegiatanModal({super.key, this.kegiatan});
 
   @override
   State<TambahKegiatanModal> createState() => _TambahKegiatanModalState();
 }
 
 class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
+  @override
+  void initState() {
+    super.initState();
+
+    final k = widget.kegiatan;
+
+    if (k != null) {
+      namaController.text = k.nama;
+      deskripsiController.text = k.deskripsi ?? "";
+      tanggalMulai = k.tanggalMulai;
+      tanggalSelesai = k.tanggalSelesai;
+    }
+  }
+
   final _formKey = GlobalKey<FormState>();
 
   final namaController = TextEditingController();
@@ -51,9 +67,12 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Tambah Kegiatan",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                widget.kegiatan == null ? "Tambah Kegiatan" : "Edit Kegiatan",
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 24),
@@ -169,15 +188,6 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                   ),
                 ),
 
-              const SizedBox(height: 24),
-              const Text(
-                "Foto Pendukung",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-
-              const SizedBox(height: 12),
-              _imageBox(vm),
-
               const SizedBox(height: 32),
               Row(
                 children: [
@@ -219,9 +229,13 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
                         if (!isValid) return;
 
+                        final isEdit = widget.kegiatan != null;
+
                         final error = vm.validateKegiatan(
                           fileKey: KegiatanViewModel.createKey,
-                          mode: KegiatanValidationMode.create,
+                          mode: isEdit
+                              ? KegiatanValidationMode.edit
+                              : KegiatanValidationMode.create,
                           nama: namaController.text,
                           deskripsi: deskripsiController.text,
                           tanggalMulai: tanggalMulai,
@@ -235,15 +249,44 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                           return;
                         }
 
-                        final success = await vm.createKegiatan(
-                          nama: namaController.text.trim(),
-                          deskripsi: deskripsiController.text.trim(),
-                          tanggalMulai: tanggalMulai!,
-                          tanggalSelesai: tanggalSelesai!,
-                        );
+                        bool success;
 
-                        if (success && context.mounted) {
+                        if (isEdit) {
+                          success = await vm.updateKegiatan(
+                            id: widget.kegiatan!.id!,
+                            data: {
+                              "nama": namaController.text.trim(),
+                              "deskripsi": deskripsiController.text.trim(),
+                              "tanggal_mulai": tanggalMulai!.toIso8601String(),
+                              "tanggal_selesai": tanggalSelesai
+                                  ?.toIso8601String(),
+                            },
+                          );
+                        } else {
+                          success = await vm.createKegiatan(
+                            nama: namaController.text.trim(),
+                            deskripsi: deskripsiController.text.trim(),
+                            tanggalMulai: tanggalMulai!,
+                            tanggalSelesai: tanggalSelesai!,
+                          );
+                        }
+
+                        if (!context.mounted) return;
+
+                        if (success) {
+                          NotificationUtils.showSuccess(
+                            context,
+                            isEdit
+                                ? "Kegiatan berhasil diupdate"
+                                : "Kegiatan berhasil ditambahkan",
+                          );
+
                           Navigator.pop(context);
+                        } else {
+                          NotificationUtils.showError(
+                            context,
+                            vm.errorMessage ?? "Terjadi kesalahan",
+                          );
                         }
                       },
 
@@ -378,50 +421,6 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
             const Icon(Icons.upload_file_rounded),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _imageBox(KegiatanViewModel vm) {
-    final image = vm.getSelectedImage(KegiatanViewModel.createKey);
-
-    return GestureDetector(
-      onTap: () => vm.pickImage(KegiatanViewModel.createKey),
-
-      child: Container(
-        width: double.infinity,
-        height: 180,
-
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-
-          border: Border.all(color: ColorsUtils.gray),
-        ),
-
-        child: image != null
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-
-                child: Image.file(
-                  image,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-
-                children: const [
-                  Icon(Icons.image_outlined, size: 42),
-
-                  SizedBox(height: 10),
-
-                  Text(
-                    "Klik untuk upload foto",
-                    style: TextStyle(color: ColorsUtils.gray),
-                  ),
-                ],
-              ),
       ),
     );
   }

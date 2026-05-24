@@ -67,25 +67,30 @@ class KegiatanViewModel extends ChangeNotifier {
   }
 
   List<Kegiatan> get kegiatanList {
-    return _allKegiatan.where((kegiatan) {
-      final matchLevel = kegiatan.level == selectedLevel;
+    return _allKegiatan
+        .where((kegiatan) {
+          final matchLevel = kegiatan.level == selectedLevel;
 
-      final matchStatus = switch (selectedStatus) {
-        KegiatanFilterStatus.semua => true,
-        KegiatanFilterStatus.dibuat => kegiatan.status == KegiatanStatus.dibuat,
-        KegiatanFilterStatus.dibatalkan =>
-          kegiatan.status == KegiatanStatus.dibatalkan,
-        KegiatanFilterStatus.selesai =>
-          kegiatan.status == KegiatanStatus.selesai,
-      };
+          final matchStatus = switch (selectedStatus) {
+            KegiatanFilterStatus.semua => true,
+            KegiatanFilterStatus.dibuat =>
+              kegiatan.status == KegiatanStatus.dibuat,
+            KegiatanFilterStatus.dibatalkan =>
+              kegiatan.status == KegiatanStatus.dibatalkan,
+            KegiatanFilterStatus.selesai =>
+              kegiatan.status == KegiatanStatus.selesai,
+          };
 
-      final query = _searchQuery.toLowerCase();
-      final matchSearch =
-          kegiatan.nama.toLowerCase().contains(query) ||
-          (kegiatan.deskripsi ?? "").toLowerCase().contains(query);
+          final query = _searchQuery.toLowerCase();
+          final matchSearch =
+              kegiatan.nama.toLowerCase().contains(query) ||
+              (kegiatan.deskripsi ?? "").toLowerCase().contains(query);
 
-      return matchLevel && matchStatus && matchSearch;
-    }).toList();
+          return matchLevel && matchStatus && matchSearch;
+        })
+        .toList()
+        .reversed
+        .toList();
   }
 
   void setLevel(KegiatanLevel level) {
@@ -107,6 +112,22 @@ class KegiatanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  String _buildDokumenFolder() {
+    final rwId = _currentUser!.rw!.id;
+
+    if (selectedLevel == KegiatanLevel.rw) {
+      return 'kegiatan/dokumen/norw/$rwId';
+    }
+
+    final rtId = _currentUser?.rt?.id;
+
+    if (rtId == null) {
+      throw Exception("RT ID tidak ditemukan untuk level RT");
+    }
+
+    return 'kegiatan/dokumen/norw/$rwId/nort/$rtId';
+  }
+
   Future<bool> createKegiatan({
     required String nama,
     required String deskripsi,
@@ -124,12 +145,14 @@ class KegiatanViewModel extends ChangeNotifier {
       }
 
       if (_currentUser == null) {
-        throw Exception("User belum dimuat");
+        throw Exception("User belum login");
       }
+
+      final folder = _buildDokumenFolder();
 
       final docUrl = await cloudinaryService.uploadFile(
         document,
-        folder: 'kegiatan/dokumen',
+        folder: folder,
       );
 
       if (docUrl == null) {
@@ -137,24 +160,22 @@ class KegiatanViewModel extends ChangeNotifier {
       }
 
       final kegiatan = Kegiatan(
-        id: null,
-        nama: nama,
-        deskripsi: deskripsi,
+        nama: nama.trim(),
+        deskripsi: deskripsi.trim(),
         tanggalMulai: tanggalMulai,
         tanggalSelesai: tanggalSelesai,
         level: selectedLevel,
-        rwId: _currentUser!.rw!.id,
-        rtId: selectedLevel == KegiatanLevel.rt ? _currentUser!.rt?.id : null,
         status: KegiatanStatus.dibuat,
+        rtId: selectedLevel == KegiatanLevel.rt ? _currentUser!.rt?.id : null,
+        rwId: _currentUser!.rw!.id,
         docReferensi: docUrl,
         imgReferensi: null,
-        waktuDibuat: DateTime.now(),
       );
 
       await repository.createKegiatan(kegiatan);
 
-      await fetchKegiatan();
       clearFiles(createKey);
+      await fetchKegiatan();
 
       return true;
     } catch (e) {
@@ -180,7 +201,7 @@ class KegiatanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateKegiatan({
+  Future<bool> updateKegiatan({
     required int id,
     required Map<String, dynamic> data,
   }) async {
@@ -206,10 +227,30 @@ class KegiatanViewModel extends ChangeNotifier {
       await repository.updateKegiatan(id, data);
 
       clearFiles(id);
-
       await fetchKegiatan();
+
+      return true;
     } catch (e) {
       _setError(e);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> batalkanKegiatan(int id) async {
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await repository.updateKegiatan(id, {"status": "Dibatalkan"});
+
+      await fetchKegiatan();
+
+      return true;
+    } catch (e) {
+      _setError(e);
+      return false;
     } finally {
       _setLoading(false);
     }

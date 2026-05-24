@@ -10,7 +10,7 @@ class CloudDashboardService {
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
-    return response.data['data'];
+    return response.data;
   }
 
   Future<Map<String, dynamic>> getDashboardRT(String token) async {
@@ -19,6 +19,6 @@ class CloudDashboardService {
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
-    return response.data['data'];
+    return response.data;
   }
 }

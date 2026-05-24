@@ -1,53 +1,59 @@
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 
 class DashboardModel {
-  final RtSimple rt;
-
+  final RtSimple? rt;
+  final RwSimple? rw;
   final int totalPenduduk;
 
   final GenderStat gender;
   final AgeDistribution ageDistribution;
 
   final int jumlahKk;
+  final int? jumlahRt;
+
+  final List<PendudukPerRT>? pendudukPerRt;
 
   final StatusSurat statusSurat;
-
   final List<Kegiatan> kegiatan;
 
   DashboardModel({
-    required this.rt,
+    this.rt,
+    this.rw,
     required this.totalPenduduk,
     required this.gender,
     required this.ageDistribution,
     required this.jumlahKk,
+    this.jumlahRt,
+    this.pendudukPerRt,
     required this.statusSurat,
     required this.kegiatan,
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
     return DashboardModel(
-      rt: RtSimple.fromJson(json['rt'] ?? {}),
-      totalPenduduk: json['total_penduduk'] ?? 0,
+      rt: json['rt'] != null ? RtSimple.fromJson(json['rt']) : null,
+
+      totalPenduduk: (json['total_penduduk'] as num?)?.toInt() ?? 0,
+      jumlahKk: (json['jumlah_kk'] as num?)?.toInt() ?? 0,
+
       gender: GenderStat.fromJson(json['gender'] ?? {}),
+
       ageDistribution: AgeDistribution.fromJson(json['age_distribution'] ?? {}),
-      jumlahKk: json['jumlah_kk'] ?? 0,
+
+      jumlahRt: json['jumlah_rt'] != null
+          ? (json['jumlah_rt'] as num).toInt()
+          : null,
+
+      pendudukPerRt: (json['penduduk_per_rt'] as List?)
+          ?.map((e) => PendudukPerRT.fromJson(e as Map<String, dynamic>))
+          .toList(),
+
       statusSurat: StatusSurat.fromJson(json['status_surat'] ?? {}),
+
       kegiatan: (json['kegiatan'] as List? ?? [])
           .map((e) => Kegiatan.fromJson(e))
           .toList(),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'rt': rt.toJson(),
-      'total_penduduk': totalPenduduk,
-      'gender': gender.toJson(),
-      'age_distribution': ageDistribution.toJson(),
-      'jumlah_kk': jumlahKk,
-      'status_surat': statusSurat.toJson(),
-      'kegiatan': kegiatan.map((e) => e.toJson()).toList(),
-    };
   }
 }
 
@@ -63,6 +69,20 @@ class RtSimple {
 
   Map<String, dynamic> toJson() {
     return {'id': id, 'rw_id': rwId};
+  }
+}
+
+class RwSimple {
+  final int id;
+
+  RwSimple({required this.id});
+
+  factory RwSimple.fromJson(Map<String, dynamic> json) {
+    return RwSimple(id: json['id'] ?? 0);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id};
   }
 }
 
@@ -138,5 +158,29 @@ class StatusSurat {
       'selesai': selesai,
       'ditolak': ditolak,
     };
+  }
+}
+
+class PendudukPerRT {
+  final int rtId;
+  final String noRt;
+  final int totalWarga;
+
+  PendudukPerRT({
+    required this.rtId,
+    required this.noRt,
+    required this.totalWarga,
+  });
+
+  factory PendudukPerRT.fromJson(Map<String, dynamic> json) {
+    return PendudukPerRT(
+      rtId: json['rt_id'] ?? 0,
+      noRt: json['no_rt'] ?? '',
+      totalWarga: json['total_warga'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'rt_id': rtId, 'no_rt': noRt, 'total_warga': totalWarga};
   }
 }
