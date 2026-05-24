@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
+import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/repositories/kegiatan_repository.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 
@@ -14,19 +15,34 @@ enum KegiatanFilterStatus { semua, dibuat, dibatalkan, selesai }
 enum KegiatanValidationMode { create, uploadBukti, edit }
 
 class KegiatanViewModel extends ChangeNotifier {
+  static const int createKey = -1;
   final KegiatanRepository repository;
   final CloudinaryService cloudinaryService;
 
   KegiatanViewModel(this.repository, this.cloudinaryService);
 
+  User? _currentUser;
+  User? get currentUser => _currentUser;
   List<Kegiatan> _allKegiatan = [];
 
-  bool isLoading = false;
-  bool isUploading = false;
-  String? errorMessage;
+  bool _isLoading = false;
+  bool _isUploading = false;
+  String? _errorMessage;
 
-  File? selectedImage;
-  File? selectedDocument;
+  bool get isLoading => _isLoading;
+  bool get isUploading => _isUploading;
+  String? get errorMessage => _errorMessage;
+
+  final Map<int, File?> _selectedImages = {};
+  final Map<int, File?> _selectedDocuments = {};
+
+  File? getSelectedImage(int kegiatanId) {
+    return _selectedImages[kegiatanId];
+  }
+
+  File? getSelectedDocument(int kegiatanId) {
+    return _selectedDocuments[kegiatanId];
+  }
 
   KegiatanLevel selectedLevel = KegiatanLevel.rw;
   KegiatanFilterStatus selectedStatus = KegiatanFilterStatus.semua;
@@ -34,18 +50,16 @@ class KegiatanViewModel extends ChangeNotifier {
   String _searchQuery = "";
 
   Future<void> fetchKegiatan() async {
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
-
     try {
+      _setLoading(true);
+      _setError(null);
+
       _allKegiatan = await repository.getAllKegiatan();
     } catch (e) {
-      errorMessage = e.toString();
+      _setError(e);
+    } finally {
+      _setLoading(false);
     }
-
-    isLoading = false;
-    notifyListeners();
   }
 
   Future<void> refresh() async {
@@ -76,7 +90,7 @@ class KegiatanViewModel extends ChangeNotifier {
 
   void setLevel(KegiatanLevel level) {
     selectedLevel = level;
-    fetchKegiatan();
+    notifyListeners();
   }
 
   void setStatus(KegiatanFilterStatus status) {
@@ -89,23 +103,25 @@ class KegiatanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> createKegiatan({
+  Future<bool> createKegiatan({
     required String nama,
     required String deskripsi,
     required DateTime tanggalMulai,
     required DateTime tanggalSelesai,
   }) async {
-    if (selectedDocument == null) {
-      errorMessage = "Dokumen wajib diupload";
-      notifyListeners();
-      return;
-    }
-
-    isLoading = true;
-    errorMessage = null;
-    notifyListeners();
-
     try {
+      _setLoading(true);
+
+      final document = _selectedDocuments[createKey];
+
+      if (document == null) {
+        throw Exception("Dokumen wajib diupload");
+      }
+
+      if (_currentUser == null) {
+        throw Exception("User belum dimuat");
+      }
+
       final kegiatan = Kegiatan(
         id: 0,
         nama: nama,
@@ -113,27 +129,41 @@ class KegiatanViewModel extends ChangeNotifier {
         tanggalMulai: tanggalMulai,
         tanggalSelesai: tanggalSelesai,
         level: KegiatanLevel.rw,
-        rwId: 2,
+        rwId: _currentUser?.rw?.id,
+        rtId: _currentUser?.rt?.id,
         status: KegiatanStatus.dibuat,
-
-        // DOC wajib
-        docReferensi: selectedDocument?.path.split("/").last,
-
-        // IMAGE tidak dikirim saat create
+        docReferensi: document.path.split('/').last,
         imgReferensi: null,
-
         waktuDibuat: DateTime.now(),
       );
 
       await repository.createKegiatan(kegiatan);
 
-      _clearFile();
-      await fetchKegiatan();
-    } catch (e) {
-      errorMessage = e.toString();
-    }
+      clearFiles(createKey);
 
-    isLoading = false;
+      await fetchKegiatan();
+
+      return true;
+    } catch (e) {
+      _setError(e);
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  void _setUploading(bool value) {
+    _isUploading = value;
+    notifyListeners();
+  }
+
+  void _setError(dynamic e) {
+    _errorMessage = e.toString().replaceAll("Exception: ", "");
     notifyListeners();
   }
 
@@ -145,8 +175,7 @@ class KegiatanViewModel extends ChangeNotifier {
       await repository.updateKegiatan(id, data);
       await fetchKegiatan();
     } catch (e) {
-      errorMessage = e.toString();
-      notifyListeners();
+      _setError(e);
     }
   }
 
@@ -155,51 +184,49 @@ class KegiatanViewModel extends ChangeNotifier {
       await repository.deleteKegiatan(id);
       await fetchKegiatan();
     } catch (e) {
-      errorMessage = e.toString();
+      _setError(e);
       notifyListeners();
     }
   }
 
-  Future<void> uploadBuktiKegiatan(int id) async {
-    if (selectedImage == null) {
-      errorMessage = "Foto bukti wajib diupload";
-      notifyListeners();
-      return;
-    }
-
-    isUploading = true;
-    errorMessage = null;
-    notifyListeners();
-
+  Future<void> uploadBuktiKegiatan(int kegiatanId) async {
     try {
+      _setUploading(true);
+
+      final image = _selectedImages[kegiatanId];
+
+      if (image == null) {
+        throw Exception("Foto bukti wajib diupload");
+      }
+
       final url = await cloudinaryService.uploadFile(
-        selectedImage!,
-        folder: 'kegiatan/$id',
+        image,
+        folder: 'kegiatan/$kegiatanId',
       );
 
       if (url == null) {
-        errorMessage = "Upload gambar gagal";
-        return;
+        throw Exception("Upload gambar gagal");
       }
 
-      await repository.updateKegiatan(id, {
+      await repository.updateKegiatan(kegiatanId, {
         "img_referensi": url,
         "status": "selesai",
       });
 
-      clearUpload();
+      clearFiles(kegiatanId);
+
       await fetchKegiatan();
     } catch (e) {
-      errorMessage = e.toString();
+      _setError(e);
+    } finally {
+      _setUploading(false);
     }
-
-    isUploading = false;
-    notifyListeners();
   }
 
-  void clearUpload() {
-    selectedImage = null;
-    selectedDocument = null;
+  void clearUpload(int kegiatanId) {
+    _selectedImages.remove(kegiatanId);
+    _selectedDocuments.remove(kegiatanId);
+
     notifyListeners();
   }
 
@@ -215,11 +242,20 @@ class KegiatanViewModel extends ChangeNotifier {
 
   bool canUploadBukti(Kegiatan k) {
     final selesai = k.tanggalSelesai ?? k.tanggalMulai;
-    final isDone = DateTime.now().isAfter(selesai);
+
+    final sudahLewatTanggal = DateTime.now().isAfter(selesai);
 
     return !isReadonly(k) &&
-        isDone &&
-        k.status == KegiatanStatus.selesai &&
+        sudahLewatTanggal &&
+        k.status == KegiatanStatus.dibuat &&
+        k.imgReferensi == null;
+  }
+
+  bool isMenungguBukti(Kegiatan k) {
+    final selesai = k.tanggalSelesai ?? k.tanggalMulai;
+
+    return DateTime.now().isAfter(selesai) &&
+        k.status == KegiatanStatus.dibuat &&
         k.imgReferensi == null;
   }
 
@@ -253,7 +289,7 @@ class KegiatanViewModel extends ChangeNotifier {
     return end == null ? start : "$start - $end";
   }
 
-  Future<void> pickImage() async {
+  Future<void> pickImage(int kegiatanId) async {
     final picker = ImagePicker();
 
     final picked = await picker.pickImage(
@@ -263,11 +299,12 @@ class KegiatanViewModel extends ChangeNotifier {
 
     if (picked == null) return;
 
-    selectedImage = File(picked.path);
+    _selectedImages[kegiatanId] = File(picked.path);
+
     notifyListeners();
   }
 
-  Future<void> pickDocument() async {
+  Future<void> pickDocument(int kegiatanId) async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'doc', 'docx'],
@@ -275,17 +312,24 @@ class KegiatanViewModel extends ChangeNotifier {
 
     if (result == null) return;
 
-    selectedDocument = File(result.files.single.path!);
+    final path = result.files.single.path;
+
+    if (path == null) return;
+
+    _selectedDocuments[kegiatanId] = File(path);
+
     notifyListeners();
   }
 
-  void _clearFile() {
-    selectedImage = null;
-    selectedDocument = null;
+  void clearFiles(int kegiatanId) {
+    _selectedImages.remove(kegiatanId);
+    _selectedDocuments.remove(kegiatanId);
+
     notifyListeners();
   }
 
   String? validateKegiatan({
+    required int fileKey,
     required KegiatanValidationMode mode,
     required String nama,
     required String deskripsi,
@@ -318,7 +362,7 @@ class KegiatanViewModel extends ChangeNotifier {
     }
 
     if (mode == KegiatanValidationMode.create) {
-      if (selectedDocument == null) {
+      if (_selectedDocuments[fileKey] == null) {
         return "Dokumen pendukung wajib diupload";
       }
     }
@@ -334,7 +378,7 @@ class KegiatanViewModel extends ChangeNotifier {
         return "Kegiatan belum selesai";
       }
 
-      if (selectedImage == null) {
+      if (_selectedImages[fileKey] == null) {
         return "Foto bukti wajib diupload";
       }
 

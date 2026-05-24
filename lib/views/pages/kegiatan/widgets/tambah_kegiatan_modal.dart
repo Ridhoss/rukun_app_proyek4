@@ -215,12 +215,17 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                         setState(() {
                           tanggalMulaiError = tanggalMulai == null;
                           tanggalSelesaiError = tanggalSelesai == null;
-                          dokumenError = vm.selectedDocument == null;
+                          dokumenError =
+                              vm.getSelectedDocument(
+                                KegiatanViewModel.createKey,
+                              ) ==
+                              null;
                         });
 
                         if (!isValid) return;
 
                         final error = vm.validateKegiatan(
+                          fileKey: KegiatanViewModel.createKey,
                           mode: KegiatanValidationMode.create,
                           nama: namaController.text,
                           deskripsi: deskripsiController.text,
@@ -243,8 +248,7 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                           tanggalSelesai: tanggalSelesai!,
                         );
 
-                        vm.clearUpload();
-
+                        vm.clearFiles(KegiatanViewModel.createKey);
                         Navigator.pop(context);
                       },
 
@@ -341,10 +345,15 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
   Widget _documentBox(KegiatanViewModel vm) {
     final fileName =
-        vm.selectedDocument?.path.split("/").last ?? "Upload dokumen kegiatan";
+        vm
+            .getSelectedDocument(KegiatanViewModel.createKey)
+            ?.path
+            .split("/")
+            .last ??
+        "Upload dokumen kegiatan";
 
     return GestureDetector(
-      onTap: vm.pickDocument,
+      onTap: () => vm.pickDocument(KegiatanViewModel.createKey),
 
       child: Container(
         width: double.infinity,
@@ -379,8 +388,10 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
   }
 
   Widget _imageBox(KegiatanViewModel vm) {
+    final image = vm.getSelectedImage(KegiatanViewModel.createKey);
+
     return GestureDetector(
-      onTap: vm.pickImage,
+      onTap: () => vm.pickImage(KegiatanViewModel.createKey),
 
       child: Container(
         width: double.infinity,
@@ -392,12 +403,12 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
           border: Border.all(color: ColorsUtils.gray),
         ),
 
-        child: vm.selectedImage != null
+        child: image != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(14),
 
                 child: Image.file(
-                  File(vm.selectedImage!.path),
+                  image,
                   fit: BoxFit.cover,
                   width: double.infinity,
                 ),

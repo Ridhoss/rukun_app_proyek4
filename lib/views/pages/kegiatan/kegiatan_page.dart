@@ -9,8 +9,22 @@ import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/detail_kegiatan_modal.dart';
 import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/tambah_kegiatan_modal.dart';
 
-class KegiatanPage extends StatelessWidget {
+class KegiatanPage extends StatefulWidget {
   const KegiatanPage({super.key});
+
+  @override
+  State<KegiatanPage> createState() => _KegiatanPageState();
+}
+
+class _KegiatanPageState extends State<KegiatanPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      context.read<KegiatanViewModel>().fetchKegiatan();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
