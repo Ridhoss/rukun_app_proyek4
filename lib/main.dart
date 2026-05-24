@@ -5,6 +5,7 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_kegiatan_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/rt_upload_setoran_rw_viewmodel.dart';
+
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -166,7 +167,11 @@ void main() async {
               IuranRWDetailViewModel(context.read<IuranRepository>()),
         ),
 
-        ChangeNotifierProvider(create: (_) => RtDashboardViewModel()),
+        ChangeNotifierProvider(
+          create: (context) => RtDashboardViewModel(
+            context.read<DashboardRepository>(),
+          ),
+        ),
 
         ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),
 
