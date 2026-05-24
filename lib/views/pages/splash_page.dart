@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
-import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});

@@ -23,12 +23,14 @@ class RwDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
+
     final warga = authVM.currentUser;
 
     final nama = warga?.warga?.nama ?? "-";
 
     return Scaffold(
       backgroundColor: ColorsUtils.lightgray,
+
       appBar: AppBarUtils.buildAppBar(
         context: context,
         name: nama,
@@ -60,6 +62,7 @@ class RwDashboard extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const RwProfilePage()),
             );
           },
+
           onLogout: () async {
             final confirm = await LogoutDialogUtils.showLogoutDialog(context);
 
@@ -78,115 +81,152 @@ class RwDashboard extends StatelessWidget {
 
       body: Consumer<DashboardRwViewModel>(
         builder: (context, vm, child) {
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              RwKasCard(
-                saldo: vm.saldoKas,
-                masuk: vm.kasMasuk,
-                keluar: vm.kasKeluar,
+
+          if (vm.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (vm.errorMessage != null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(vm.errorMessage!, textAlign: TextAlign.center),
               ),
+            );
+          }
 
-              const SizedBox(height: 18),
+          return RefreshIndicator(
+            onRefresh: vm.fetchDashboard,
 
-              Row(
-                children: [
-                  Expanded(
-                    child: RwSummaryCard(
-                      title: "Total Penduduk",
-                      value: "${vm.totalPenduduk}",
-                      subtitle: "↑ 12 Bulan ini",
-                      icon: Icons.people_alt_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RwSummaryCard(
-                      title: "Jumlah KK",
-                      value: "${vm.totalKK}",
-                      subtitle: "↑ dari bulan lalu",
-                      icon: Icons.home_work_outlined,
-                    ),
-                  ),
-                ],
-              ),
+            child: ListView(
+              padding: const EdgeInsets.all(16),
 
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: RwSummaryCard(
-                      title: "Jumlah RT",
-                      value: "${vm.totalRT}",
-                      subtitle: "✓ Semua Aktif",
-                      icon: Icons.account_tree_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RwSummaryCard(
-                      title: "Status Surat",
-                      value: "${vm.totalSurat}",
-                      subtitle: "5 Pending | 5 Diproses",
-                      icon: Icons.mail_outline,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+              children: [
+                RwKasCard(
+                  saldo: vm.saldoKas,
+                  masuk: vm.kasMasuk,
+                  keluar: vm.kasKeluar,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                const SizedBox(height: 18),
+                Row(
                   children: [
-                    const Text(
-                      "Data Penduduk",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    Expanded(
+                      child: RwSummaryCard(
+                        title: "Total Penduduk",
+                        value: "${vm.totalPenduduk}",
+                        subtitle: "Data warga aktif",
+                        icon: Icons.people_alt_outlined,
                       ),
                     ),
 
-                    const SizedBox(height: 15),
+                    const SizedBox(width: 12),
 
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: SizedBox(height: 220, child: RwBarChart()),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        Expanded(
-                          child: SizedBox(height: 200, child: RwPieChart()),
-                        ),
-                      ],
+                    Expanded(
+                      child: RwSummaryCard(
+                        title: "Jumlah KK",
+                        value: "${vm.totalKK}",
+                        subtitle: "Kartu keluarga terdaftar",
+                        icon: Icons.home_work_outlined,
+                      ),
                     ),
                   ],
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RwSummaryCard(
+                        title: "Jumlah RT",
+                        value: "${vm.totalRT}",
+                        subtitle: "✓ Semua aktif",
+                        icon: Icons.account_tree_outlined,
+                      ),
+                    ),
 
-              const Text(
-                "Kegiatan Berlangsung",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
+                    const SizedBox(width: 12),
 
-              const SizedBox(height: 14),
+                    Expanded(
+                      child: RwSummaryCard(
+                        title: "Status Surat",
+                        value: "${vm.totalSurat}",
+                        subtitle:
+                            "${vm.suratPending} Pending | ${vm.suratDiproses} Diproses",
+                        icon: Icons.mail_outline,
+                      ),
+                    ),
+                  ],
+                ),
 
-              const RwKegiatanCard(),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(18),
 
-              const SizedBox(height: 30),
-            ],
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      const Text(
+                        "Data Penduduk",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          const Expanded(
+                            child: SizedBox(height: 220, child: RwBarChart()),
+                          ),
+
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: SizedBox(height: 220, child: RwPieChart()),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+                const Text(
+                  "Kegiatan Berlangsung",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+
+                const SizedBox(height: 14),
+                vm.kegiatan.isEmpty
+                    ? Container(
+                        padding: const EdgeInsets.all(20),
+                        alignment: Alignment.center,
+
+                        child: const Text("Belum ada kegiatan berlangsung"),
+                      )
+                    : Column(
+                        children: vm.kegiatan.map((item) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+
+                            child: RwKegiatanCard(kegiatan: item),
+                          );
+                        }).toList(),
+                      ),
+
+                const SizedBox(height: 30),
+              ],
+            ),
           );
         },
       ),

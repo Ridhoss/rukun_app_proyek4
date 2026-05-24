@@ -22,7 +22,16 @@ class RwSummaryCard extends StatelessWidget {
 
       decoration: BoxDecoration(
         color: ColorsUtils.white,
+
         borderRadius: BorderRadius.circular(18),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
 
       child: Column(
@@ -33,48 +42,50 @@ class RwSummaryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: ColorsUtils.gray,
-                  fontSize: 12,
+              Expanded(
+                child: Text(
+                  title,
+
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+
+                  style: const TextStyle(color: ColorsUtils.gray, fontSize: 12),
                 ),
               ),
 
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
 
                 decoration: BoxDecoration(
                   color: ColorsUtils.b50,
                   borderRadius: BorderRadius.circular(8),
                 ),
 
-                child: Icon(
-                  icon,
-                  size: 16,
-                  color: ColorsUtils.b200,
-                ),
+                child: Icon(icon, size: 16, color: ColorsUtils.b200),
               ),
             ],
           ),
 
           const SizedBox(height: 10),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+
+            child: Text(
+              value,
+
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
           ),
 
           const SizedBox(height: 8),
-
           Text(
             subtitle,
-            style: const TextStyle(
-              color: ColorsUtils.gray,
-              fontSize: 11,
-            ),
+
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+
+            style: const TextStyle(color: ColorsUtils.gray, fontSize: 11),
           ),
         ],
       ),

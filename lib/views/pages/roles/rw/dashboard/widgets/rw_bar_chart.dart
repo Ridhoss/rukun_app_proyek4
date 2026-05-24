@@ -1,24 +1,29 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
+
 class RwBarChart extends StatelessWidget {
   const RwBarChart({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<DashboardRwViewModel>();
+
+    final data = [vm.anak, vm.produktif, vm.lansia];
+
+    final maxValue = data.reduce((a, b) => a > b ? a : b);
+
     return SizedBox(
       height: 220,
 
       child: BarChart(
         BarChartData(
-          maxY: 150,
-
+          maxY: (maxValue + 20).toDouble(),
           alignment: BarChartAlignment.spaceAround,
-
           borderData: FlBorderData(show: false),
-
           gridData: const FlGridData(show: false),
-
           titlesData: FlTitlesData(
             leftTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: false),
@@ -37,14 +42,18 @@ class RwBarChart extends StatelessWidget {
                 showTitles: true,
 
                 getTitlesWidget: (value, meta) {
-                  final labels = ["RT 01", "RT 02", "RT 03", "RT 04", "RT 05"];
+                  final labels = ["Anak", "Produktif", "Lansia"];
 
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
 
                     child: Text(
                       labels[value.toInt()],
-                      style: const TextStyle(fontSize: 10),
+
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   );
                 },
@@ -53,33 +62,26 @@ class RwBarChart extends StatelessWidget {
           ),
 
           barGroups: [
-            _bar(0, 120),
-            _bar(1, 130),
-            _bar(2, 125),
-            _bar(3, 140),
-            _bar(4, 135),
+            _bar(0, vm.anak.toDouble(), ColorsUtils.yellow),
+            _bar(1, vm.produktif.toDouble(), ColorsUtils.green),
+            _bar(2, vm.lansia.toDouble(), ColorsUtils.b200),
           ],
         ),
       ),
     );
   }
 
-  BarChartGroupData _bar(int x, double y) {
+
+  BarChartGroupData _bar(int x, double y, Color color) {
     return BarChartGroupData(
       x: x,
 
       barRods: [
         BarChartRodData(
           toY: y,
-          width: 16,
-
-          borderRadius: BorderRadius.circular(4),
-
-          rodStackItems: [
-            BarChartRodStackItem(0, 40, ColorsUtils.yellow),
-            BarChartRodStackItem(40, 100, ColorsUtils.green),
-            BarChartRodStackItem(100, y, ColorsUtils.b200),
-          ],
+          width: 22,
+          color: color,
+          borderRadius: BorderRadius.circular(6),
         ),
       ],
     );

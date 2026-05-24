@@ -1,6 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
 
 class RwPieChart extends StatefulWidget {
   const RwPieChart({super.key});
@@ -14,13 +16,17 @@ class _RwPieChartState extends State<RwPieChart> {
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<DashboardRwViewModel>();
+    final values = [vm.pria.toDouble(), vm.wanita.toDouble()];
+    final titles = ["Pria", "Wanita"];
+    final colors = [ColorsUtils.skyblue, ColorsUtils.red];
+
     return SizedBox(
       height: 220,
       child: PieChart(
         PieChartData(
           centerSpaceRadius: 40,
           sectionsSpace: 2,
-
           pieTouchData: PieTouchData(
             touchCallback: (event, response) {
               setState(() {
@@ -30,30 +36,23 @@ class _RwPieChartState extends State<RwPieChart> {
                   touchedIndex = -1;
                   return;
                 }
+
                 touchedIndex = response.touchedSection!.touchedSectionIndex;
               });
             },
           ),
-
-          sections: List.generate(5, (i) {
-            final colors = [
-              ColorsUtils.green,
-              ColorsUtils.o100,
-              ColorsUtils.skyblue,
-              ColorsUtils.b200,
-              ColorsUtils.red,
-            ];
-
-            final values = <double>[120, 90, 110, 140, 80];
-            final titles = ["RT 01", "RT 02", "RT 03", "RT 04", "RT 05"];
-
+          sections: List.generate(values.length, (i) {
             final isTouched = i == touchedIndex;
 
             return PieChartSectionData(
               value: values[i],
+
               color: colors[i],
+
               title: titles[i],
-              radius: isTouched ? 60 : 50,
+
+              radius: isTouched ? 62 : 52,
+
               titleStyle: TextStyle(
                 fontSize: isTouched ? 16 : 12,
                 fontWeight: FontWeight.bold,

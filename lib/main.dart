@@ -1,4 +1,6 @@
+import 'package:rukun_app_proyek4/repositories/dashboard_repository.dart';
 import 'package:rukun_app_proyek4/repositories/kegiatan_repository.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_dashboard_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kegiatan_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewmodel.dart';
@@ -79,6 +81,8 @@ void main() async {
 
         Provider(create: (_) => CloudKegiatanService()),
 
+        Provider(create: (_) => CloudDashboardService()),
+
         Provider(
           create: (context) => IuranRepository(
             context.read<CloudIuranService>(),
@@ -121,6 +125,13 @@ void main() async {
           ),
         ),
 
+        Provider(
+          create: (context) => DashboardRepository(
+            context.read<CloudDashboardService>(),
+            context.read<AuthLocalService>(),
+          ),
+        ),
+
         ChangeNotifierProvider(
           create: (context) => AuthViewModel(context.read()),
         ),
@@ -154,6 +165,10 @@ void main() async {
           create: (context) =>
               IuranRWDetailViewModel(context.read<IuranRepository>()),
         ),
+
+        ChangeNotifierProvider(create: (_) => RtDashboardViewModel()),
+
+        ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),
 
         ChangeNotifierProvider(
           create: (context) => IuranRTDetailViewModel(
@@ -199,8 +214,6 @@ void main() async {
           ),
         ),
 
-        ChangeNotifierProvider(create: (_) => DashboardRwViewModel()),
-
         ChangeNotifierProvider(
           create: (context) => RTUploadSetoranRWViewModel(
             repository: context.read<IuranRepository>(),
@@ -208,10 +221,13 @@ void main() async {
           ),
         ),
 
-        ChangeNotifierProvider(create: (_) => RtDashboardViewModel()),
-
-        ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              DashboardRwViewModel(context.read<DashboardRepository>())
+                ..fetchDashboard(),
+        ),
       ],
+
       child: const MyApp(),
     ),
   );
