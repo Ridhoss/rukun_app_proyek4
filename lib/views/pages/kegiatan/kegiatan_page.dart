@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
@@ -67,7 +68,6 @@ class _KegiatanPageState extends State<KegiatanPage> {
 
                 _buildSearch(vm),
 
-                const SizedBox(height: 16),
                 _headerKegiatan(context, vm),
 
                 Expanded(
@@ -85,7 +85,11 @@ class _KegiatanPageState extends State<KegiatanPage> {
 
                             return Column(
                               children: [
-                                _card(context, vm, kegiatan),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(22),
+                                  onTap: () => _openDetail(context, kegiatan),
+                                  child: _card(context, vm, kegiatan),
+                                ),
 
                                 if (i == vm.kegiatanList.length - 1)
                                   const SizedBox(height: 40),
@@ -474,7 +478,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
                   child: _fullButton(
                     label: "Lihat Kegiatan",
                     onTap: () {
-                      _openDetail(context, kegiatan, true);
+                      _openDetail(context, kegiatan);
                     },
                   ),
                 ),
@@ -487,7 +491,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
                   child: _fullButton(
                     label: "Upload Bukti Kegiatan",
                     onTap: () {
-                      _openDetail(context, kegiatan, false);
+                      _openDetail(context, kegiatan);
                     },
                   ),
                 ),
@@ -522,7 +526,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
                     child: _outlineButton(
                       label: "Batalkan",
                       color: Colors.red,
-                      onTap: () {
+                      onTap: () async {
                         showDialog(
                           context: context,
                           builder: (_) {
@@ -538,16 +542,30 @@ class _KegiatanPageState extends State<KegiatanPage> {
                                 ),
 
                                 ElevatedButton(
-                                  onPressed: () {
+                                  onPressed: () async {
                                     Navigator.pop(context);
 
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          "Dummy pembatalan kegiatan berhasil",
-                                        ),
-                                      ),
+                                    final vm = context
+                                        .read<KegiatanViewModel>();
+
+                                    final success = await vm.batalkanKegiatan(
+                                      kegiatan.id!,
                                     );
+
+                                    if (!context.mounted) return;
+
+                                    if (success) {
+                                      NotificationUtils.showSuccess(
+                                        context,
+                                        "Kegiatan berhasil dibatalkan",
+                                      );
+                                    } else {
+                                      NotificationUtils.showError(
+                                        context,
+                                        vm.errorMessage ??
+                                            "Gagal membatalkan kegiatan",
+                                      );
+                                    }
                                   },
                                   child: const Text("Ya"),
                                 ),
@@ -568,7 +586,11 @@ class _KegiatanPageState extends State<KegiatanPage> {
                         : "Lihat Kegiatan",
 
                     onTap: () {
-                      _openDetail(context, kegiatan, !vm.canEdit(kegiatan));
+                      if (vm.canEdit(kegiatan)) {
+                        _openEdit(context, kegiatan);
+                      } else {
+                        _openDetail(context, kegiatan);
+                      }
                     },
                   ),
                 ),
@@ -639,7 +661,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
     );
   }
 
-  void _openDetail(BuildContext context, Kegiatan kegiatan, bool readonly) {
+  void _openDetail(BuildContext context, Kegiatan kegiatan) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -654,7 +676,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
         return FractionallySizedBox(
           heightFactor: 0.92,
 
-          child: DetailKegiatanModal(kegiatan: kegiatan, readonly: readonly),
+          child: DetailKegiatanModal(kegiatan: kegiatan),
         );
       },
     );
@@ -679,4 +701,21 @@ class _KegiatanPageState extends State<KegiatanPage> {
       },
     );
   }
+}
+
+void _openEdit(BuildContext context, Kegiatan kegiatan) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (_) {
+      return FractionallySizedBox(
+        heightFactor: 0.92,
+        child: TambahKegiatanModal(kegiatan: kegiatan),
+      );
+    },
+  );
 }
