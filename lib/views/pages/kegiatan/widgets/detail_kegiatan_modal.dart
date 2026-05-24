@@ -217,6 +217,7 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
                           ? null
                           : () async {
                               final error = vm.validateKegiatan(
+                                fileKey: widget.kegiatan.id!,
                                 mode: KegiatanValidationMode.edit,
                                 kegiatan: widget.kegiatan,
                                 nama: namaController.text.trim(),
@@ -244,8 +245,10 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
                                 },
                               );
 
-                              if (vm.selectedImage != null) {
+                              if (vm.getSelectedImage(widget.kegiatan.id!) !=
+                                  null) {
                                 final error = vm.validateKegiatan(
+                                  fileKey: widget.kegiatan.id!,
                                   mode: KegiatanValidationMode.uploadBukti,
                                   nama: widget.kegiatan.nama,
                                   deskripsi: widget.kegiatan.deskripsi ?? "",
@@ -370,13 +373,14 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
     String? fileName,
   ) {
     final currentFile =
-        vm.selectedDocument?.path.split("/").last ??
+        vm.getSelectedDocument(widget.kegiatan.id!)?.path.split("/").last ??
         fileName ??
         "Belum ada dokumen";
 
     return GestureDetector(
-      onTap: widget.readonly ? null : vm.pickDocument,
-
+      onTap: widget.readonly
+          ? null
+          : () => vm.pickDocument(widget.kegiatan.id!),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(18),
@@ -412,8 +416,7 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
     String? imageName,
   ) {
     return GestureDetector(
-      onTap: widget.readonly ? null : vm.pickImage,
-
+      onTap: widget.readonly ? null : () => vm.pickImage(widget.kegiatan.id!),
       child: Container(
         width: double.infinity,
         height: 180,
@@ -424,12 +427,12 @@ class _DetailKegiatanModalState extends State<DetailKegiatanModal> {
           border: Border.all(color: ColorsUtils.gray),
         ),
 
-        child: vm.selectedImage != null
+        child: vm.getSelectedImage(widget.kegiatan.id!) != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(14),
 
                 child: Image.file(
-                  File(vm.selectedImage!.path),
+                  File(vm.getSelectedImage(widget.kegiatan.id!)!.path),
                   fit: BoxFit.cover,
                   width: double.infinity,
                 ),

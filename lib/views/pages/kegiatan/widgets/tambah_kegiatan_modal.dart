@@ -209,18 +209,18 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         final isValid = _formKey.currentState!.validate();
 
                         setState(() {
                           tanggalMulaiError = tanggalMulai == null;
                           tanggalSelesaiError = tanggalSelesai == null;
-                          dokumenError = vm.selectedDocument == null;
                         });
 
                         if (!isValid) return;
 
                         final error = vm.validateKegiatan(
+                          fileKey: KegiatanViewModel.createKey,
                           mode: KegiatanValidationMode.create,
                           nama: namaController.text,
                           deskripsi: deskripsiController.text,
@@ -232,20 +232,19 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                           ScaffoldMessenger.of(
                             context,
                           ).showSnackBar(SnackBar(content: Text(error)));
-
                           return;
                         }
 
-                        vm.createKegiatan(
+                        final success = await vm.createKegiatan(
                           nama: namaController.text.trim(),
                           deskripsi: deskripsiController.text.trim(),
                           tanggalMulai: tanggalMulai!,
                           tanggalSelesai: tanggalSelesai!,
                         );
 
-                        vm.clearUpload();
-
-                        Navigator.pop(context);
+                        if (success && context.mounted) {
+                          Navigator.pop(context);
+                        }
                       },
 
                       style: ElevatedButton.styleFrom(
@@ -341,10 +340,15 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
   Widget _documentBox(KegiatanViewModel vm) {
     final fileName =
-        vm.selectedDocument?.path.split("/").last ?? "Upload dokumen kegiatan";
+        vm
+            .getSelectedDocument(KegiatanViewModel.createKey)
+            ?.path
+            .split("/")
+            .last ??
+        "Upload dokumen kegiatan";
 
     return GestureDetector(
-      onTap: vm.pickDocument,
+      onTap: () => vm.pickDocument(KegiatanViewModel.createKey),
 
       child: Container(
         width: double.infinity,
@@ -379,8 +383,10 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
   }
 
   Widget _imageBox(KegiatanViewModel vm) {
+    final image = vm.getSelectedImage(KegiatanViewModel.createKey);
+
     return GestureDetector(
-      onTap: vm.pickImage,
+      onTap: () => vm.pickImage(KegiatanViewModel.createKey),
 
       child: Container(
         width: double.infinity,
@@ -392,12 +398,12 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
           border: Border.all(color: ColorsUtils.gray),
         ),
 
-        child: vm.selectedImage != null
+        child: image != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(14),
 
                 child: Image.file(
-                  File(vm.selectedImage!.path),
+                  image,
                   fit: BoxFit.cover,
                   width: double.infinity,
                 ),

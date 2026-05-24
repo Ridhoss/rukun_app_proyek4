@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:rukun_app_proyek4/models/rt_model.dart';
 import 'package:rukun_app_proyek4/models/rw_model.dart';
 
@@ -58,13 +59,13 @@ class Kegiatan {
       imgReferensi: json['img_referensi'],
       docReferensi: json['doc_referensi'],
       waktuDibuat: json['waktu_dibuat'] != null
-          ? DateTime.parse(json['waktu_dibuat'])
+          ? DateFormat('yyyy-MM-dd').parse(json['waktu_dibuat'])
           : null,
       waktuDiubah: json['waktu_diubah'] != null
-          ? DateTime.parse(json['waktu_diubah'])
+          ? DateFormat('yyyy-MM-dd').parse(json['waktu_diubah'])
           : null,
       waktuDihapus: json['waktu_dihapus'] != null
-          ? DateTime.parse(json['waktu_dihapus'])
+          ? DateFormat('yyyy-MM-dd').parse(json['waktu_dihapus'])
           : null,
       rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
       rw: json['rw'] != null ? RwModel.fromJson(json['rw']) : null,
@@ -75,8 +76,10 @@ class Kegiatan {
     final data = {
       'nama': nama,
       'deskripsi': deskripsi,
-      'tanggal_mulai': tanggalMulai.toUtc().toIso8601String(),
-      'tanggal_selesai': tanggalSelesai?.toUtc().toIso8601String(),
+      'tanggal_mulai': DateFormat('yyyy-MM-dd').format(tanggalMulai),
+      'tanggal_selesai': tanggalSelesai != null
+          ? DateFormat('yyyy-MM-dd').format(tanggalSelesai!)
+          : null,
       'level': level == KegiatanLevel.rt ? 'RT' : 'RW',
       'rt_id': rtId,
       'rw_id': rwId,
