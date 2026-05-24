@@ -209,17 +209,12 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         final isValid = _formKey.currentState!.validate();
 
                         setState(() {
                           tanggalMulaiError = tanggalMulai == null;
                           tanggalSelesaiError = tanggalSelesai == null;
-                          dokumenError =
-                              vm.getSelectedDocument(
-                                KegiatanViewModel.createKey,
-                              ) ==
-                              null;
                         });
 
                         if (!isValid) return;
@@ -237,19 +232,19 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                           ScaffoldMessenger.of(
                             context,
                           ).showSnackBar(SnackBar(content: Text(error)));
-
                           return;
                         }
 
-                        vm.createKegiatan(
+                        final success = await vm.createKegiatan(
                           nama: namaController.text.trim(),
                           deskripsi: deskripsiController.text.trim(),
                           tanggalMulai: tanggalMulai!,
                           tanggalSelesai: tanggalSelesai!,
                         );
 
-                        vm.clearFiles(KegiatanViewModel.createKey);
-                        Navigator.pop(context);
+                        if (success && context.mounted) {
+                          Navigator.pop(context);
+                        }
                       },
 
                       style: ElevatedButton.styleFrom(

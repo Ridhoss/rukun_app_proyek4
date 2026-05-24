@@ -98,6 +98,10 @@ class KegiatanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setCurrentUser(User user) {
+    _currentUser = user;
+  }
+
   void setSearch(String value) {
     _searchQuery = value;
     notifyListeners();
@@ -111,6 +115,7 @@ class KegiatanViewModel extends ChangeNotifier {
   }) async {
     try {
       _setLoading(true);
+      _setError(null);
 
       final document = _selectedDocuments[createKey];
 
@@ -122,26 +127,34 @@ class KegiatanViewModel extends ChangeNotifier {
         throw Exception("User belum dimuat");
       }
 
+      final docUrl = await cloudinaryService.uploadFile(
+        document,
+        folder: 'kegiatan/dokumen',
+      );
+
+      if (docUrl == null) {
+        throw Exception("Upload dokumen gagal");
+      }
+
       final kegiatan = Kegiatan(
-        id: 0,
+        id: null,
         nama: nama,
         deskripsi: deskripsi,
         tanggalMulai: tanggalMulai,
         tanggalSelesai: tanggalSelesai,
-        level: KegiatanLevel.rw,
-        rwId: _currentUser?.rw?.id,
-        rtId: _currentUser?.rt?.id,
+        level: selectedLevel,
+        rwId: _currentUser!.rw!.id,
+        rtId: selectedLevel == KegiatanLevel.rt ? _currentUser!.rt?.id : null,
         status: KegiatanStatus.dibuat,
-        docReferensi: document.path.split('/').last,
+        docReferensi: docUrl,
         imgReferensi: null,
         waktuDibuat: DateTime.now(),
       );
 
       await repository.createKegiatan(kegiatan);
 
-      clearFiles(createKey);
-
       await fetchKegiatan();
+      clearFiles(createKey);
 
       return true;
     } catch (e) {
@@ -172,10 +185,33 @@ class KegiatanViewModel extends ChangeNotifier {
     required Map<String, dynamic> data,
   }) async {
     try {
+      _setLoading(true);
+      _setError(null);
+
+      final document = _selectedDocuments[id];
+
+      if (document != null) {
+        final documentUrl = await cloudinaryService.uploadFile(
+          document,
+          folder: 'kegiatan/dokumen',
+        );
+
+        if (documentUrl == null) {
+          throw Exception("Upload dokumen gagal");
+        }
+
+        data['doc_referensi'] = documentUrl;
+      }
+
       await repository.updateKegiatan(id, data);
+
+      clearFiles(id);
+
       await fetchKegiatan();
     } catch (e) {
       _setError(e);
+    } finally {
+      _setLoading(false);
     }
   }
 
@@ -210,7 +246,7 @@ class KegiatanViewModel extends ChangeNotifier {
 
       await repository.updateKegiatan(kegiatanId, {
         "img_referensi": url,
-        "status": "selesai",
+        "status": "Selesai",
       });
 
       clearFiles(kegiatanId);

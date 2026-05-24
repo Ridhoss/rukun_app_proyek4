@@ -21,8 +21,17 @@ class _KegiatanPageState extends State<KegiatanPage> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      context.read<KegiatanViewModel>().fetchKegiatan();
+    Future.microtask(() async {
+      final authVm = context.read<AuthViewModel>();
+      final kegiatanVm = context.read<KegiatanViewModel>();
+
+      final user = authVm.currentUser;
+
+      if (user != null) {
+        kegiatanVm.setCurrentUser(user);
+      }
+
+      await kegiatanVm.fetchKegiatan();
     });
   }
 
