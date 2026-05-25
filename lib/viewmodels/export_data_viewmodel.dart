@@ -45,10 +45,10 @@ class ExportDataViewModel extends ChangeNotifier {
         scopeName = "RT_$rtId";
         listKk = await kkRepo.getKKByRT(rtId);
         
-        // Ambil warga berdasarkan KK yang ada di RT ini
-        // Jika API getAllWarga() sudah memfilter berdasarkan token RT, kita bisa langsung pakai getAllWarga()
-        // Kita asumsikan backend sudah memfilter otomatis:
-        listWarga = await wargaRepo.getAllWarga();
+        // Ambil semua warga, tapi filter hanya untuk KK yang ada di RT ini
+        final allWarga = await wargaRepo.getAllWarga();
+        final validKkIds = listKk.map((k) => k.id).toSet();
+        listWarga = allWarga.where((w) => validKkIds.contains(w.keluarga?.id)).toList();
       } else {
         throw Exception("Role tidak diizinkan mengekspor data");
       }
