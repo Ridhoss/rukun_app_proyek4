@@ -59,9 +59,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
           final iuran = vm.iuran;
           final level = widget.user.pengurus?.level.toLowerCase();
           final isRTUser = level == "rt";
-          final isIuranRT = iuran?.level == IuranLevel.rt;
-
-          final canShowSetoranButton = isRTUser && isIuranRT;
 
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -93,39 +90,37 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                 if (rt != null) _buildRtInfo(rt),
                 const SizedBox(height: 16),
 
-                if (canShowSetoranButton)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.upload),
-                      label: const Text("Setoran RT ke RW"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => RTSetoranRWPage(
-                              iuranId: widget.iuranId,
-                              rtId: widget.rtId,
-                              user: widget.user,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                const SizedBox(height: 16),
-
+                // if (canShowSetoranButton)
+                //   SizedBox(
+                //     width: double.infinity,
+                //     child: ElevatedButton.icon(
+                //       icon: const Icon(Icons.upload),
+                //       label: const Text("Setoran RT ke RW"),
+                //       style: ElevatedButton.styleFrom(
+                //         backgroundColor: Colors.blue,
+                //         foregroundColor: Colors.white,
+                //       ),
+                //       onPressed: () {
+                //         Navigator.push(
+                //           context,
+                //           MaterialPageRoute(
+                //             builder: (_) => RTSetoranRWPage(
+                //               iuranId: widget.iuranId,
+                //               rtId: widget.rtId,
+                //               user: widget.user,
+                //             ),
+                //           ),
+                //         );
+                //       },
+                //     ),
+                //   ),
                 _buildMonthlyList(
                   months,
                   transaksi,
                   rt?.totalKeluarga ?? 0,
                   rt?.id ?? 0,
                   iuran.id ?? 0,
+                  isRTUser,
                 ),
               ],
             ),
@@ -246,6 +241,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
     int totalKeluarga,
     int rtId,
     int iuranId,
+    bool isRTUser,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,6 +318,102 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 10),
+                  if (isRTUser)
+                    Container(
+                      margin: const EdgeInsets.only(top: 10),
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.account_balance_wallet),
+                        label: const Text("Setor ke RW"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade600,
+                          foregroundColor: Colors.white,
+                          elevation: 2,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                            ),
+                            builder: (context) {
+                              return Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: const [
+                                        Icon(
+                                          Icons.receipt_long,
+                                          color: Colors.blue,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          "Konfirmasi Setoran",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 12),
+
+                                    Text(
+                                      "Bulan: $label",
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    Text(
+                                      "Total pendapatan: Rp $totalPendapatan",
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+
+                                    const SizedBox(height: 20),
+
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "Setoran $label berhasil dikirim ke RW",
+                                              ),
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          );
+                                        },
+                                        child: const Text("Konfirmasi Setor"),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
                 ],
               ),
             ),
