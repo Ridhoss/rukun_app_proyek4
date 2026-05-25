@@ -329,85 +329,439 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue.shade600,
                           foregroundColor: Colors.white,
-                          elevation: 2,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                         onPressed: () {
+                          TextEditingController jumlahController =
+                              TextEditingController(
+                                text: totalPendapatan.toString(),
+                              );
+                          TextEditingController catatanController =
+                              TextEditingController();
+
                           showModalBottomSheet(
                             context: context,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                            ),
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
                             builder: (context) {
-                              return Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: const [
-                                        Icon(
-                                          Icons.receipt_long,
-                                          color: Colors.blue,
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          "Konfirmasi Setoran",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
+                              TextEditingController jumlahController =
+                                  TextEditingController(
+                                    text: totalPendapatan.toString(),
+                                  );
+                              TextEditingController catatanController =
+                                  TextEditingController();
+
+                              String? fileName;
+
+                              return StatefulBuilder(
+                                builder: (context, setState) {
+                                  return Container(
+                                    padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(
+                                        context,
+                                      ).viewInsets.bottom,
                                     ),
-
-                                    const SizedBox(height: 12),
-
-                                    Text(
-                                      "Bulan: $label",
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                    Text(
-                                      "Total pendapatan: Rp $totalPendapatan",
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-
-                                    const SizedBox(height: 20),
-
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.green,
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 12,
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Setoran $label berhasil dikirim ke RW",
-                                              ),
-                                              backgroundColor: Colors.green,
-                                            ),
-                                          );
-                                        },
-                                        child: const Text("Konfirmasi Setor"),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                    child: SingleChildScrollView(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // HANDLE BAR
+                                            Center(
+                                              child: Container(
+                                                width: 50,
+                                                height: 5,
+                                                margin: const EdgeInsets.only(
+                                                  bottom: 16,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[300],
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                            ),
+
+                                            // HEADER
+                                            Container(
+                                              padding: const EdgeInsets.all(12),
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    Colors.blue.shade600,
+                                                    Colors.blue.shade300,
+                                                  ],
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons
+                                                        .account_balance_wallet,
+                                                    color: Colors.white,
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        const Text(
+                                                          "Setoran RT ke RW",
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          "Kelola laporan keuangan bulanan",
+                                                          style: TextStyle(
+                                                            color: Colors.white
+                                                                .withOpacity(
+                                                                  0.9,
+                                                                ),
+                                                            fontSize: 12,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 16),
+
+                                            // PERIODE CHIP
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 6,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.withOpacity(
+                                                  0.1,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                "Periode: $label",
+                                                style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 16),
+
+                                            // RINGKASAN CARD
+                                            Container(
+                                              padding: const EdgeInsets.all(12),
+                                              decoration: BoxDecoration(
+                                                color: Colors.green.withOpacity(
+                                                  0.1,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.trending_up,
+                                                    color: Colors.green,
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      const Text(
+                                                        "Total Pendapatan",
+                                                      ),
+                                                      Text(
+                                                        "Rp $totalPendapatan",
+                                                        style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 16),
+
+                                            // INPUT JUMLAH
+                                            TextField(
+                                              controller: jumlahController,
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              decoration: const InputDecoration(
+                                                labelText: "Jumlah Setoran",
+                                                prefixIcon: Icon(
+                                                  Icons.payments,
+                                                ),
+                                                border: OutlineInputBorder(),
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 12),
+
+                                            // CATATAN
+                                            TextField(
+                                              controller: catatanController,
+                                              decoration: const InputDecoration(
+                                                labelText: "Catatan (opsional)",
+                                                prefixIcon: Icon(Icons.note),
+                                                border: OutlineInputBorder(),
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 12),
+
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  "Bukti Setoran",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+
+                                                const SizedBox(height: 10),
+
+                                                GestureDetector(
+                                                  onTap: () async {
+                                                    // TODO: image_picker / file_picker
+                                                    setState(() {
+                                                      fileName =
+                                                          "bukti_setoran.jpg";
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    width: double.infinity,
+                                                    height: 170,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                      border: Border.all(
+                                                        color: Colors
+                                                            .blue
+                                                            .shade300,
+                                                      ),
+                                                      color: fileName == null
+                                                          ? const Color(
+                                                              0xFFF9FAFB,
+                                                            )
+                                                          : Colors.transparent,
+                                                    ),
+                                                    child: fileName == null
+                                                        ? const Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .cloud_upload_outlined,
+                                                                size: 40,
+                                                              ),
+                                                              SizedBox(
+                                                                height: 8,
+                                                              ),
+                                                              Text(
+                                                                "Upload Bukti Setoran",
+                                                                style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: 4,
+                                                              ),
+                                                              Text(
+                                                                "Foto / PDF / Dokumen",
+                                                                style: TextStyle(
+                                                                  fontSize: 11,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          )
+                                                        : Stack(
+                                                            children: [
+                                                              Container(
+                                                                width: double
+                                                                    .infinity,
+                                                                height: double
+                                                                    .infinity,
+                                                                decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        12,
+                                                                      ),
+                                                                  color: Colors
+                                                                      .green
+                                                                      .withOpacity(
+                                                                        0.05,
+                                                                      ),
+                                                                ),
+                                                                child: const Center(
+                                                                  child: Column(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    children: [
+                                                                      Icon(
+                                                                        Icons
+                                                                            .description,
+                                                                        size:
+                                                                            50,
+                                                                        color: Colors
+                                                                            .green,
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height:
+                                                                            8,
+                                                                      ),
+                                                                      Text(
+                                                                        "File Terupload",
+                                                                        style: TextStyle(
+                                                                          fontWeight:
+                                                                              FontWeight.w600,
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+
+                                                              // edit overlay (kayak AddKKPage kamu)
+                                                              Positioned(
+                                                                right: 8,
+                                                                top: 8,
+                                                                child: Container(
+                                                                  padding:
+                                                                      const EdgeInsets.all(
+                                                                        6,
+                                                                      ),
+                                                                  decoration: BoxDecoration(
+                                                                    color: Colors
+                                                                        .black54,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                          8,
+                                                                        ),
+                                                                  ),
+                                                                  child: const Icon(
+                                                                    Icons.edit,
+                                                                    size: 16,
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                  ),
+                                                ),
+
+                                                if (fileName != null)
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          top: 8,
+                                                        ),
+                                                    child: Text(
+                                                      "File: $fileName",
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 20),
+
+                                            // BUTTON SUBMIT
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: ColorsUtils.b300,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 14,
+                                                      ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        "Setoran $label berhasil dikirim ke RW",
+                                                        style: TextStyle(color: ColorsUtils.white),
+                                                      ),
+                                                      backgroundColor:
+                                                          ColorsUtils.b300,
+                                                    ),
+                                                  );
+                                                },
+                                                child: const Text(
+                                                  "Kirim Setoran",
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: ColorsUtils.white
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           );
