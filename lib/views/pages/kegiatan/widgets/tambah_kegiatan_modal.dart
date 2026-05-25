@@ -15,6 +15,8 @@ class TambahKegiatanModal extends StatefulWidget {
 }
 
 class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
@@ -219,76 +221,90 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
 
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () async {
-                        final isValid = _formKey.currentState!.validate();
+                      onPressed: _isSubmitting
+                          ? null
+                          : () async {
+                              final isValid = _formKey.currentState!.validate();
 
-                        setState(() {
-                          tanggalMulaiError = tanggalMulai == null;
-                          tanggalSelesaiError = tanggalSelesai == null;
-                        });
+                              setState(() {
+                                tanggalMulaiError = tanggalMulai == null;
+                                tanggalSelesaiError = tanggalSelesai == null;
+                              });
 
-                        if (!isValid) return;
+                              if (!isValid) return;
 
-                        final isEdit = widget.kegiatan != null;
+                              final vm = context.read<KegiatanViewModel>();
 
-                        final error = vm.validateKegiatan(
-                          fileKey: KegiatanViewModel.createKey,
-                          mode: isEdit
-                              ? KegiatanValidationMode.edit
-                              : KegiatanValidationMode.create,
-                          nama: namaController.text,
-                          deskripsi: deskripsiController.text,
-                          tanggalMulai: tanggalMulai,
-                          tanggalSelesai: tanggalSelesai,
-                        );
+                              final isEdit = widget.kegiatan != null;
 
-                        if (error != null) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text(error)));
-                          return;
-                        }
+                              final error = vm.validateKegiatan(
+                                fileKey: KegiatanViewModel.createKey,
+                                mode: isEdit
+                                    ? KegiatanValidationMode.edit
+                                    : KegiatanValidationMode.create,
+                                nama: namaController.text,
+                                deskripsi: deskripsiController.text,
+                                tanggalMulai: tanggalMulai,
+                                tanggalSelesai: tanggalSelesai,
+                              );
 
-                        bool success;
+                              if (error != null) {
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(SnackBar(content: Text(error)));
+                                return;
+                              }
 
-                        if (isEdit) {
-                          success = await vm.updateKegiatan(
-                            id: widget.kegiatan!.id!,
-                            data: {
-                              "nama": namaController.text.trim(),
-                              "deskripsi": deskripsiController.text.trim(),
-                              "tanggal_mulai": tanggalMulai!.toIso8601String(),
-                              "tanggal_selesai": tanggalSelesai
-                                  ?.toIso8601String(),
+                              setState(() => _isSubmitting = true);
+
+                              bool success;
+
+                              try {
+                                if (isEdit) {
+                                  success = await vm.updateKegiatan(
+                                    id: widget.kegiatan!.id!,
+                                    data: {
+                                      "nama": namaController.text.trim(),
+                                      "deskripsi": deskripsiController.text
+                                          .trim(),
+                                      "tanggal_mulai": tanggalMulai!
+                                          .toIso8601String(),
+                                      "tanggal_selesai": tanggalSelesai
+                                          ?.toIso8601String(),
+                                    },
+                                  );
+                                } else {
+                                  success = await vm.createKegiatan(
+                                    nama: namaController.text.trim(),
+                                    deskripsi: deskripsiController.text.trim(),
+                                    tanggalMulai: tanggalMulai!,
+                                    tanggalSelesai: tanggalSelesai!,
+                                  );
+                                }
+                              } finally {
+                                if (mounted) {
+                                  setState(() => _isSubmitting = false);
+                                }
+                              }
+
+                              if (!context.mounted) return;
+
+                              if (success) {
+                                NotificationUtils.showSuccess(
+                                  context,
+                                  isEdit
+                                      ? "Kegiatan berhasil diupdate"
+                                      : "Kegiatan berhasil ditambahkan",
+                                );
+
+                                Navigator.pop(context);
+                              } else {
+                                NotificationUtils.showError(
+                                  context,
+                                  vm.errorMessage ?? "Terjadi kesalahan",
+                                );
+                              }
                             },
-                          );
-                        } else {
-                          success = await vm.createKegiatan(
-                            nama: namaController.text.trim(),
-                            deskripsi: deskripsiController.text.trim(),
-                            tanggalMulai: tanggalMulai!,
-                            tanggalSelesai: tanggalSelesai!,
-                          );
-                        }
-
-                        if (!context.mounted) return;
-
-                        if (success) {
-                          NotificationUtils.showSuccess(
-                            context,
-                            isEdit
-                                ? "Kegiatan berhasil diupdate"
-                                : "Kegiatan berhasil ditambahkan",
-                          );
-
-                          Navigator.pop(context);
-                        } else {
-                          NotificationUtils.showError(
-                            context,
-                            vm.errorMessage ?? "Terjadi kesalahan",
-                          );
-                        }
-                      },
 
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColorsUtils.green,
@@ -299,10 +315,19 @@ class _TambahKegiatanModalState extends State<TambahKegiatanModal> {
                         ),
                       ),
 
-                      child: const Text(
-                        "Simpan",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              "Simpan",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                     ),
                   ),
                 ],

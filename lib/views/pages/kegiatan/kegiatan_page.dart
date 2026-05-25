@@ -136,49 +136,50 @@ class _KegiatanPageState extends State<KegiatanPage> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
 
-      child: Row(
-        children: [
-          const Expanded(
-            child: Text(
-              "Daftar Kegiatan",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
+      child: SizedBox(
+        height: 48,
 
-          if (vm.selectedLevel == KegiatanLevel.rw)
-            ElevatedButton(
-              onPressed: () {
-                _openCreate(context);
-              },
-
-              style:
-                  ElevatedButton.styleFrom(
-                    backgroundColor: ColorsUtils.lightgray,
-                    foregroundColor: ColorsUtils.black,
-
-                    elevation: 0,
-
-                    shadowColor: Colors.transparent,
-                    surfaceTintColor: Colors.transparent,
-
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ).copyWith(
-                    overlayColor: WidgetStatePropertyAll(Colors.transparent),
-                  ),
-
-              child: const Text(
-                "+ Tambah",
-                style: TextStyle(fontWeight: FontWeight.w600),
+        child: Row(
+          children: [
+            const Expanded(
+              child: Text(
+                "Daftar Kegiatan",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-        ],
+
+            if (vm.canCreateOnCurrentLevel())
+              ElevatedButton(
+                onPressed: () {
+                  _openCreate(context);
+                },
+
+                style:
+                    ElevatedButton.styleFrom(
+                      backgroundColor: ColorsUtils.lightgray,
+                      foregroundColor: ColorsUtils.black,
+
+                      elevation: 0,
+
+                      shadowColor: Colors.transparent,
+                      surfaceTintColor: Colors.transparent,
+
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    ).copyWith(
+                      overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                    ),
+
+                child: const Text(
+                  "+ Tambah",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -432,15 +433,33 @@ class _KegiatanPageState extends State<KegiatanPage> {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  kegiatan.nama,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      kegiatan.nama,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+
+                    if (kegiatan.level == KegiatanLevel.rt &&
+                        kegiatan.rt?.noRt != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          "RT ${kegiatan.rt?.noRt}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: ColorsUtils.slateGray,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-
               const SizedBox(width: 12),
               _badge(kegiatan.status),
             ],

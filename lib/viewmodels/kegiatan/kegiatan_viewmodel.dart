@@ -49,6 +49,22 @@ class KegiatanViewModel extends ChangeNotifier {
 
   String _searchQuery = "";
 
+  bool canCreateOnCurrentLevel() {
+    final level = _currentUser?.pengurus?.level;
+
+    if (level == null) return false;
+
+    if (selectedLevel == KegiatanLevel.rw) {
+      return level.toUpperCase() == "RW";
+    }
+
+    if (selectedLevel == KegiatanLevel.rt) {
+      return level.toUpperCase() == "RT";
+    }
+
+    return false;
+  }
+
   Future<void> fetchKegiatan() async {
     try {
       _setLoading(true);
@@ -67,6 +83,10 @@ class KegiatanViewModel extends ChangeNotifier {
   }
 
   List<Kegiatan> get kegiatanList {
+    final user = _currentUser;
+    final userLevel = user?.pengurus?.level?.toUpperCase();
+    final userRtId = user?.rt?.id;
+
     return _allKegiatan
         .where((kegiatan) {
           final matchLevel = kegiatan.level == selectedLevel;
@@ -86,11 +106,39 @@ class KegiatanViewModel extends ChangeNotifier {
               kegiatan.nama.toLowerCase().contains(query) ||
               (kegiatan.deskripsi ?? "").toLowerCase().contains(query);
 
-          return matchLevel && matchStatus && matchSearch;
+          bool matchUser = true;
+
+          if (selectedLevel == KegiatanLevel.rt) {
+            if (userLevel == "RT") {
+              matchUser = kegiatan.rtId == userRtId;
+            } else if (userLevel == "RW") {
+              matchUser = true;
+            } else {
+              matchUser = false;
+            }
+          }
+
+          return matchLevel && matchStatus && matchSearch && matchUser;
         })
         .toList()
         .reversed
         .toList();
+  }
+
+  List<Kegiatan> get filteredKegiatan {
+    final currentRtId = _currentUser?.rt?.id;
+
+    return _allKegiatan.where((kegiatan) {
+      if (selectedLevel != kegiatan.level) {
+        return false;
+      }
+
+      if (selectedLevel == KegiatanLevel.rt) {
+        return kegiatan.rtId == currentRtId;
+      }
+
+      return true;
+    }).toList();
   }
 
   void setLevel(KegiatanLevel level) {
@@ -113,7 +161,15 @@ class KegiatanViewModel extends ChangeNotifier {
   }
 
   String _buildDokumenFolder() {
-    final rwId = _currentUser!.rw!.id;
+    if (_currentUser == null) {
+      throw Exception("User belum login");
+    }
+
+    final rwId = _currentUser?.rw?.id;
+
+    if (rwId == null) {
+      throw Exception("RW ID tidak ditemukan");
+    }
 
     if (selectedLevel == KegiatanLevel.rw) {
       return 'kegiatan/dokumen/norw/$rwId';
@@ -122,7 +178,7 @@ class KegiatanViewModel extends ChangeNotifier {
     final rtId = _currentUser?.rt?.id;
 
     if (rtId == null) {
-      throw Exception("RT ID tidak ditemukan untuk level RT");
+      throw Exception("RT ID tidak ditemukan");
     }
 
     return 'kegiatan/dokumen/norw/$rwId/nort/$rtId';
@@ -159,6 +215,20 @@ class KegiatanViewModel extends ChangeNotifier {
         throw Exception("Upload dokumen gagal");
       }
 
+      final rwId = _currentUser?.rw?.id;
+
+      if (rwId == null) {
+        throw Exception("RW ID tidak ditemukan");
+      }
+
+      final rtId = selectedLevel == KegiatanLevel.rt
+          ? _currentUser?.rt?.id
+          : null;
+
+      if (selectedLevel == KegiatanLevel.rt && rtId == null) {
+        throw Exception("RT ID tidak ditemukan");
+      }
+
       final kegiatan = Kegiatan(
         nama: nama.trim(),
         deskripsi: deskripsi.trim(),
@@ -166,8 +236,8 @@ class KegiatanViewModel extends ChangeNotifier {
         tanggalSelesai: tanggalSelesai,
         level: selectedLevel,
         status: KegiatanStatus.dibuat,
-        rtId: selectedLevel == KegiatanLevel.rt ? _currentUser!.rt?.id : null,
-        rwId: _currentUser!.rw!.id,
+        rtId: rtId,
+        rwId: rwId,
         docReferensi: docUrl,
         imgReferensi: null,
       );
@@ -307,7 +377,19 @@ class KegiatanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isReadonly(Kegiatan k) => k.level == KegiatanLevel.rt;
+  bool isReadonly(Kegiatan k) {
+    final level = _currentUser?.pengurus?.level.toUpperCase();
+
+    if (level == "RW") {
+      return k.level == KegiatanLevel.rt;
+    }
+
+    if (level == "RT") {
+      return k.level == KegiatanLevel.rw;
+    }
+
+    return true;
+  }
 
   bool canEdit(Kegiatan k) {
     return !isReadonly(k) &&
@@ -345,16 +427,17 @@ class KegiatanViewModel extends ChangeNotifier {
         now.isBefore(end);
   }
 
-  int get totalSemua => _allKegiatan.length;
+  int get totalSemua => filteredKegiatan.length;
 
   int get totalDibuat =>
-      _allKegiatan.where((e) => e.status == KegiatanStatus.dibuat).length;
+      filteredKegiatan.where((e) => e.status == KegiatanStatus.dibuat).length;
 
   int get totalSelesai =>
-      _allKegiatan.where((e) => e.status == KegiatanStatus.selesai).length;
+      filteredKegiatan.where((e) => e.status == KegiatanStatus.selesai).length;
 
-  int get totalDibatalkan =>
-      _allKegiatan.where((e) => e.status == KegiatanStatus.dibatalkan).length;
+  int get totalDibatalkan => filteredKegiatan
+      .where((e) => e.status == KegiatanStatus.dibatalkan)
+      .length;
 
   String formatTanggal(Kegiatan k) {
     final start = DateFormat("dd MMM yyyy").format(k.tanggalMulai);
