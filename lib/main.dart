@@ -30,6 +30,8 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
+import 'package:rukun_app_proyek4/services/utils/excel_export_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/add_iuran_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_bulanan_detail_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_rt_detail_viewmodel.dart';
@@ -165,6 +167,14 @@ void main() async {
         ChangeNotifierProvider(
           create: (context) =>
               IuranRWDetailViewModel(context.read<IuranRepository>()),
+        ),
+
+        ChangeNotifierProvider(
+          create: (ctx) => ExportDataViewModel(
+            kkRepo: ctx.read<KKRepository>(),
+            wargaRepo: ctx.read<WargaRepository>(),
+            exportService: ExcelExportService(),
+          ),
         ),
 
         ChangeNotifierProvider(

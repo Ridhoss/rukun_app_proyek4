@@ -287,7 +287,7 @@ class Warga {
 
       tempatLahir: json['tempat_lahir'],
       tglLahir: json['tgl_lahir'] != null
-          ? DateTime.parse(json['tgl_lahir'])
+          ? DateTime.tryParse(json['tgl_lahir'])
           : null,
 
       pendidikan: json['pendidikan'],
@@ -295,7 +295,7 @@ class Warga {
       golonganDarah: json['golongan_darah'],
 
       tglPerkawinan: json['tgl_perkawinan'] != null
-          ? DateTime.parse(json['tgl_perkawinan'])
+          ? DateTime.tryParse(json['tgl_perkawinan'])
           : null,
 
       noPaspor: json['no_paspor'],
@@ -306,13 +306,13 @@ class Warga {
       keluarga: json['keluarga'] != null ? Keluarga.fromJson(json['keluarga']) : null,
 
       waktuDibuat: json['waktu_dibuat'] != null
-          ? DateTime.parse(json['waktu_dibuat'])
+          ? DateTime.tryParse(json['waktu_dibuat'])
           : null,
       waktuDiubah: json['waktu_diubah'] != null
-          ? DateTime.parse(json['waktu_diubah'])
+          ? DateTime.tryParse(json['waktu_diubah'])
           : null,
       waktuDihapus: json['waktu_dihapus'] != null
-          ? DateTime.parse(json['waktu_dihapus'])
+          ? DateTime.tryParse(json['waktu_dihapus'])
           : null,
     );
   }
