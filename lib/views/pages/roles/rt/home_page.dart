@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/logout_dialog_utils.dart';
+import 'package:rukun_app_proyek4/utils/rt_settings_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rt/profile_page.dart';
+import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
 class RtHomePage extends StatefulWidget {
   const RtHomePage({super.key});
@@ -17,10 +23,7 @@ class _RtHomePageState extends State<RtHomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authVM = context.read<AuthViewModel>();
-      final rtId = authVM.currentUser?.rt?.id ?? 1;
-
-      context.read<RtDashboardViewModel>().fetchDashboard(rtId);
+      context.read<RtDashboardViewModel>().fetchDashboard();
     });
   }
 
@@ -30,7 +33,62 @@ class _RtHomePageState extends State<RtHomePage> {
     final namaUser = authVM.currentUser?.warga?.nama ?? "Ketua RT";
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: ColorsUtils.lightgray,
+
+      appBar: AppBarUtils.buildAppBar(
+        context: context,
+        name: namaUser,
+        title: "",
+        subtitle: "",
+        showAvatar: true,
+        showName: true,
+        showGreeting: true,
+        settingsWidget: RtSettingsUtils(
+          onProfile: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RtProfilePage()),
+            );
+          },
+          onExport: () async {
+            final vm = context.read<ExportDataViewModel>();
+            if (authVM.currentUser != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Memproses file Excel...")),
+              );
+              final success = await vm.exportDataKependudukan(authVM.currentUser!);
+              if (context.mounted) {
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Berhasil mengekspor data!")),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(vm.errorMessage ?? "Gagal mengekspor data"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            }
+          },
+          onLogout: () async {
+            final confirm = await LogoutDialogUtils.showLogoutDialog(context);
+
+            if (confirm == true) {
+              await authVM.logout();
+
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const WelcomePage()),
+                (route) => false,
+              );
+            }
+          },
+        ),
+      ),
+
       body: Consumer<RtDashboardViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
@@ -38,208 +96,187 @@ class _RtHomePageState extends State<RtHomePage> {
           }
 
           if (viewModel.errorMessage != null) {
-            return Center(child: Text("Error: ${viewModel.errorMessage}"));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  "Error: ${viewModel.errorMessage}",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
           }
 
-          final data = viewModel.dashboardData;
-
-          if (data == null) {
+          if (viewModel.dashboard == null) {
             return const Center(child: Text("Data belum tersedia"));
           }
 
-          final int totalGender = data.totalWanita + data.totalPria;
-          final double progressWanita = totalGender > 0 ? data.totalWanita / totalGender : 0.0;
+          final int totalGender = viewModel.totalWanita + viewModel.totalPria;
+          final double progressWanita =
+              totalGender > 0 ? viewModel.totalWanita / totalGender : 0.0;
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.zero,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          return RefreshIndicator(
+            onRefresh: viewModel.fetchDashboard,
+            child: ListView(
+              padding: const EdgeInsets.all(20),
               children: [
-                // 1. HEADER GREETING DENGAN WARNA BIRU (FULL WIDTH)
+                // 1. KAS CARD (GRADIENT)
                 Container(
                   width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: ColorsUtils.b400,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(24),
-                      bottomRight: Radius.circular(24),
-                    ),
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Selamat Pagi,",
-                                style: TextStyle(fontSize: 14, color: Colors.white70),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                namaUser,
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RtProfilePage(),
-                                ),
-                              );
-                            },
-                            child: const CircleAvatar(
-                              radius: 25,
-                              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // AREA UTAMA KONTEN (DENGAN PADDING INTERNAL)
-                Padding(
                   padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: const LinearGradient(
+                      colors: [ColorsUtils.b300, ColorsUtils.b500],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 2. KAS CARD (GRADIENT)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: const LinearGradient(
-                            colors: [ColorsUtils.b300, ColorsUtils.b500],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Saldo Kas RT",
-                                style: TextStyle(color: Colors.white70, fontSize: 14)),
-                            const SizedBox(height: 8),
-                            Text(data.saldoKas,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _kasInfo("Kas Masuk", data.kasMasuk),
-                                _kasInfo("Kas Keluar", data.kasKeluar),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: const [
-                                    Text("Diperbarui",
-                                        style: TextStyle(color: Colors.white60, fontSize: 10)),
-                                    Text("Hari Ini",
-                                        style: TextStyle(color: Colors.white, fontSize: 11)),
-                                  ],
-                                )
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-
-                      // 3. STATS GRID (2x2)
-                      GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 15,
-                        mainAxisSpacing: 15,
-                        childAspectRatio: 1.6,
-                        children: [
-                          _statCard("Total Penduduk", data.totalPenduduk.toString()),
-                          _statCard("Jumlah KK", data.jumlahKk.toString()),
-                          _statCard("Surat Pending", data.suratPending.toString()),
-                          _statCard("Surat Diproses", data.suratDiproses.toString()),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-
-                      // 4. DEMOGRAFI UMUM
-                      const Text("Demografi Umum",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          const Icon(Icons.female, color: Colors.pink, size: 18),
-                          Text(" Wanita (${data.totalWanita})", style: const TextStyle(fontSize: 13)),
-                          const Spacer(),
-                          Text("Pria (${data.totalPria}) ", style: const TextStyle(fontSize: 13)),
-                          const Icon(Icons.male, color: ColorsUtils.b300, size: 18),
-                        ],
-                      ),
+                      const Text("Saldo Kas RT",
+                          style: TextStyle(color: Colors.white70, fontSize: 14)),
                       const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: progressWanita,
-                          minHeight: 10,
-                          backgroundColor: ColorsUtils.b200,
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+                      Text(
+                        "Rp ${NumberFormat('#,###', 'id_ID').format(viewModel.saldoKas.toInt())}",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 25),
-
-                      // 5. BERDASARKAN USIA
-                      const Text("Berdasarkan Usia",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 15),
-                      _ageRow(Icons.child_care, "Anak", "(0-15 tahun)", data.totalAnak.toString()),
-                      _ageRow(Icons.accessibility_new, "Usia Produktif", "(15-64 tahun)", data.totalProduktif.toString()),
-                      _ageRow(Icons.elderly, "Lansia", "(>64 tahun)", data.totalLansia.toString()),
-                      const SizedBox(height: 30),
-
-                      // 6. KEGIATAN BERLANGSUNG
+                      const SizedBox(height: 20),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(Icons.calendar_month, color: ColorsUtils.b300),
-                          const SizedBox(width: 10),
-                          const Text("Kegiatan Berlangsung",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          _kasInfo(
+                            "Kas Masuk",
+                            "+ Rp ${NumberFormat('#,###', 'id_ID').format(viewModel.kasMasuk.toInt())}",
+                          ),
+                          _kasInfo(
+                            "Kas Keluar",
+                            "- Rp ${NumberFormat('#,###', 'id_ID').format(viewModel.kasKeluar.toInt())}",
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: const [
+                              Text("Diperbarui",
+                                  style: TextStyle(
+                                      color: Colors.white60, fontSize: 10)),
+                              Text("Hari Ini",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 11)),
+                            ],
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 15),
-                      _kegiatanCard(
-                        status: "BERLANGSUNG",
-                        statusColor: ColorsUtils.green,
-                        title: "Kerja Bakti Bersih RT 02",
-                        desc: "Kegiatan membersihkan lingkungan RT 02 yang mencakup seluruh blok...",
-                        date: "11 - 15 Mei 2026",
-                      ),
-                      _kegiatanCard(
-                        status: "UPCOMING",
-                        statusColor: ColorsUtils.b300,
-                        title: "Pelatihan Pupuk Kompos",
-                        desc: "Kegiatan pelatihan pembuatan pupuk dari sampah organik untuk warga...",
-                        date: "20 - 24 Mei 2026",
-                      ),
-                      const SizedBox(height: 80), // Dikasih jarak agak jauh biar nggak nabrak bottom nav
                     ],
                   ),
                 ),
+                const SizedBox(height: 25),
+
+                // 2. STATS GRID (2x2)
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                  childAspectRatio: 1.6,
+                  children: [
+                    _statCard("Total Penduduk", viewModel.totalPenduduk.toString()),
+                    _statCard("Jumlah KK", viewModel.jumlahKk.toString()),
+                    _statCard("Surat Pending", viewModel.suratPending.toString()),
+                    _statCard("Surat Diproses", viewModel.suratDiproses.toString()),
+                  ],
+                ),
+                const SizedBox(height: 30),
+
+                // 3. DEMOGRAFI UMUM
+                const Text("Demografi Umum",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Icon(Icons.female, color: Colors.pink, size: 18),
+                    Text(" Wanita (${viewModel.totalWanita})",
+                        style: const TextStyle(fontSize: 13)),
+                    const Spacer(),
+                    Text("Pria (${viewModel.totalPria}) ",
+                        style: const TextStyle(fontSize: 13)),
+                    const Icon(Icons.male, color: ColorsUtils.b300, size: 18),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: progressWanita,
+                    minHeight: 10,
+                    backgroundColor: ColorsUtils.b200,
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+                  ),
+                ),
+                const SizedBox(height: 25),
+
+                // 4. BERDASARKAN USIA
+                const Text("Berdasarkan Usia",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 15),
+                _ageRow(Icons.child_care, "Anak", "(0-15 tahun)",
+                    viewModel.totalAnak.toString()),
+                _ageRow(Icons.accessibility_new, "Usia Produktif", "(15-64 tahun)",
+                    viewModel.totalProduktif.toString()),
+                _ageRow(Icons.elderly, "Lansia", "(>64 tahun)",
+                    viewModel.totalLansia.toString()),
+                const SizedBox(height: 30),
+
+                // 5. KEGIATAN BERLANGSUNG
+                Row(
+                  children: const [
+                    Icon(Icons.calendar_month, color: ColorsUtils.b300),
+                    SizedBox(width: 10),
+                    Text("Kegiatan Berlangsung",
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 15),
+
+                if (viewModel.kegiatan.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    alignment: Alignment.center,
+                    child: const Text("Belum ada kegiatan berlangsung"),
+                  )
+                else
+                  ...viewModel.kegiatan.map((item) {
+                    final now = DateTime.now();
+                    final bool isBerlangsung = item.isBerlangsung;
+                    final bool isUpcoming =
+                        item.tanggalMulai.isAfter(now) && !isBerlangsung;
+
+                    final String statusText =
+                        isBerlangsung ? "BERLANGSUNG" : (isUpcoming ? "UPCOMING" : item.status.name.toUpperCase());
+                    final Color statusColor =
+                        isBerlangsung ? ColorsUtils.green : ColorsUtils.b300;
+
+                    final String dateRange = item.tanggalSelesai != null
+                        ? "${DateFormat('dd MMM yyyy', 'id_ID').format(item.tanggalMulai)} - ${DateFormat('dd MMM yyyy', 'id_ID').format(item.tanggalSelesai!)}"
+                        : DateFormat('dd MMM yyyy', 'id_ID').format(item.tanggalMulai);
+
+                    return _kegiatanCard(
+                      status: statusText,
+                      statusColor: statusColor,
+                      title: item.nama,
+                      desc: item.deskripsi ?? "-",
+                      date: dateRange,
+                    );
+                  }).toList(),
+
+                const SizedBox(height: 80), // Jarak biar nggak nabrak bottom nav
               ],
             ),
           );

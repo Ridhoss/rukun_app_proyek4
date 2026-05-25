@@ -30,13 +30,13 @@ class Keluarga {
       kodePos: json['kode_pos'],
       imgRef: json['img_referensi'],
       waktuDibuat: json['waktu_dibuat'] != null
-          ? DateTime.parse(json['waktu_dibuat'])
+          ? DateTime.tryParse(json['waktu_dibuat'])
           : null,
       waktuDiubah: json['waktu_diubah'] != null
-          ? DateTime.parse(json['waktu_diubah'])
+          ? DateTime.tryParse(json['waktu_diubah'])
           : null,
       waktuDihapus: json['waktu_dihapus'] != null
-          ? DateTime.parse(json['waktu_dihapus'])
+          ? DateTime.tryParse(json['waktu_dihapus'])
           : null,
     );
   }

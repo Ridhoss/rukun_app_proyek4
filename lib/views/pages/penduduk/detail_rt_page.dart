@@ -11,6 +11,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/kartukeluarga/add_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/detail_rt_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/penduduk/crudkk/add_kk_page.dart';
 import 'package:rukun_app_proyek4/views/pages/penduduk/detail_kk_page.dart';
 
@@ -233,6 +234,37 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
                   ),
                 ],
               ),
+            ),
+
+            Consumer<ExportDataViewModel>(
+              builder: (context, vm, child) {
+                return IconButton(
+                  icon: const Icon(Icons.download, color: ColorsUtils.b500),
+                  tooltip: 'Export KK',
+                  onPressed: vm.isExporting
+                      ? null
+                      : () async {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Memproses file Excel...")),
+                          );
+                          final success = await vm.exportDataPerKeluarga(kk);
+                          if (context.mounted) {
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Berhasil mengekspor data KK!")),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(vm.errorMessage ?? "Gagal mengekspor data"),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                );
+              },
             ),
 
             const Icon(Icons.chevron_right, color: ColorsUtils.gray),

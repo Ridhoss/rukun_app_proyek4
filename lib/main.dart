@@ -5,6 +5,7 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_kegiatan_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/rt_upload_setoran_rw_viewmodel.dart';
+
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -29,6 +30,8 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
+import 'package:rukun_app_proyek4/services/utils/excel_export_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/add_iuran_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_bulanan_detail_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_rt_detail_viewmodel.dart';
@@ -166,7 +169,19 @@ void main() async {
               IuranRWDetailViewModel(context.read<IuranRepository>()),
         ),
 
-        ChangeNotifierProvider(create: (_) => RtDashboardViewModel()),
+        ChangeNotifierProvider(
+          create: (ctx) => ExportDataViewModel(
+            kkRepo: ctx.read<KKRepository>(),
+            wargaRepo: ctx.read<WargaRepository>(),
+            exportService: ExcelExportService(),
+          ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) => RtDashboardViewModel(
+            context.read<DashboardRepository>(),
+          ),
+        ),
 
         ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),
 

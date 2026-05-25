@@ -1,31 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:rukun_app_proyek4/models/rt/rt_dashboard_model.dart';
-import 'package:rukun_app_proyek4/services/cloud/cloud_rt_dashboard_service.dart';
+import 'package:rukun_app_proyek4/models/dashboard_model.dart';
+import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
+import 'package:rukun_app_proyek4/repositories/dashboard_repository.dart';
 
 class RtDashboardViewModel extends ChangeNotifier {
-  final CloudRtDashboardService _service = CloudRtDashboardService();
+  final DashboardRepository repository;
 
-  RtDashboardModel? _dashboardData;
-  RtDashboardModel? get dashboardData => _dashboardData;
+  RtDashboardViewModel(this.repository);
 
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
+  DashboardModel? dashboard;
 
-  String? _errorMessage;
-  String? get errorMessage => _errorMessage;
+  bool isLoading = false;
+  String? errorMessage;
 
-  Future<void> fetchDashboard(int rtId) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  // Kas masih dummy (sama seperti RW, belum ada endpoint kas)
+  final double saldoKas = 0;
+  final double kasMasuk = 0;
+  final double kasKeluar = 0;
 
+  Future<void> fetchDashboard() async {
     try {
-      _dashboardData = await _service.fetchDashboardData(rtId);
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      dashboard = await repository.getDashboardRT();
     } catch (e) {
-      _errorMessage = e.toString();
+      errorMessage = e.toString();
+      debugPrint("ERROR DASHBOARD RT: $e");
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
+
+  // Convenience getters
+  int get totalPenduduk => dashboard?.totalPenduduk ?? 0;
+  int get jumlahKk => dashboard?.jumlahKk ?? 0;
+  int get totalSurat => dashboard?.statusSurat.total ?? 0;
+  int get suratPending => dashboard?.statusSurat.diajukan ?? 0;
+  int get suratDiproses => dashboard?.statusSurat.disetujui ?? 0;
+  int get totalPria => dashboard?.gender.pria ?? 0;
+  int get totalWanita => dashboard?.gender.wanita ?? 0;
+  int get totalAnak => dashboard?.ageDistribution.anak ?? 0;
+  int get totalProduktif => dashboard?.ageDistribution.produktif ?? 0;
+  int get totalLansia => dashboard?.ageDistribution.lansia ?? 0;
+
+  List<Kegiatan> get kegiatan => dashboard?.kegiatan ?? [];
 }
