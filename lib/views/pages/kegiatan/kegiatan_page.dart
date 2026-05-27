@@ -461,7 +461,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
                 ),
               ),
               const SizedBox(width: 12),
-              _badge(kegiatan.status),
+              _badge(kegiatan),
             ],
           ),
 
@@ -621,8 +621,8 @@ class _KegiatanPageState extends State<KegiatanPage> {
     );
   }
 
-  Widget _badge(KegiatanStatus status) {
-    final ui = status.ui;
+  Widget _badge(Kegiatan kegiatan) {
+    final ui = kegiatan.uiStatus;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
