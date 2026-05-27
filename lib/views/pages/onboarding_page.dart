@@ -21,7 +21,7 @@ class _OnboardingViewState extends State<OnboardingView> {
           "Aplikasi pengelolaan data kependudukan, kegiatan, iuran, dan layanan surat untuk RT, RW, dan warga.",
     },
     {
-      "animation": "assets/animation/task.json",
+      "animation": "assets/animation/analytic.json",
       "title": "Kelola Data & Kegiatan",
       "desc":
           "RT dan RW dapat mengatur data warga, kegiatan lingkungan, serta informasi penting dengan lebih mudah dan terstruktur.",
