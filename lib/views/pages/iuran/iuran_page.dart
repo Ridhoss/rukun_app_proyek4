@@ -108,11 +108,7 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
               ),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.inbox_outlined,
-                    size: 48,
-                    color: ColorsUtils.gray,
-                  ),
+                  Icon(Icons.inbox_outlined, size: 48, color: ColorsUtils.gray),
                   const SizedBox(height: 12),
 
                   Text(
@@ -218,52 +214,77 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
   }
 
   Widget _buildStaticFilter(RwIuranViewModel vm) {
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: () => vm.setFilter(IuranFilter.semua),
-          child: _buildFilterChip(
-            "Semua",
-            vm.selectedFilter == IuranFilter.semua,
-          ),
+    return Transform.translate(
+      offset: const Offset(-54, 0),
+
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+
+        child: Row(
+          children: [
+            _filterChip(
+              label: "Semua",
+              selected: vm.selectedFilter == IuranFilter.semua,
+              onTap: () => vm.setFilter(IuranFilter.semua),
+            ),
+
+            _filterChip(
+              label: "Rutin",
+              selected: vm.selectedFilter == IuranFilter.rutin,
+              onTap: () => vm.setFilter(IuranFilter.rutin),
+            ),
+
+            _filterChip(
+              label: "Khusus",
+              selected: vm.selectedFilter == IuranFilter.khusus,
+              onTap: () => vm.setFilter(IuranFilter.khusus),
+            ),
+          ],
         ),
-
-        const SizedBox(width: 8),
-
-        GestureDetector(
-          onTap: () => vm.setFilter(IuranFilter.rutin),
-          child: _buildFilterChip(
-            "Rutin",
-            vm.selectedFilter == IuranFilter.rutin,
-          ),
-        ),
-
-        const SizedBox(width: 8),
-
-        GestureDetector(
-          onTap: () => vm.setFilter(IuranFilter.khusus),
-          child: _buildFilterChip(
-            "Khusus",
-            vm.selectedFilter == IuranFilter.khusus,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildFilterChip(String text, bool selected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: selected ? ColorsUtils.b200 : ColorsUtils.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: ColorsUtils.gray),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: selected ? ColorsUtils.white : ColorsUtils.black,
-          fontWeight: FontWeight.w600,
+  Widget _filterChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+
+        margin: const EdgeInsets.only(right: 10),
+
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+
+        decoration: BoxDecoration(
+          color: selected ? ColorsUtils.b300 : ColorsUtils.white,
+
+          borderRadius: BorderRadius.circular(30),
+
+          border: Border.all(
+            color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
+          ),
+
+          boxShadow: [
+            BoxShadow(
+              color: ColorsUtils.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? ColorsUtils.white : ColorsUtils.black,
+
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
