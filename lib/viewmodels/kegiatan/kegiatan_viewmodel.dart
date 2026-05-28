@@ -339,6 +339,7 @@ class KegiatanViewModel extends ChangeNotifier {
   Future<void> uploadBuktiKegiatan(int kegiatanId) async {
     try {
       _setUploading(true);
+      _setError(null);
 
       final image = _selectedImages[kegiatanId];
 
