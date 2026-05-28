@@ -378,6 +378,10 @@ class KegiatanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool canDelete(Kegiatan k) {
+    return !isReadonly(k) && k.status == KegiatanStatus.selesai;
+  }
+
   bool isReadonly(Kegiatan k) {
     final level = _currentUser?.pengurus?.level.toUpperCase();
 

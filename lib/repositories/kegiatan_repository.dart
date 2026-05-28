@@ -81,7 +81,7 @@ class KegiatanRepository {
 
     final result = await _safeCall(
       () => service.deleteKegiatan(id, token),
-    );
+    ); 
 
     _validateStatus(result);
   }

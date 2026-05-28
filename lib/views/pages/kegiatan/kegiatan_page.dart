@@ -171,7 +171,9 @@ class _KegiatanPageState extends State<KegiatanPage> {
 
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                     ).copyWith(
-                      overlayColor: WidgetStatePropertyAll(ColorsUtils.transparent),
+                      overlayColor: WidgetStatePropertyAll(
+                        ColorsUtils.transparent,
+                      ),
                     ),
 
                 child: const Text(
@@ -462,7 +464,95 @@ class _KegiatanPageState extends State<KegiatanPage> {
                 ),
               ),
               const SizedBox(width: 12),
-              _badge(kegiatan),
+
+              Row(
+                children: [
+                  _badge(kegiatan),
+
+                  if (vm.canDelete(kegiatan)) ...[
+                    const SizedBox(width: 8),
+
+                    InkWell(
+                      borderRadius: BorderRadius.circular(30),
+
+                      onTap: () async {
+                        showDialog(
+                          context: context,
+
+                          builder: (_) {
+                            return AlertDialog(
+                              title: const Text("Hapus Kegiatan"),
+
+                              content: const Text(
+                                "Kegiatan selesai akan dihapus. Apakah anda yakin?",
+                              ),
+
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+
+                                  child: const Text("Batal"),
+                                ),
+
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: ColorsUtils.red,
+                                    foregroundColor: ColorsUtils.white,
+                                  ),
+
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+
+                                    try {
+                                      await vm.deleteKegiatan(kegiatan.id!);
+
+                                      if (!context.mounted) return;
+
+                                      NotificationUtils.showSuccess(
+                                        context,
+                                        "Kegiatan berhasil dihapus",
+                                      );
+                                    } catch (e) {
+                                      if (!context.mounted) return;
+
+                                      NotificationUtils.showError(
+                                        context,
+                                        vm.errorMessage ??
+                                            "Gagal menghapus kegiatan",
+                                      );
+                                    }
+                                  },
+
+                                  icon: const Icon(Icons.delete_outline),
+
+                                  label: const Text("Hapus"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+
+                        decoration: BoxDecoration(
+                          color: ColorsUtils.red.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+
+                        child: const Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: ColorsUtils.red,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ],
           ),
 
