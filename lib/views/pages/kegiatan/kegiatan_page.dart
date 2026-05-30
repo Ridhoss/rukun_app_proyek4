@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/detail_kegiatan_modal.dart';
 import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/tambah_kegiatan_modal.dart';
+import 'package:rukun_app_proyek4/views/pages/kegiatan/widgets/upload_bukti_kegiatan_modal.dart';
 
 class KegiatanPage extends StatefulWidget {
   const KegiatanPage({super.key});
@@ -161,8 +162,8 @@ class _KegiatanPageState extends State<KegiatanPage> {
 
                       elevation: 0,
 
-                      shadowColor: Colors.transparent,
-                      surfaceTintColor: Colors.transparent,
+                      shadowColor: ColorsUtils.transparent,
+                      surfaceTintColor: ColorsUtils.transparent,
 
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -170,7 +171,9 @@ class _KegiatanPageState extends State<KegiatanPage> {
 
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                     ).copyWith(
-                      overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                      overlayColor: WidgetStatePropertyAll(
+                        ColorsUtils.transparent,
+                      ),
                     ),
 
                 child: const Text(
@@ -461,7 +464,95 @@ class _KegiatanPageState extends State<KegiatanPage> {
                 ),
               ),
               const SizedBox(width: 12),
-              _badge(kegiatan.status),
+
+              Row(
+                children: [
+                  _badge(kegiatan),
+
+                  if (vm.canDelete(kegiatan)) ...[
+                    const SizedBox(width: 8),
+
+                    InkWell(
+                      borderRadius: BorderRadius.circular(30),
+
+                      onTap: () async {
+                        showDialog(
+                          context: context,
+
+                          builder: (_) {
+                            return AlertDialog(
+                              title: const Text("Hapus Kegiatan"),
+
+                              content: const Text(
+                                "Kegiatan selesai akan dihapus. Apakah anda yakin?",
+                              ),
+
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+
+                                  child: const Text("Batal"),
+                                ),
+
+                                ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: ColorsUtils.red,
+                                    foregroundColor: ColorsUtils.white,
+                                  ),
+
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+
+                                    try {
+                                      await vm.deleteKegiatan(kegiatan.id!);
+
+                                      if (!context.mounted) return;
+
+                                      NotificationUtils.showSuccess(
+                                        context,
+                                        "Kegiatan berhasil dihapus",
+                                      );
+                                    } catch (e) {
+                                      if (!context.mounted) return;
+
+                                      NotificationUtils.showError(
+                                        context,
+                                        vm.errorMessage ??
+                                            "Gagal menghapus kegiatan",
+                                      );
+                                    }
+                                  },
+
+                                  icon: const Icon(Icons.delete_outline),
+
+                                  label: const Text("Hapus"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+
+                        decoration: BoxDecoration(
+                          color: ColorsUtils.red.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+
+                        child: const Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: ColorsUtils.red,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ],
           ),
 
@@ -510,7 +601,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
                   child: _fullButton(
                     label: "Upload Bukti Kegiatan",
                     onTap: () {
-                      _openDetail(context, kegiatan);
+                      _openUploadBukti(context, kegiatan);
                     },
                   ),
                 ),
@@ -544,7 +635,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
                   Expanded(
                     child: _outlineButton(
                       label: "Batalkan",
-                      color: Colors.red,
+                      color: ColorsUtils.red,
                       onTap: () async {
                         showDialog(
                           context: context,
@@ -621,8 +712,8 @@ class _KegiatanPageState extends State<KegiatanPage> {
     );
   }
 
-  Widget _badge(KegiatanStatus status) {
-    final ui = status.ui;
+  Widget _badge(Kegiatan kegiatan) {
+    final ui = kegiatan.uiStatus;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -667,7 +758,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
 
       style: ElevatedButton.styleFrom(
         backgroundColor: ColorsUtils.b300,
-        foregroundColor: Colors.white,
+        foregroundColor: ColorsUtils.white,
 
         elevation: 0,
 
@@ -685,7 +776,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
       context: context,
       isScrollControlled: true,
 
-      backgroundColor: Colors.white,
+      backgroundColor: ColorsUtils.white,
 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -706,7 +797,7 @@ class _KegiatanPageState extends State<KegiatanPage> {
       context: context,
       isScrollControlled: true,
 
-      backgroundColor: Colors.white,
+      backgroundColor: ColorsUtils.white,
 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -722,11 +813,30 @@ class _KegiatanPageState extends State<KegiatanPage> {
   }
 }
 
+void _openUploadBukti(BuildContext context, Kegiatan kegiatan) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: ColorsUtils.white,
+
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+
+    builder: (_) {
+      return FractionallySizedBox(
+        heightFactor: 0.75,
+        child: UploadBuktiKegiatanModal(kegiatan: kegiatan),
+      );
+    },
+  );
+}
+
 void _openEdit(BuildContext context, Kegiatan kegiatan) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: ColorsUtils.white,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),

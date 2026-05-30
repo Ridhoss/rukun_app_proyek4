@@ -103,16 +103,12 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: ColorsUtils.white,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.inbox_outlined,
-                    size: 48,
-                    color: Colors.grey.shade400,
-                  ),
+                  Icon(Icons.inbox_outlined, size: 48, color: ColorsUtils.gray),
                   const SizedBox(height: 12),
 
                   Text(
@@ -132,7 +128,7 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
                         ? "Iuran RT akan muncul di sini"
                         : "Iuran RW akan muncul di sini",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: ColorsUtils.gray),
                   ),
                 ],
               ),
@@ -145,110 +141,150 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
   }
 
   Widget _buildStaticToggle(RwIuranViewModel vm) {
-    final isRW = vm.mode == DashboardMode.rw;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
 
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              vm.setMode(DashboardMode.rw);
-            },
-            child: Container(
-              height: 42,
-              decoration: BoxDecoration(
-                color: isRW ? Colors.blue : Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                "RW",
-                style: TextStyle(
-                  color: isRW ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _toggleButton(
+              selected: vm.mode == DashboardMode.rw,
+              label: "RW",
+              onTap: () => vm.setMode(DashboardMode.rw),
             ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: _toggleButton(
+              selected: vm.mode == DashboardMode.rt,
+              label: "RT",
+              onTap: () => vm.setMode(DashboardMode.rt),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _toggleButton({
+    required bool selected,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+
+        height: 48,
+
+        decoration: BoxDecoration(
+          color: selected ? ColorsUtils.b300 : ColorsUtils.white,
+
+          borderRadius: BorderRadius.circular(16),
+
+          boxShadow: [
+            BoxShadow(
+              color: ColorsUtils.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+
+          border: Border.all(
+            color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
           ),
         ),
 
-        const SizedBox(width: 10),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? ColorsUtils.white : ColorsUtils.black,
 
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              vm.setMode(DashboardMode.rt);
-            },
-            child: Container(
-              height: 42,
-              decoration: BoxDecoration(
-                color: !isRW ? Colors.blue : Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                "RT",
-                style: TextStyle(
-                  color: !isRW ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildStaticFilter(RwIuranViewModel vm) {
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: () => vm.setFilter(IuranFilter.semua),
-          child: _buildFilterChip(
-            "Semua",
-            vm.selectedFilter == IuranFilter.semua,
-          ),
+    return Transform.translate(
+      offset: const Offset(-54, 0),
+
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+
+        child: Row(
+          children: [
+            _filterChip(
+              label: "Semua",
+              selected: vm.selectedFilter == IuranFilter.semua,
+              onTap: () => vm.setFilter(IuranFilter.semua),
+            ),
+
+            _filterChip(
+              label: "Rutin",
+              selected: vm.selectedFilter == IuranFilter.rutin,
+              onTap: () => vm.setFilter(IuranFilter.rutin),
+            ),
+
+            _filterChip(
+              label: "Khusus",
+              selected: vm.selectedFilter == IuranFilter.khusus,
+              onTap: () => vm.setFilter(IuranFilter.khusus),
+            ),
+          ],
         ),
-
-        const SizedBox(width: 8),
-
-        GestureDetector(
-          onTap: () => vm.setFilter(IuranFilter.rutin),
-          child: _buildFilterChip(
-            "Rutin",
-            vm.selectedFilter == IuranFilter.rutin,
-          ),
-        ),
-
-        const SizedBox(width: 8),
-
-        GestureDetector(
-          onTap: () => vm.setFilter(IuranFilter.khusus),
-          child: _buildFilterChip(
-            "Khusus",
-            vm.selectedFilter == IuranFilter.khusus,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildFilterChip(String text, bool selected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: selected ? Colors.blue : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: selected ? Colors.white : Colors.black,
-          fontWeight: FontWeight.w600,
+  Widget _filterChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+
+        margin: const EdgeInsets.only(right: 10),
+
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+
+        decoration: BoxDecoration(
+          color: selected ? ColorsUtils.b300 : ColorsUtils.white,
+
+          borderRadius: BorderRadius.circular(30),
+
+          border: Border.all(
+            color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
+          ),
+
+          boxShadow: [
+            BoxShadow(
+              color: ColorsUtils.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? ColorsUtils.white : ColorsUtils.black,
+
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
@@ -339,11 +375,11 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: ColorsUtils.white,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: ColorsUtils.black.withOpacity(0.05),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -373,14 +409,14 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
                   ),
                   decoration: BoxDecoration(
                     color: item.tipe == IuranType.reguler
-                        ? Colors.blue
-                        : Colors.orange,
+                        ? ColorsUtils.b200
+                        : ColorsUtils.o100,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     item.tipe.name.toUpperCase(),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: ColorsUtils.white,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -410,7 +446,7 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
               "Terkumpul: Rp.${item.totalTerkumpul ?? 0}",
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.green,
+                color: ColorsUtils.green,
               ),
             ),
 
@@ -420,10 +456,10 @@ class _PengurusIuranPageState extends State<PengurusIuranPage> {
               label: Text(
                 (item.isActive ?? false) ? 'Iuran Aktif' : 'Iuran Non-Aktif',
               ),
-              labelStyle: TextStyle(color: Colors.white, fontSize: 12),
+              labelStyle: TextStyle(color: ColorsUtils.white, fontSize: 12),
               backgroundColor: (item.isActive ?? false)
-                  ? Colors.green
-                  : Colors.red,
+                  ? ColorsUtils.green
+                  : ColorsUtils.red,
               padding: const EdgeInsets.symmetric(horizontal: 6),
             ),
           ],

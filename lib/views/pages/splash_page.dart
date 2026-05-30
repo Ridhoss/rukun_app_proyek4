@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rukun_app_proyek4/middleware/auth_gate.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/views/pages/onboarding_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -47,7 +47,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const AuthGate()),
+          MaterialPageRoute(builder: (context) => const OnboardingView()),
         );
       }
     });

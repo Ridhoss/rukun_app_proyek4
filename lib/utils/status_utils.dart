@@ -110,29 +110,50 @@ class KegiatanUiStatus {
   });
 }
 
-extension KegiatanStatusExtension on KegiatanStatus {
-  KegiatanUiStatus get ui {
-    switch (this) {
-      case KegiatanStatus.dibuat:
-        return const KegiatanUiStatus(
-          label: "Dibuat",
-          color: ColorsUtils.b300,
-          type: FilterKegiatanStatus.segera,
-        );
+extension KegiatanUiExtension on Kegiatan {
+  KegiatanUiStatus get uiStatus {
+    final now = DateTime.now();
 
-      case KegiatanStatus.dibatalkan:
-        return const KegiatanUiStatus(
-          label: "Dibatalkan",
-          color: ColorsUtils.red,
-          type: FilterKegiatanStatus.dibatalkan,
-        );
+    final selesai = tanggalSelesai ?? tanggalMulai;
 
-      case KegiatanStatus.selesai:
-        return const KegiatanUiStatus(
-          label: "Selesai",
-          color: ColorsUtils.g100,
-          type: FilterKegiatanStatus.selesai,
-        );
+    if (status == KegiatanStatus.dibatalkan) {
+      return const KegiatanUiStatus(
+        label: "Dibatalkan",
+        color: ColorsUtils.red,
+        type: FilterKegiatanStatus.dibatalkan,
+      );
     }
+
+    if (status == KegiatanStatus.selesai) {
+      return const KegiatanUiStatus(
+        label: "Selesai",
+        color: ColorsUtils.g100,
+        type: FilterKegiatanStatus.selesai,
+      );
+    }
+
+    final isBerlangsung = now.isAfter(tanggalMulai) && now.isBefore(selesai);
+
+    if (isBerlangsung) {
+      return const KegiatanUiStatus(
+        label: "Berlangsung",
+        color: ColorsUtils.b200,
+        type: FilterKegiatanStatus.berlangsung,
+      );
+    }
+
+    if (now.isBefore(tanggalMulai)) {
+      return const KegiatanUiStatus(
+        label: "Segera",
+        color: ColorsUtils.o100,
+        type: FilterKegiatanStatus.segera,
+      );
+    }
+
+    return const KegiatanUiStatus(
+      label: "Selesai",
+      color: ColorsUtils.g100,
+      type: FilterKegiatanStatus.selesai,
+    );
   }
 }

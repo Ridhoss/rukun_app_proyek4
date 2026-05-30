@@ -15,7 +15,8 @@ class KegiatanPage extends StatelessWidget {
     final nama = context.watch<AuthViewModel>().currentUser?.warga?.nama ?? "-";
 
     return ChangeNotifierProvider(
-      create: (_) => KegiatanViewmodel()..loadDummy(),
+      create: (_) => KegiatanViewmodel(),
+
       child: Scaffold(
         backgroundColor: ColorsUtils.lightgray,
 
@@ -57,8 +58,10 @@ class KegiatanPage extends StatelessWidget {
   Widget _statusFilter(KegiatanViewmodel vm) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
+
         child: Row(
           children: [
             _chip(vm, "Semua", FilterKegiatanStatus.semua),
@@ -81,21 +84,30 @@ class KegiatanPage extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => vm.setStatus(status),
+
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
+
         margin: const EdgeInsets.only(right: 10),
+
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+
         decoration: BoxDecoration(
           color: selected ? ColorsUtils.b300 : Colors.grey.shade100,
+
           borderRadius: BorderRadius.circular(30),
+
           border: Border.all(
             color: selected ? Colors.transparent : Colors.grey.shade300,
           ),
         ),
+
         child: Text(
           text,
+
           style: TextStyle(
             color: selected ? Colors.white : Colors.black87,
+
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -110,38 +122,50 @@ class KegiatanPage extends StatelessWidget {
 
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 20),
+
       itemCount: vm.data.length,
+
       itemBuilder: (context, index) {
-        return _card(vm, vm.data[index]);
+        return _card(vm.data[index]);
       },
     );
   }
 
-  Widget _card(KegiatanViewmodel vm, Kegiatan item) {
-    final ui = vm.getUiStatus(item);
+  Widget _card(Kegiatan item) {
+    final ui = item.uiStatus;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
         color: Colors.white,
+
         borderRadius: BorderRadius.circular(22),
+
         border: Border.all(color: ui.color.withOpacity(0.15)),
+
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
+
             blurRadius: 12,
+
             offset: const Offset(0, 4),
           ),
         ],
       ),
+
       child: Row(
         children: [
           Container(
             width: 6,
             height: 78,
+
             decoration: BoxDecoration(
               color: ui.color,
+
               borderRadius: BorderRadius.circular(20),
             ),
           ),
@@ -151,20 +175,23 @@ class KegiatanPage extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
                 Row(
                   children: [
                     Expanded(
                       child: Text(
                         item.nama,
+
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
+
                           fontSize: 16,
                         ),
                       ),
                     ),
 
-                    _badge(ui.label, ui.color),
+                    _badge(ui),
                   ],
                 ),
 
@@ -173,6 +200,7 @@ class KegiatanPage extends StatelessWidget {
                 if (item.deskripsi != null)
                   Text(
                     item.deskripsi!,
+
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
 
@@ -182,7 +210,9 @@ class KegiatanPage extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.calendar_today_rounded,
+
                       size: 15,
+
                       color: Colors.grey.shade600,
                     ),
 
@@ -190,8 +220,10 @@ class KegiatanPage extends StatelessWidget {
 
                     Text(
                       _tanggal(item),
+
                       style: TextStyle(
                         color: Colors.grey.shade700,
+
                         fontSize: 12,
                       ),
                     ),
@@ -200,7 +232,9 @@ class KegiatanPage extends StatelessWidget {
 
                     Icon(
                       Icons.groups_rounded,
+
                       size: 16,
+
                       color: Colors.grey.shade600,
                     ),
 
@@ -208,8 +242,10 @@ class KegiatanPage extends StatelessWidget {
 
                     Text(
                       item.level == KegiatanLevel.rt ? "RT" : "RW",
+
                       style: TextStyle(
                         color: Colors.grey.shade700,
+
                         fontSize: 12,
                       ),
                     ),
@@ -223,17 +259,21 @@ class KegiatanPage extends StatelessWidget {
     );
   }
 
-  Widget _badge(String text, Color color) {
+  Widget _badge(KegiatanUiStatus ui) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: ui.color.withOpacity(0.15),
+
         borderRadius: BorderRadius.circular(30),
       ),
+
       child: Text(
-        text,
+        ui.label,
+
         style: TextStyle(
-          color: color,
+          color: ui.color,
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),

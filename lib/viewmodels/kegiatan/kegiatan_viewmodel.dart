@@ -339,6 +339,7 @@ class KegiatanViewModel extends ChangeNotifier {
   Future<void> uploadBuktiKegiatan(int kegiatanId) async {
     try {
       _setUploading(true);
+      _setError(null);
 
       final image = _selectedImages[kegiatanId];
 
@@ -375,6 +376,10 @@ class KegiatanViewModel extends ChangeNotifier {
     _selectedDocuments.remove(kegiatanId);
 
     notifyListeners();
+  }
+
+  bool canDelete(Kegiatan k) {
+    return !isReadonly(k) && k.status == KegiatanStatus.selesai;
   }
 
   bool isReadonly(Kegiatan k) {

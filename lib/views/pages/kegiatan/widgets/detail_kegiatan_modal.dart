@@ -33,7 +33,6 @@ class DetailKegiatanModal extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// HEADER
             Row(
               children: [
                 const Expanded(
@@ -47,21 +46,18 @@ class DetailKegiatanModal extends StatelessWidget {
             ),
 
             const SizedBox(height: 20),
-
             Text(
               kegiatan.nama,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 8),
-
             Text(
               kegiatan.deskripsi ?? "-",
               style: const TextStyle(height: 1.5),
             ),
 
             const SizedBox(height: 16),
-
             Row(
               children: [
                 const Icon(Icons.calendar_today, size: 16),
@@ -75,15 +71,12 @@ class DetailKegiatanModal extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
-
-            /// DOCUMENT
             const Text(
               "Dokumen Kegiatan",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 10),
-
             _fileCard(
               title: "Download Dokumen",
               url: kegiatan.docReferensi,
@@ -91,20 +84,35 @@ class DetailKegiatanModal extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
-
-            /// IMAGE
             const Text(
               "Foto Kegiatan",
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 10),
-
-            _fileCard(
-              title: "Download Foto",
-              url: kegiatan.imgReferensi,
-              icon: Icons.image_outlined,
-            ),
+            if (kegiatan.imgReferensi != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  kegiatan.imgReferensi!,
+                  width: double.infinity,
+                  height: 220,
+                  fit: BoxFit.cover,
+                ),
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border.all(color: ColorsUtils.gray),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Text(
+                  "Belum ada foto kegiatan",
+                  textAlign: TextAlign.center,
+                ),
+              ),
           ],
         ),
       ),
@@ -130,7 +138,6 @@ class DetailKegiatanModal extends StatelessWidget {
           Icon(icon),
 
           const SizedBox(width: 12),
-
           Expanded(
             child: Text(
               hasFile ? title : "Tidak tersedia",
@@ -152,13 +159,13 @@ class DetailKegiatanModal extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.15),
+        color: ColorsUtils.b200.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         kegiatan.status.label,
         style: const TextStyle(
-          color: Colors.blue,
+          color: ColorsUtils.b200,
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
