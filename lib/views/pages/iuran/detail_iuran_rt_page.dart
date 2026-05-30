@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_rt_detail_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_bulanan_page.dart';
+import 'package:rukun_app_proyek4/views/pages/iuran/widgets/setoran_approval_modal.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/widgets/setoran_form_modal.dart';
 
 class IuranRTDetailPage extends StatefulWidget {
@@ -69,6 +70,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
           final iuran = vm.iuran;
           final level = widget.user.pengurus?.level.toLowerCase();
           final isRTUser = level == "rt";
+          final isRWUser = level == "rw";
 
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -107,6 +109,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                   rt?.id ?? 0,
                   iuran.id ?? 0,
                   isRTUser,
+                  isRWUser,
                 ),
               ],
             ),
@@ -228,6 +231,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
     int rtId,
     int iuranId,
     bool isRTUser,
+    bool isRWUser,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,9 +335,9 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 10),
-                  if (isRTUser)
+                  if (isRTUser || isRWUser)
                     Container(
                       margin: const EdgeInsets.only(top: 10),
                       width: double.infinity,
@@ -358,6 +362,26 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                         onPressed: () async {
                           final vm = context.read<IuranRTDetailViewModel>();
 
+                          if (isRWUser) {
+                            await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => SetoranApprovalModal(
+                                label: label,
+                                month: month,
+                                iuranId: iuranId,
+                                rtId: rtId,
+                                jumlahPembayar: jumlahPembayar,
+                                totalPendapatan: totalPendapatan,
+                                saldoKasRt: vm.saldoKasRt,
+                                detailSetoran: setoran,
+                              ),
+                            );
+                            return;
+                          }
+
+                          // RT FLOW
                           if (sudahSetor) {
                             await showModalBottomSheet(
                               context: context,
@@ -372,11 +396,9 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                                 jumlahPembayar: jumlahPembayar,
                                 totalPendapatan: totalPendapatan,
                                 saldoKasRt: vm.saldoKasRt,
-                                detailSetoran:
-                                    setoran, // ini penting untuk mode detail
+                                detailSetoran: setoran,
                               ),
                             );
-
                             return;
                           }
 
@@ -395,19 +417,6 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                               saldoKasRt: vm.saldoKasRt,
                             ),
                           );
-
-                          if (context.mounted) {
-                            vm.resetSetoranForm();
-
-                            NotificationUtils.showSuccess(
-                              context,
-                              "Setoran $label berhasil dikirim",
-                            );
-                          }
-
-                          if (context.mounted) {
-                            vm.resetSetoranForm();
-                          }
                         },
                       ),
                     ),
