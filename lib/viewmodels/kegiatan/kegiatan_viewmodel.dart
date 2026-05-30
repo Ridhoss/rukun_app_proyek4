@@ -68,7 +68,7 @@ class KegiatanViewModel extends ChangeNotifier {
   Future<void> fetchKegiatan() async {
     try {
       _setLoading(true);
-      _setError(null);
+      clearError();
 
       _allKegiatan = await repository.getAllKegiatan();
     } catch (e) {
@@ -192,7 +192,7 @@ class KegiatanViewModel extends ChangeNotifier {
   }) async {
     try {
       _setLoading(true);
-      _setError(null);
+      clearError();
 
       final document = _selectedDocuments[createKey];
 
@@ -267,7 +267,16 @@ class KegiatanViewModel extends ChangeNotifier {
   }
 
   void _setError(dynamic e) {
-    _errorMessage = e.toString().replaceAll("Exception: ", "");
+    if (e == null) {
+      _errorMessage = null;
+    } else {
+      _errorMessage = e.toString().replaceAll("Exception: ", "");
+    }
+    notifyListeners();
+  }
+
+  void clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 
@@ -277,7 +286,7 @@ class KegiatanViewModel extends ChangeNotifier {
   }) async {
     try {
       _setLoading(true);
-      _setError(null);
+      clearError();
 
       final document = _selectedDocuments[id];
 
@@ -311,7 +320,7 @@ class KegiatanViewModel extends ChangeNotifier {
   Future<bool> batalkanKegiatan(int id) async {
     try {
       _setLoading(true);
-      _setError(null);
+      clearError();
 
       await repository.updateKegiatan(id, {"status": "Dibatalkan"});
 
@@ -339,7 +348,7 @@ class KegiatanViewModel extends ChangeNotifier {
   Future<void> uploadBuktiKegiatan(int kegiatanId) async {
     try {
       _setUploading(true);
-      _setError(null);
+      clearError();
 
       final image = _selectedImages[kegiatanId];
 
