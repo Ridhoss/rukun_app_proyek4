@@ -8,7 +8,6 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/iuran/iuran_rt_detail_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_bulanan_page.dart';
-import 'package:rukun_app_proyek4/views/pages/roles/rt/iuran/rt_setoran_rw_page.dart';
 
 class IuranRTDetailPage extends StatefulWidget {
   final int iuranId;

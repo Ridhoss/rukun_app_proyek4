@@ -141,7 +141,7 @@ class DetailKegiatanModal extends StatelessWidget {
           if (hasFile)
             IconButton(
               icon: const Icon(Icons.download_rounded),
-              onPressed: () => _openUrl(url!),
+              onPressed: () => _openUrl(url),
             ),
         ],
       ),
