@@ -84,7 +84,7 @@ class KegiatanViewModel extends ChangeNotifier {
 
   List<Kegiatan> get kegiatanList {
     final user = _currentUser;
-    final userLevel = user?.pengurus?.level?.toUpperCase();
+    final userLevel = user?.pengurus?.level.toUpperCase();
     final userRtId = user?.rt?.id;
 
     return _allKegiatan

@@ -59,7 +59,7 @@ class _SetoranApprovalModalState extends State<SetoranApprovalModal> {
     final isApproved = status == "Diterima";
     final isRejected = status == "Ditolak";
     final isPending = status == "Dikirim";
-    final isEmpty = setoran == null;
+    // final isEmpty = setoran == null;
 
     Color statusColor() {
       if (isApproved) return Colors.green;
