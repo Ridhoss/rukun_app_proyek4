@@ -1,7 +1,9 @@
 import 'package:rukun_app_proyek4/repositories/dashboard_repository.dart';
 import 'package:rukun_app_proyek4/repositories/kegiatan_repository.dart';
+import 'package:rukun_app_proyek4/repositories/setoran_iuran_repository.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_dashboard_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kegiatan_service.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_setoran_iuran_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/rt_upload_setoran_rw_viewmodel.dart';
@@ -86,6 +88,8 @@ void main() async {
 
         Provider(create: (_) => CloudDashboardService()),
 
+        Provider(create: (_) => CloudSetoranIuranRtService()),
+
         Provider(
           create: (context) => IuranRepository(
             context.read<CloudIuranService>(),
@@ -135,6 +139,13 @@ void main() async {
           ),
         ),
 
+        Provider(
+          create: (context) => SetoranIuranRtRepository(
+            context.read<CloudSetoranIuranRtService>(),
+            context.read<AuthLocalService>(),
+          ),
+        ),
+
         ChangeNotifierProvider(
           create: (context) => AuthViewModel(context.read()),
         ),
@@ -178,9 +189,8 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) => RtDashboardViewModel(
-            context.read<DashboardRepository>(),
-          ),
+          create: (context) =>
+              RtDashboardViewModel(context.read<DashboardRepository>()),
         ),
 
         ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),
@@ -189,6 +199,8 @@ void main() async {
           create: (context) => IuranRTDetailViewModel(
             iuranRepo: context.read<IuranRepository>(),
             rtrwRepo: context.read<RTRWRepository>(),
+            setoranRepository: context.read<SetoranIuranRtRepository>(),
+            cloudinaryService: context.read<CloudinaryService>(),
           ),
         ),
 

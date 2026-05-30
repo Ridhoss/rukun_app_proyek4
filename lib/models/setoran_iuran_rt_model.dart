@@ -26,7 +26,7 @@ class SetoranIuranRt {
   final int iuranId;
   final int rtId;
 
-  final String periodeBulan;
+  final DateTime periodeBulan;
 
   final int totalPembayar;
   final int jumlahSetoran;
@@ -61,7 +61,7 @@ class SetoranIuranRt {
       iuranId: json['iuran_id'],
       rtId: json['rt_id'],
 
-      periodeBulan: json['periode_bulan'],
+      periodeBulan: DateTime.parse(json['periode_bulan']),
 
       totalPembayar: json['total_pembayar'],
       jumlahSetoran: json['jumlah_setoran'],
@@ -87,7 +87,7 @@ class SetoranIuranRt {
       'id': id,
       'iuran_id': iuranId,
       'rt_id': rtId,
-      'periode_bulan': periodeBulan,
+      'periode_bulan': periodeBulan.toIso8601String(),
       'total_pembayar': totalPembayar,
       'jumlah_setoran': jumlahSetoran,
       'document_ref': documentRef,
@@ -100,7 +100,7 @@ class SetoranIuranRt {
     int? id,
     int? iuranId,
     int? rtId,
-    String? periodeBulan,
+    DateTime? periodeBulan,
     int? totalPembayar,
     int? jumlahSetoran,
     String? documentRef,

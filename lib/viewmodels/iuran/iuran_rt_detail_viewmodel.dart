@@ -1,15 +1,31 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/rt_model.dart';
+import 'package:rukun_app_proyek4/models/setoran_iuran_rt_model.dart';
 import 'package:rukun_app_proyek4/models/transaksi_model.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repository.dart';
 import 'package:rukun_app_proyek4/repositories/rtrw_repository.dart';
+import 'package:rukun_app_proyek4/repositories/setoran_iuran_repository.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 
 class IuranRTDetailViewModel extends ChangeNotifier {
   final IuranRepository iuranRepo;
   final RTRWRepository rtrwRepo;
+  final SetoranIuranRtRepository setoranRepository;
+  final CloudinaryService cloudinaryService;
 
-  IuranRTDetailViewModel({required this.iuranRepo, required this.rtrwRepo});
+  IuranRTDetailViewModel({
+    required this.iuranRepo,
+    required this.rtrwRepo,
+    required this.setoranRepository,
+    required this.cloudinaryService,
+  });
+
+  File? buktiSetoran;
 
   bool isLoading = false;
   String? errorMessage;
@@ -20,6 +36,45 @@ class IuranRTDetailViewModel extends ChangeNotifier {
   List<Transaksi> transaksi = [];
 
   int totalTerkumpul = 0;
+
+  int get saldoKasRt => rtDetail?.saldoKas ?? 0;
+
+  final Map<String, SetoranIuranRt?> setoranPerPeriode = {};
+
+  Future<void> pickBuktiSetoran() async {
+    final picker = ImagePicker();
+
+    final picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (picked != null) {
+      buktiSetoran = File(picked.path);
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadSetoranPeriode(int iuranId, int rtId, DateTime month) async {
+    final periode = DateFormat('yyyy-MM').format(month);
+    final key = "$iuranId-$rtId-$periode";
+
+    try {
+      final result = await setoranRepository.getSetoranByPeriode(
+        iuranId,
+        rtId,
+        periode,
+      );
+
+      setoranPerPeriode[key] = (result != null && result.id != null)
+          ? result
+          : null;
+    } catch (_) {
+      setoranPerPeriode[key] = null;
+    }
+
+    notifyListeners();
+  }
 
   Future<void> fetchDetail(int iuranId, int rtId) async {
     isLoading = true;
@@ -46,6 +101,18 @@ class IuranRTDetailViewModel extends ChangeNotifier {
       totalTerkumpul = transaksi
           .where((t) => t.status == StatusPembayaran.dibayar)
           .fold<int>(0, (sum, item) => sum + (item.jumlah ?? 0));
+
+      final semuaSetoran = await setoranRepository.getSetoranByIuranRT(
+        iuranId,
+        rtId,
+      );
+
+      for (final item in semuaSetoran) {
+        final periode = item.periodeBulan;
+
+        final key = "${item.iuranId}-${item.rtId}-$periode";
+        setoranPerPeriode[key] = item;
+      }
     } catch (e) {
       errorMessage = e.toString();
     }
@@ -53,5 +120,63 @@ class IuranRTDetailViewModel extends ChangeNotifier {
     isLoading = false;
 
     notifyListeners();
+  }
+
+  Future<bool> createSetoran(SetoranIuranRt setoran) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+
+      notifyListeners();
+
+      String? documentRef;
+
+      if (buktiSetoran != null) {
+        documentRef = await cloudinaryService.uploadFile(
+          buktiSetoran!,
+          folder: 'setoran_iuran_rt',
+        );
+
+        if (documentRef == null) {
+          throw Exception("Gagal upload bukti setoran");
+        }
+      }
+
+      final data = setoran.copyWith(documentRef: documentRef);
+
+      await setoranRepository.createSetoran(data);
+
+      final periode = DateFormat('yyyy-MM').format(data.periodeBulan);
+      final key = "${data.iuranId}-${data.rtId}-$periode";
+
+      final refreshed = await setoranRepository.getSetoranByPeriode(
+        data.iuranId,
+        data.rtId,
+        periode,
+      );
+
+      setoranPerPeriode[key] = refreshed;
+
+      notifyListeners();
+      notifyListeners();
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString().replaceAll("Exception: ", "");
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetSetoranForm() async {
+    buktiSetoran = null;
+    notifyListeners();
+  }
+
+  String periodeKey(int iuranId, int rtId, DateTime month) {
+    final periode = DateFormat('yyyy-MM').format(month);
+    return "$iuranId-$rtId-$periode";
   }
 }

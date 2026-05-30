@@ -12,9 +12,7 @@ class SetoranIuranRtRepository {
   Future<List<SetoranIuranRt>> getAllSetoran() async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getAllSetoran(token),
-    );
+    final result = await _safeCall(() => service.getAllSetoran(token));
 
     _validateStatus(result);
 
@@ -26,9 +24,7 @@ class SetoranIuranRtRepository {
   Future<SetoranIuranRt?> getSetoranById(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getSetoranById(id, token),
-    );
+    final result = await _safeCall(() => service.getSetoranById(id, token));
 
     _validateStatus(result);
 
@@ -42,9 +38,7 @@ class SetoranIuranRtRepository {
   Future<List<SetoranIuranRt>> getSetoranByRT(int rtId) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getSetoranByRT(rtId, token),
-    );
+    final result = await _safeCall(() => service.getSetoranByRT(rtId, token));
 
     _validateStatus(result);
 
@@ -70,21 +64,43 @@ class SetoranIuranRtRepository {
     return data.map((e) => SetoranIuranRt.fromJson(e)).toList();
   }
 
-  Future<void> createSetoran(Map<String, dynamic> data) async {
+  Future<SetoranIuranRt?> getSetoranByPeriode(
+    int iuranId,
+    int rtId,
+    String periode,
+  ) async {
     final token = await _requireToken();
 
     final result = await _safeCall(
-      () => service.createSetoran(data, token),
+      () => service.getSetoranByPeriode(iuranId, rtId, periode, token),
+    );
+
+    _validateStatus(result);
+
+    final data = result['data'];
+
+    if (data == null) {
+      return null;
+    }
+
+    return SetoranIuranRt.fromJson(data);
+  }
+
+  Future<void> createSetoran(SetoranIuranRt setoran) async {
+    final token = await _requireToken();
+
+    final result = await _safeCall(
+      () => service.createSetoran(setoran.toJson(), token),
     );
 
     _validateStatus(result);
   }
 
-  Future<void> updateSetoran(int id, Map<String, dynamic> data) async {
+  Future<void> updateSetoran(int id, SetoranIuranRt setoran) async {
     final token = await _requireToken();
 
     final result = await _safeCall(
-      () => service.updateSetoran(id, data, token),
+      () => service.updateSetoran(id, setoran.toJson(), token),
     );
 
     _validateStatus(result);
@@ -93,9 +109,7 @@ class SetoranIuranRtRepository {
   Future<void> approveSetoran(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.approveSetoran(id, token),
-    );
+    final result = await _safeCall(() => service.approveSetoran(id, token));
 
     _validateStatus(result);
   }
@@ -113,9 +127,7 @@ class SetoranIuranRtRepository {
   Future<void> deleteSetoran(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.deleteSetoran(id, token),
-    );
+    final result = await _safeCall(() => service.deleteSetoran(id, token));
 
     _validateStatus(result);
   }

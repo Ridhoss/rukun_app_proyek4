@@ -7,7 +7,7 @@ class CloudSetoranIuranRtService {
   // GET ALL
   Future<Map<String, dynamic>> getAllSetoran(String token) async {
     final response = await _dio.get(
-      '/setoran-iuran-rt',
+      '/setoran',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -20,7 +20,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.get(
-      '/setoran-iuran-rt/$id',
+      '/setoran/$id',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -33,7 +33,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.get(
-      '/setoran-iuran-rt/rt/$rtId',
+      '/setoran/rt/$rtId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -47,7 +47,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.get(
-      '/setoran-iuran-rt/iuran/$iuranId/rt/$rtId',
+      '/setoran/iuran/$iuranId/rt/$rtId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -62,7 +62,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.get(
-      '/setoran-iuran-rt/iuran/$iuranId/rt/$rtId/periode/$periode',
+      '/setoran/iuran/$iuranId/rt/$rtId/periode/$periode',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -75,7 +75,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.post(
-      '/setoran-iuran-rt',
+      '/setoran',
       data: data,
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
@@ -89,7 +89,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.put(
-      '/setoran-iuran-rt/$id/approve',
+      '/setoran/$id/approve',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -103,7 +103,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.put(
-      '/setoran-iuran-rt/$id/reject',
+      '/setoran/$id/reject',
       data: {'catatan': catatan},
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
@@ -118,7 +118,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.put(
-      '/setoran-iuran-rt/$id',
+      '/setoran/$id',
       data: data,
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
@@ -132,7 +132,7 @@ class CloudSetoranIuranRtService {
     String token,
   ) async {
     final response = await _dio.delete(
-      '/setoran-iuran-rt/$id',
+      '/setoran/$id',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
