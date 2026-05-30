@@ -265,7 +265,26 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
 
           final key = vm.periodeKey(iuranId, rtId, month);
           final setoran = vm.setoranPerPeriode[key];
-          final sudahSetor = setoran != null;
+
+          final status = setoran?.status;
+          final isBelumSetor = setoran == null;
+          final isPending = status == "Dikirim";
+          final isApproved = status == "Diterima";
+          final isRejected = status == "Ditolak";
+
+          Color statusColor() {
+            if (isApproved) return Colors.green;
+            if (isPending) return Colors.orange;
+            if (isRejected) return Colors.red;
+            return Colors.red;
+          }
+
+          String statusText() {
+            if (isApproved) return "DISETUJUI";
+            if (isPending) return "SUDAH SETOR";
+            if (isRejected) return "DITOLAK";
+            return "BELUM SETOR";
+          }
 
           return InkWell(
             onTap: () async {
@@ -321,17 +340,15 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: sudahSetor
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.red.withOpacity(0.1),
+                      color: statusColor().withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      sudahSetor ? "SUDAH SETOR" : "BELUM SETOR",
+                      statusText(),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: sudahSetor ? Colors.green : Colors.red,
+                        color: statusColor(),
                       ),
                     ),
                   ),
@@ -343,13 +360,23 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         icon: Icon(
-                          sudahSetor
-                              ? Icons.visibility
-                              : Icons.account_balance_wallet,
+                          isBelumSetor
+                              ? Icons.account_balance_wallet
+                              : isPending
+                              ? Icons.hourglass_bottom
+                              : Icons.visibility,
                         ),
 
                         label: Text(
-                          sudahSetor ? "Lihat Detail Setoran" : "Setor ke RW",
+                          isBelumSetor
+                              ? (isRWUser ? "Review Setoran" : "Setor ke RW")
+                              : isPending
+                              ? (isRWUser
+                                    ? "Review Setoran"
+                                    : "Menunggu Approval")
+                              : (isRWUser
+                                    ? "Lihat & Approval"
+                                    : "Lihat Detail"),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue.shade600,
@@ -382,7 +409,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                           }
 
                           // RT FLOW
-                          if (sudahSetor) {
+                          if (!isBelumSetor) {
                             await showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,

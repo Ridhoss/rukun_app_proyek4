@@ -158,7 +158,6 @@ class IuranRTDetailViewModel extends ChangeNotifier {
       setoranPerPeriode[key] = refreshed;
 
       notifyListeners();
-      notifyListeners();
 
       return true;
     } catch (e) {
@@ -168,6 +167,67 @@ class IuranRTDetailViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<bool> approveSetoran(int setoranId) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      await setoranRepository.approveSetoran(setoranId);
+
+      // refresh data biar sinkron
+      await _refreshSetoran(setoranId);
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> rejectSetoran(int setoranId, String catatan) async {
+    try {
+      if (catatan.trim().isEmpty) {
+        errorMessage = "Catatan penolakan wajib diisi";
+        notifyListeners();
+        return false;
+      }
+
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      await setoranRepository.rejectSetoran(setoranId, catatan);
+
+      await _refreshSetoran(setoranId);
+
+      return true;
+    } catch (e) {
+      errorMessage = e.toString();
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _refreshSetoran(int setoranId) async {
+    final updated = await setoranRepository.getSetoranById(setoranId);
+
+    if (updated == null) return;
+
+    final periode = updated.periodeBulan;
+    final key =
+        "${updated.iuranId}-${updated.rtId}-${DateFormat('yyyy-MM').format(periode)}";
+
+    setoranPerPeriode[key] = updated;
+
+    notifyListeners();
   }
 
   Future<void> resetSetoranForm() async {

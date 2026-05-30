@@ -40,7 +40,6 @@ class SetoranFormModal extends StatefulWidget {
 
 class _SetoranFormModalState extends State<SetoranFormModal> {
   late TextEditingController jumlahController;
-  late TextEditingController catatanController;
 
   @override
   void initState() {
@@ -51,16 +50,11 @@ class _SetoranFormModalState extends State<SetoranFormModal> {
           ? (widget.detailSetoran?.jumlahSetoran.toString() ?? '')
           : widget.totalPendapatan.toString(),
     );
-
-    catatanController = TextEditingController(
-      text: widget.isDetail ? (widget.detailSetoran?.catatan ?? '') : '',
-    );
   }
 
   @override
   void dispose() {
     jumlahController.dispose();
-    catatanController.dispose();
     super.dispose();
   }
 
@@ -79,7 +73,6 @@ class _SetoranFormModalState extends State<SetoranFormModal> {
           vm.resetSetoranForm();
 
           jumlahController.clear();
-          catatanController.clear();
         }
       },
       child: Container(
@@ -319,19 +312,6 @@ class _SetoranFormModalState extends State<SetoranFormModal> {
                   ),
                 ),
 
-                const SizedBox(height: 12),
-
-                /// CATATAN
-                TextField(
-                  controller: catatanController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: "Catatan (opsional)",
-                    prefixIcon: Icon(Icons.note),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
                 const SizedBox(height: 16),
 
                 const Text(
@@ -430,9 +410,6 @@ class _SetoranFormModalState extends State<SetoranFormModal> {
                               widget.totalPendapatan,
                           documentRef: fileName,
                           status: SetoranStatus.dikirim,
-                          catatan: catatanController.text.isEmpty
-                              ? null
-                              : catatanController.text,
                         );
 
                         await context
@@ -442,7 +419,6 @@ class _SetoranFormModalState extends State<SetoranFormModal> {
                         await vm.resetSetoranForm();
 
                         jumlahController.clear();
-                        catatanController.clear();
 
                         if (context.mounted) {
                           Navigator.pop(context);
