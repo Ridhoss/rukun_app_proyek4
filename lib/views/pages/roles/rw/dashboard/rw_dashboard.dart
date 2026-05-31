@@ -81,7 +81,6 @@ class RwDashboard extends StatelessWidget {
 
       body: Consumer<DashboardRwViewModel>(
         builder: (context, vm, child) {
-
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -106,6 +105,7 @@ class RwDashboard extends StatelessWidget {
                   saldo: vm.saldoKas,
                   masuk: vm.kasMasuk,
                   keluar: vm.kasKeluar,
+                  rw: authVM.currentUser!.rw!,
                 ),
 
                 const SizedBox(height: 18),

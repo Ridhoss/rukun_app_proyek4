@@ -1,8 +1,10 @@
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
+import 'package:rukun_app_proyek4/models/rt_model.dart';
+import 'package:rukun_app_proyek4/models/rw_model.dart';
 
 class DashboardModel {
-  final RtSimple? rt;
-  final RwSimple? rw;
+  final RtModel? rt;
+  final RwModel? rw;
   final int totalPenduduk;
 
   final GenderStat gender;
@@ -16,6 +18,8 @@ class DashboardModel {
   final StatusSurat statusSurat;
   final List<Kegiatan> kegiatan;
 
+  final KasSummary? kas;
+
   DashboardModel({
     this.rt,
     this.rw,
@@ -27,11 +31,13 @@ class DashboardModel {
     this.pendudukPerRt,
     required this.statusSurat,
     required this.kegiatan,
+    this.kas,
   });
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
     return DashboardModel(
-      rt: json['rt'] != null ? RtSimple.fromJson(json['rt']) : null,
+      rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
+      rw: json['rw'] != null ? RwModel.fromJson(json['rw']) : null,
 
       totalPenduduk: (json['total_penduduk'] as num?)?.toInt() ?? 0,
       jumlahKk: (json['jumlah_kk'] as num?)?.toInt() ?? 0,
@@ -53,36 +59,9 @@ class DashboardModel {
       kegiatan: (json['kegiatan'] as List? ?? [])
           .map((e) => Kegiatan.fromJson(e))
           .toList(),
+
+      kas: json['kas'] != null ? KasSummary.fromJson(json['kas']) : null,
     );
-  }
-}
-
-class RtSimple {
-  final int id;
-  final int rwId;
-
-  RtSimple({required this.id, required this.rwId});
-
-  factory RtSimple.fromJson(Map<String, dynamic> json) {
-    return RtSimple(id: json['id'] ?? 0, rwId: json['rw_id'] ?? 0);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'rw_id': rwId};
-  }
-}
-
-class RwSimple {
-  final int id;
-
-  RwSimple({required this.id});
-
-  factory RwSimple.fromJson(Map<String, dynamic> json) {
-    return RwSimple(id: json['id'] ?? 0);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'id': id};
   }
 }
 
@@ -183,4 +162,24 @@ class PendudukPerRT {
   Map<String, dynamic> toJson() {
     return {'rt_id': rtId, 'no_rt': noRt, 'total_warga': totalWarga};
   }
+}
+
+class KasSummary {
+  final int totalMasuk;
+  final int totalKeluar;
+
+  KasSummary({required this.totalMasuk, required this.totalKeluar});
+
+  factory KasSummary.fromJson(Map<String, dynamic> json) {
+    return KasSummary(
+      totalMasuk: (json['total_masuk'] as num?)?.toInt() ?? 0,
+      totalKeluar: (json['total_keluar'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'total_masuk': totalMasuk, 'total_keluar': totalKeluar};
+  }
+
+  int get saldoBersih => totalMasuk - totalKeluar;
 }

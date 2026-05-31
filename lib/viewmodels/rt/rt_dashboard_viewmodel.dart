@@ -13,11 +13,6 @@ class RtDashboardViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  // Kas masih dummy (sama seperti RW, belum ada endpoint kas)
-  final double saldoKas = 0;
-  final double kasMasuk = 0;
-  final double kasKeluar = 0;
-
   Future<void> fetchDashboard() async {
     try {
       isLoading = true;
@@ -33,6 +28,10 @@ class RtDashboardViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  double get saldoKas => (dashboard?.rt?.saldoKas ?? 0).toDouble();
+  double get kasMasuk => (dashboard?.kas?.totalMasuk ?? 0).toDouble();
+  double get kasKeluar => (dashboard?.kas?.totalKeluar ?? 0).toDouble();
 
   // Convenience getters
   int get totalPenduduk => dashboard?.totalPenduduk ?? 0;

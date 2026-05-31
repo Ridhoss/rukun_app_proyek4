@@ -13,11 +13,6 @@ class DashboardRwViewModel extends ChangeNotifier {
 
   DashboardModel? dashboard;
 
-  // dummy
-  final double saldoKas = 8450000;
-  final double kasMasuk = 12300000;
-  final double kasKeluar = 3850000;
-
   Future<void> fetchDashboard() async {
     try {
       isLoading = true;
@@ -36,6 +31,11 @@ class DashboardRwViewModel extends ChangeNotifier {
     }
   }
 
+  // dummy
+  double get saldoKas => (dashboard?.rw?.saldoKas ?? 0).toDouble();
+  double get kasMasuk => (dashboard?.kas?.totalMasuk ?? 0).toDouble();
+  double get kasKeluar => (dashboard?.kas?.totalKeluar ?? 0).toDouble();
+
   int get totalPenduduk => dashboard?.totalPenduduk ?? 0;
   int get totalKK => dashboard?.jumlahKk ?? 0;
   int get totalRT => dashboard?.jumlahRt ?? 0;
@@ -49,7 +49,6 @@ class DashboardRwViewModel extends ChangeNotifier {
   int get anak => dashboard?.ageDistribution.anak ?? 0;
   int get produktif => dashboard?.ageDistribution.produktif ?? 0;
   int get lansia => dashboard?.ageDistribution.lansia ?? 0;
-
 
   List<PendudukPerRT> get pendudukPerRt => dashboard?.pendudukPerRt ?? [];
   List<Kegiatan> get kegiatan => dashboard?.kegiatan ?? [];

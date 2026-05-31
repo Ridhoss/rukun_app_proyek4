@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:rukun_app_proyek4/models/rw_model.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 
 class RwKasCard extends StatelessWidget {
   final double saldo;
   final double masuk;
   final double keluar;
+  final RwModel rw;
 
   const RwKasCard({
     super.key,
     required this.saldo,
     required this.masuk,
     required this.keluar,
+    required this.rw,
   });
 
   String rupiah(double value) {
@@ -31,10 +34,7 @@ class RwKasCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
 
         gradient: const LinearGradient(
-          colors: [
-            ColorsUtils.b200,
-            ColorsUtils.b300,
-          ],
+          colors: [ColorsUtils.b200, ColorsUtils.b300],
         ),
       ),
 
@@ -42,12 +42,9 @@ class RwKasCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
-          const Text(
-            "Saldo Kas RW 002",
-            style: TextStyle(
-              color: ColorsUtils.white,
-              fontSize: 13,
-            ),
+          Text(
+            "Saldo Kas RW ${rw.noRw}",
+            style: TextStyle(color: ColorsUtils.white, fontSize: 13),
           ),
 
           const SizedBox(height: 8),
@@ -86,10 +83,7 @@ class RwKasCard extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: ColorsUtils.white,
-            fontSize: 11,
-          ),
+          style: const TextStyle(color: ColorsUtils.white, fontSize: 11),
         ),
 
         const SizedBox(height: 6),
