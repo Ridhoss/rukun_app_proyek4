@@ -408,13 +408,18 @@ class _SetoranFormModalState extends State<SetoranFormModal> {
                           jumlahSetoran:
                               int.tryParse(jumlahController.text) ??
                               widget.totalPendapatan,
-                          documentRef: fileName,
+                          documentRef: null,
                           status: SetoranStatus.dikirim,
                         );
 
+                        final localPath = vm.buktiSetoran?.path;
+
                         await context
                             .read<IuranRTDetailViewModel>()
-                            .createSetoran(setoran);
+                            .createSetoran(
+                              setoran,
+                              localDocumentPath: localPath,
+                            );
 
                         await vm.resetSetoranForm();
 

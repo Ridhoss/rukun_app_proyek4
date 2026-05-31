@@ -266,6 +266,7 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
           final setoran = vm.setoranPerPeriode[key];
 
           final status = setoran?.status;
+          final isLocalPending = setoran?.id != null && (setoran!.id! < 0);
           final isBelumSetor = setoran == null;
           final isPending = status == "Dikirim";
           final isApproved = status == "Diterima";
@@ -333,23 +334,31 @@ class _IuranRTDetailPageState extends State<IuranRTDetailPage> {
                   ),
                   const SizedBox(height: 6),
 
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor().withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      statusText(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor(),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor().withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          statusText(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: statusColor(),
+                          ),
+                        ),
                       ),
-                    ),
+                      if (isLocalPending) ...[
+                        const SizedBox(width: 8),
+                        _buildBadge('Sinkronisasi', Colors.orange),
+                      ],
+                    ],
                   ),
 
                   const SizedBox(height: 10),

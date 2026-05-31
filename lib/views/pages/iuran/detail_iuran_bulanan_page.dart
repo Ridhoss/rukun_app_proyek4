@@ -272,12 +272,37 @@ class _DetailIuranBulananPageState extends State<DetailIuranBulananPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    k.keluarga.noKK,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          k.keluarga.noKK,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                      if (k.idTransaksi != null && k.idTransaksi! < 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            'Sinkronisasi',
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
 
                   const SizedBox(height: 6),
@@ -560,9 +585,34 @@ class _DetailIuranBulananPageState extends State<DetailIuranBulananPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  k.keluarga.noKK,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        k.keluarga.noKK,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    if (k.idTransaksi != null && k.idTransaksi! < 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Sinkronisasi',
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
 
                 const SizedBox(height: 6),

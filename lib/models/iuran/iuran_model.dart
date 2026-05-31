@@ -15,6 +15,8 @@ class Iuran {
   final RwModel? rw;
   final IuranType tipe;
   final bool? isActive;
+  final String? syncStatus;
+  final int? clientTempId;
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
@@ -30,6 +32,8 @@ class Iuran {
     this.rw,
     required this.tipe,
     this.isActive,
+    this.syncStatus,
+    this.clientTempId,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
@@ -49,6 +53,8 @@ class Iuran {
       rw: json['rw'] != null ? RwModel.fromJson(json['rw']) : null,
       tipe: _type(json['tipe']),
       isActive: json['is_active'],
+      syncStatus: json['sync_status'] as String?,
+      clientTempId: (json['client_temp_id'] as num?)?.toInt(),
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.tryParse(json['waktu_dibuat'].toString())
           : null,
@@ -72,14 +78,24 @@ class Iuran {
       'nama': nama,
       'jumlah': jumlah,
       'level': level == IuranLevel.rt ? 'RT' : 'RW',
-      'rt_id': rt!.id,
-      'rw_id': rw!.id,
+      'rt_id': rt?.id,
+      'rw_id': rw?.id,
       'tipe': tipe.name,
       'is_active': isActive,
+      'sync_status': syncStatus,
+      'client_temp_id': clientTempId,
     };
 
     if (id != null) {
       data['id'] = id;
+    }
+
+    if (rt != null) {
+      data['rt'] = rt!.toJson();
+    }
+
+    if (rw != null) {
+      data['rw'] = rw!.toJson();
     }
 
     return data;
@@ -96,4 +112,6 @@ class Iuran {
     if (value == "reguler") return IuranType.reguler;
     return IuranType.insidentil;
   }
+
+  bool get isPendingSync => syncStatus == 'pending';
 }

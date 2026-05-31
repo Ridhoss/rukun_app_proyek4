@@ -217,6 +217,7 @@ class Warga {
   final int? id;
   final String nama;
   final String nik;
+  final String? syncStatus;
 
   final JenisKelamin? jk;
   final String? tempatLahir;
@@ -250,6 +251,7 @@ class Warga {
     this.id,
     required this.nama,
     required this.nik,
+    this.syncStatus,
     this.jk,
     this.tempatLahir,
     this.tglLahir,
@@ -277,6 +279,7 @@ class Warga {
       id: json['id'] as int?,
       nama: json['nama'],
       nik: json['nik'],
+      syncStatus: json['sync_status'] as String?,
 
       jk: _parseJenisKelamin(json['jk']),
       agama: _parseAgama(json['agama']),
@@ -303,7 +306,9 @@ class Warga {
       namaAyah: json['nama_ayah'],
       namaIbu: json['nama_ibu'],
 
-      keluarga: json['keluarga'] != null ? Keluarga.fromJson(json['keluarga']) : null,
+      keluarga: json['keluarga'] != null
+          ? Keluarga.fromJson(json['keluarga'])
+          : null,
 
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.tryParse(json['waktu_dibuat'])
@@ -322,6 +327,7 @@ class Warga {
       'id': id,
       'nama': nama,
       'nik': nik,
+      'sync_status': syncStatus,
 
       'jk': _jkToString(jk),
       'tempat_lahir': tempatLahir,
@@ -351,6 +357,8 @@ class Warga {
       'keluarga_id': keluarga?.id,
     };
   }
+
+  bool get isPendingSync => syncStatus == 'pending';
 
   static JenisKelamin? _parseJenisKelamin(String? value) {
     switch (value) {

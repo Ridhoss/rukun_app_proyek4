@@ -84,6 +84,20 @@ class PengajuanSuratViewModel extends ChangeNotifier {
     try {
       final success = await repository.createSurat(data);
 
+      if (success) {
+        _list.insert(
+          0,
+          data.copyWith(
+            id: -DateTime.now().microsecondsSinceEpoch,
+            syncStatus: 'pending',
+            waktuDibuat: DateTime.now(),
+            waktuDiubah: DateTime.now(),
+          ),
+        );
+
+        notifyListeners();
+      }
+
       isLoading = false;
       notifyListeners();
 
@@ -108,7 +122,7 @@ class PengajuanSuratViewModel extends ChangeNotifier {
       final body = {
         "keperluan": data.keperluan,
         "keterangan": data.keterangan,
-        "status": data.status.value
+        "status": data.status.value,
       };
 
       await repository.updateSurat(id, body);

@@ -29,6 +29,8 @@ class PengajuanSurat {
   final int? disetujuiOleh;
   final DateTime? waktuDisetujui;
   final bool isSigned;
+  final String? syncStatus;
+  final int? clientTempId;
   final DateTime? waktuDibuat;
   final DateTime? waktuDiubah;
   final DateTime? waktuDihapus;
@@ -46,6 +48,8 @@ class PengajuanSurat {
     this.catatan,
     this.waktuDisetujui,
     this.isSigned = false,
+    this.syncStatus,
+    this.clientTempId,
     this.waktuDibuat,
     this.waktuDiubah,
     this.waktuDihapus,
@@ -64,6 +68,8 @@ class PengajuanSurat {
     int? disetujuiOleh,
     DateTime? waktuDisetujui,
     bool? isSigned,
+    String? syncStatus,
+    int? clientTempId,
     DateTime? waktuDibuat,
     DateTime? waktuDiubah,
     DateTime? waktuDihapus,
@@ -81,6 +87,8 @@ class PengajuanSurat {
       disetujuiOleh: disetujuiOleh ?? this.disetujuiOleh,
       waktuDisetujui: waktuDisetujui ?? this.waktuDisetujui,
       isSigned: isSigned ?? this.isSigned,
+      syncStatus: syncStatus ?? this.syncStatus,
+      clientTempId: clientTempId ?? this.clientTempId,
       waktuDibuat: waktuDibuat ?? this.waktuDibuat,
       waktuDiubah: waktuDiubah ?? this.waktuDiubah,
       waktuDihapus: waktuDihapus ?? this.waktuDihapus,
@@ -103,6 +111,8 @@ class PengajuanSurat {
           ? DateTime.parse(json['waktu_disetujui'])
           : null,
       isSigned: json['is_signed'] ?? false,
+      syncStatus: json['sync_status'] as String?,
+      clientTempId: (json['client_temp_id'] as num?)?.toInt(),
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.parse(json['waktu_dibuat'])
           : null,
@@ -129,6 +139,8 @@ class PengajuanSurat {
       'disetujui_oleh': disetujuiOleh,
       'waktu_disetujui': waktuDisetujui?.toIso8601String(),
       'is_signed': isSigned,
+      'sync_status': syncStatus,
+      'client_temp_id': clientTempId,
       'waktu_dibuat': waktuDibuat?.toIso8601String(),
       'waktu_diubah': waktuDiubah?.toIso8601String(),
       'waktu_dihapus': waktuDihapus?.toIso8601String(),
@@ -136,14 +148,14 @@ class PengajuanSurat {
   }
 
   static SuratStatus _status(String? v) {
-    switch (v) {
-      case "Disetujui":
+    switch (v?.toLowerCase()) {
+      case "disetujui":
         return SuratStatus.disetujui;
 
-      case "Ditolak":
+      case "ditolak":
         return SuratStatus.ditolak;
 
-      case "Selesai":
+      case "selesai":
         return SuratStatus.selesai;
 
       default:
@@ -166,4 +178,6 @@ class PengajuanSurat {
         return "Selesai";
     }
   }
+
+  bool get isPendingSync => syncStatus == 'pending';
 }

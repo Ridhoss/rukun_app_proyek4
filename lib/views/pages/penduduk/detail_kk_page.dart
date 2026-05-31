@@ -414,9 +414,36 @@ class _DetailKKView extends StatelessWidget {
                       child: Icon(Icons.person, color: ColorsUtils.b500),
                     ),
                     title: Text(warga.nama),
-                    subtitle: Text(
-                      warga.nik,
-                      style: const TextStyle(fontSize: 12),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(warga.nik, style: const TextStyle(fontSize: 12)),
+                        if (warga.isPendingSync) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF7ED),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: const Color(0xFFF59E0B),
+                              ),
+                            ),
+                            child: const Text(
+                              'Menunggu sinkron',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFB45309),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     trailing: const Icon(Icons.chevron_right),
                   ),
