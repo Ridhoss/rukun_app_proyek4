@@ -67,13 +67,14 @@ class UploadIuranViewModel extends ChangeNotifier {
         throw Exception("Jumlah pembayaran tidak valid");
       }
 
-      final imageUrl = await cloudinaryService.uploadFile(
-        buktiFile!,
-        folder: "bukti_iuran",
-      );
-
-      if (imageUrl == null) {
-        throw Exception("Gagal upload bukti pembayaran");
+      String? imageUrl;
+      try {
+        imageUrl = await cloudinaryService.uploadFile(
+          buktiFile!,
+          folder: "bukti_iuran",
+        );
+      } catch (_) {
+        // Offline: imageUrl stays null, will use local path
       }
 
       final transaksi = Transaksi(
@@ -89,7 +90,10 @@ class UploadIuranViewModel extends ChangeNotifier {
         imgRef: imageUrl,
       );
 
-      await iuranRepository.createTransaksi(transaksi);
+      await iuranRepository.createTransaksi(
+        transaksi,
+        localFilePath: imageUrl == null ? buktiFile!.path : null,
+      );
 
       isSuccess = true;
     } catch (e) {

@@ -402,7 +402,7 @@ class SuratRepository {
             }
           }
         }
-        if (queueId != null) {
+        if (queueId != null && operation != 'file_upload') {
           await _sync.removeAction(queueId);
         }
       } catch (_) {
@@ -657,19 +657,8 @@ class SuratRepository {
   ) async {
     try {
       return await fn();
-    } on DioException catch (e) {
-      final data = e.response?.data;
-
-      String message = "Terjadi kesalahan";
-
-      if (data is Map<String, dynamic>) {
-        message =
-            data['message'] ?? data['meta']?['message'] ?? "Terjadi kesalahan";
-      } else if (data is String) {
-        message = data;
-      }
-
-      throw Exception(message);
+    } on DioException {
+      rethrow;
     } catch (e) {
       throw Exception(e.toString().replaceAll("Exception: ", ""));
     }

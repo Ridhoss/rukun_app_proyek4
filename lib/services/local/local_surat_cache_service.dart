@@ -70,22 +70,22 @@ class SuratLocalCacheService {
 
   Future<void> removeSuratAll(int id) async {
     final box = await HiveService().openBox<dynamic>(_allBoxName);
-    await box.delete(id & 0xFFFFFFFF);
+    await box.delete(id.toString());
   }
 
   Future<void> removeSuratSaya(int id) async {
     final box = await HiveService().openBox<dynamic>(_sayaBoxName);
-    await box.delete(id & 0xFFFFFFFF);
+    await box.delete(id.toString());
   }
 
   Future<void> removeSuratRt(int rtId, int id) async {
     final box = await HiveService().openBox<dynamic>(_rtBoxName(rtId));
-    await box.delete(id & 0xFFFFFFFF);
+    await box.delete(id.toString());
   }
 
   Future<void> removeSuratRw(int rwId, int id) async {
     final box = await HiveService().openBox<dynamic>(_rwBoxName(rwId));
-    await box.delete(id & 0xFFFFFFFF);
+    await box.delete(id.toString());
   }
 
   Future<void> _upsertCollection({
@@ -100,9 +100,7 @@ class SuratLocalCacheService {
         continue;
       }
 
-      // Hive integer keys must be non-negative; convert to unsigned 32-bit
-      final storageKey = id & 0xFFFFFFFF;
-      await box.put(storageKey, Map<String, dynamic>.from(item));
+      await box.put(id.toString(), Map<String, dynamic>.from(item));
     }
   }
 

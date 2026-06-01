@@ -46,12 +46,12 @@ class PendudukLocalCacheService {
 
   Future<void> removeKeluarga(int id) async {
     final box = await HiveService().openBox<dynamic>(_keluargaBoxName);
-    await box.delete(id);
+    await box.delete(id.toString());
   }
 
   Future<void> removeWarga(int id) async {
     final box = await HiveService().openBox<dynamic>(_wargaBoxName);
-    await box.delete(id);
+    await box.delete(id.toString());
   }
 
   Future<void> _upsertCollection({
@@ -66,7 +66,7 @@ class PendudukLocalCacheService {
         continue;
       }
 
-      await box.put(id, Map<String, dynamic>.from(item));
+      await box.put(id.toString(), Map<String, dynamic>.from(item));
     }
   }
 

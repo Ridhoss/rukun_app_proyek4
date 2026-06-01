@@ -11,6 +11,7 @@ class OfflineSyncStatusService {
     'offline_sync_surat',
     'offline_sync_iuran',
     'offline_sync_setoran',
+    'offline_sync_kegiatan',
   ];
 
   final ValueNotifier<int> pendingCount = ValueNotifier<int>(0);

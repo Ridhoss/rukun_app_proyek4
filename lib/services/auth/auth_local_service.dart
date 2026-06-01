@@ -25,6 +25,20 @@ class AuthLocalService {
     await box.delete('token');
   }
 
+  Future<void> saveUserJson(Map<String, dynamic> userJson) async {
+    final box = await _box();
+    await box.put('user', userJson);
+  }
+
+  Future<Map<String, dynamic>?> getUserJson() async {
+    final box = await _box();
+    final raw = box.get('user');
+    if (raw is Map) {
+      return Map<String, dynamic>.from(raw);
+    }
+    return null;
+  }
+
   Future<void> clear() async {
     final box = await _box();
     await box.clear();

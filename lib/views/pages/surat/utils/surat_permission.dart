@@ -19,7 +19,9 @@ class SuratPermission {
       return true;
     }
 
-    if (role == UserRole.rw && status == SuratStatus.disetujui) {
+    if (role == UserRole.rw &&
+        (status == SuratStatus.diajukan ||
+            status == SuratStatus.disetujui)) {
       return true;
     }
 
@@ -27,7 +29,9 @@ class SuratPermission {
   }
 
   bool get canViewDetail {
-    return status != SuratStatus.diajukan || role == UserRole.rt;
+    return status != SuratStatus.diajukan ||
+        role == UserRole.rt ||
+        role == UserRole.rw;
   }
 
   bool get showButton {
@@ -36,8 +40,5 @@ class SuratPermission {
 
   bool get canOpenModal => canAct || status == SuratStatus.selesai;
 
-  bool get isReadOnly =>
-      status == SuratStatus.selesai ||
-      (role == UserRole.rt && status != SuratStatus.diajukan) ||
-      (role == UserRole.rw && status != SuratStatus.disetujui);
+  bool get isReadOnly => status == SuratStatus.selesai || !canAct;
 }
