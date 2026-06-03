@@ -24,8 +24,13 @@ class SetoranIuranRtRepository {
   final SetoranIuranLocalSyncService syncQueue = SetoranIuranLocalSyncService();
 
   Future<List<SetoranIuranRt>> getAllSetoran() async {
+    final token = await local.getToken();
+
+    if (token == null) {
+      return _getCachedSetoran();
+    }
+
     try {
-      final token = await _requireToken();
       await syncPending();
 
       final result = await _safeCall(() => service.getAllSetoran(token));
@@ -321,11 +326,11 @@ class SetoranIuranRtRepository {
               if (uploaded != null) {
                 cleanPayload['document_ref'] = uploaded;
               } else {
-                // upload failed; skip processing now so it remains queued
-                continue;
+                // upload failed; will be caught by outer try-catch for retry
+                throw Exception('Upload bukti gagal');
               }
-            } catch (_) {
-              continue;
+            } catch (e) {
+              rethrow;
             }
           }
 
@@ -455,14 +460,22 @@ class SetoranIuranRtRepository {
   }
 
   bool _canUseCache(Object error) {
-    final message = error.toString().toLowerCase();
+    if (error is DioException) {
+      return switch (error.type) {
+        DioExceptionType.connectionError ||
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.receiveTimeout ||
+        DioExceptionType.sendTimeout ||
+        DioExceptionType.unknown => true,
+        _ => false,
+      };
+    }
 
+    final message = error.toString().toLowerCase();
     return message.contains('socketexception') ||
-        message.contains('connection') ||
-        message.contains('network') ||
-        message.contains('timed out') ||
         message.contains('failed host lookup') ||
-        message.contains('no internet');
+        message.contains('connection refused') ||
+        message.contains('network is unreachable');
   }
 
   Future<String> _requireToken() async {
@@ -480,10 +493,8 @@ class SetoranIuranRtRepository {
   ) async {
     try {
       return await fn();
-    } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? "Terjadi kesalahan";
-
-      throw Exception(message);
+    } on DioException {
+      rethrow;
     } catch (e) {
       throw Exception(e.toString().replaceAll("Exception: ", ""));
     }

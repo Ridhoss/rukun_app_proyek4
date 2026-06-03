@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuransaya_model.dart';
 import 'package:rukun_app_proyek4/models/iuran/rw/iuran_detail_rw_model.dart';
@@ -7,18 +9,25 @@ import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_iuran_cache_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_iuran_sync_service.dart';
+import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 
 class IuranRepository {
   final CloudIuranService service;
   final AuthLocalService local;
+  final CloudinaryService? cloudinary;
 
-  IuranRepository(this.service, this.local);
+  IuranRepository(this.service, this.local, [this.cloudinary]);
 
   final IuranLocalCacheService cache = IuranLocalCacheService();
   final IuranLocalSyncService syncQueue = IuranLocalSyncService();
 
   Future<List<Iuran>> getAllIuran() async {
-    final token = await _requireToken();
+    final token = await local.getToken();
+
+    if (token == null) {
+      return _getCachedIuran();
+    }
+
     try {
       await _syncPendingIuran(token);
 
@@ -193,6 +202,11 @@ class IuranRepository {
     final tempIdMap = <int, int>{};
 
     for (final action in pending) {
+      if (action['entity'] == 'transaksi') {
+        await _syncTransaksiAction(action, token);
+        continue;
+      }
+
       if (action['entity'] != 'iuran') continue;
 
       final queueId = action['queue_id'] as String?;
@@ -206,60 +220,139 @@ class IuranRepository {
         (action['payload'] as Map?)?.cast<String, dynamic>() ?? {},
       );
 
-      if (operation == 'create') {
-        final cleanPayload = _stripSyncFields(payload)..remove('id');
+      try {
+        if (operation == 'create') {
+          final cleanPayload = _stripSyncFields(payload)..remove('id');
 
-        final result = await _safeCall(
-          () => service.createIuran(cleanPayload, token),
-        );
-        _validateStatus(result);
+          final result = await _safeCall(
+            () => service.createIuran(cleanPayload, token),
+          );
+          _validateStatus(result);
 
-        final data = result['data'];
-        if (data is Map) {
-          final serverRaw = Map<String, dynamic>.from(data);
-          await cache.removeIuran(entityId);
-          await cache.upsertIuranRaw(serverRaw);
+          final data = result['data'];
+          if (data is Map) {
+            final serverRaw = Map<String, dynamic>.from(data);
+            await cache.removeIuran(entityId);
+            await cache.upsertIuranRaw(serverRaw);
 
-          final serverId = (serverRaw['id'] as num?)?.toInt();
-          if (serverId != null) tempIdMap[entityId] = serverId;
+            final serverId = (serverRaw['id'] as num?)?.toInt();
+            if (serverId != null) tempIdMap[entityId] = serverId;
+          }
+
+          await syncQueue.removeAction(queueId);
+          continue;
         }
 
-        await syncQueue.removeAction(queueId);
+        final targetId = tempIdMap[entityId] ?? entityId;
+
+        if (operation == 'update') {
+          final cleanPayload = _stripSyncFields(payload)..remove('id');
+          final result = await _safeCall(
+            () => service.updateIuran(
+              targetId,
+              Iuran.fromJson({...cleanPayload, 'id': targetId}).toJson(),
+              token,
+            ),
+          );
+          _validateStatus(result);
+
+          final data = result['data'];
+          if (data is Map) {
+            await cache.upsertIuranRaw(Map<String, dynamic>.from(data));
+          } else {
+            await cache.upsertIuranRaw({...cleanPayload, 'id': targetId});
+          }
+
+          await syncQueue.removeAction(queueId);
+          continue;
+        }
+
+        if (operation == 'delete') {
+          final result = await _safeCall(
+            () => service.deleteIuran(targetId, token),
+          );
+          _validateStatus(result);
+          await cache.removeIuran(targetId);
+          await syncQueue.removeAction(queueId);
+        }
+      } catch (e) {
+        try {
+          final currentAttempts = (action['attempts'] as int?) ?? 0;
+          final nextAttempts = currentAttempts + 1;
+          if (nextAttempts >= 3) {
+            await syncQueue.removeAction(queueId);
+            debugPrint(
+              'Iuran queue $queueId failed permanently after $nextAttempts attempts',
+            );
+          } else {
+            await syncQueue.updateActionAttempts(queueId, nextAttempts);
+            debugPrint(
+              'Iuran queue $queueId will retry later (attempt $nextAttempts)',
+            );
+          }
+        } catch (_) {}
         continue;
       }
+    }
+  }
 
-      final targetId = tempIdMap[entityId] ?? entityId;
+  Future<void> _syncTransaksiAction(
+    Map<String, dynamic> action,
+    String token,
+  ) async {
+    final queueId = action['queue_id'] as String?;
+    if (queueId == null) return;
 
-      if (operation == 'update') {
-        final cleanPayload = _stripSyncFields(payload);
-        final result = await _safeCall(
-          () => service.updateIuran(
-            targetId,
-            Iuran.fromJson(cleanPayload).toJson(),
-            token,
-          ),
-        );
-        _validateStatus(result);
+    final operation = action['operation'] as String?;
+    if (operation != 'transaksi_create') return;
 
-        final data = result['data'];
-        if (data is Map) {
-          await cache.upsertIuranRaw(Map<String, dynamic>.from(data));
+    final payload = Map<String, dynamic>.from(
+      (action['payload'] as Map?)?.cast<String, dynamic>() ?? {},
+    );
+
+    try {
+      final localPath = payload['_local_file_path'] as String?;
+      String? imageUrl;
+
+      if (localPath != null && cloudinary != null) {
+        final file = File(localPath);
+        if (await file.exists()) {
+          imageUrl = await cloudinary!.uploadFile(file, folder: 'bukti_iuran');
+          if (imageUrl == null) {
+            debugPrint('Transaksi sync: upload bukti failed, will retry');
+            throw Exception('Upload bukti gagal');
+          }
+        }
+      }
+
+      final cleanPayload = _stripSyncFields(payload)..remove('id');
+      if (imageUrl != null) {
+        cleanPayload['img_referensi'] = imageUrl;
+      }
+
+      final result = await _safeCall(
+        () => service.createTransaksi(cleanPayload, token),
+      );
+      _validateStatus(result);
+
+      await syncQueue.removeAction(queueId);
+      debugPrint('Transaksi sync success for $queueId');
+    } catch (e) {
+      try {
+        final currentAttempts = (action['attempts'] as int?) ?? 0;
+        final nextAttempts = currentAttempts + 1;
+        if (nextAttempts >= 3) {
+          await syncQueue.removeAction(queueId);
+          debugPrint(
+            'Transaksi queue $queueId failed permanently after $nextAttempts attempts',
+          );
         } else {
-          await cache.upsertIuranRaw({...cleanPayload, 'id': targetId});
+          await syncQueue.updateActionAttempts(queueId, nextAttempts);
+          debugPrint(
+            'Transaksi queue $queueId will retry later (attempt $nextAttempts)',
+          );
         }
-
-        await syncQueue.removeAction(queueId);
-        continue;
-      }
-
-      if (operation == 'delete') {
-        final result = await _safeCall(
-          () => service.deleteIuran(targetId, token),
-        );
-        _validateStatus(result);
-        await cache.removeIuran(targetId);
-        await syncQueue.removeAction(queueId);
-      }
+      } catch (_) {}
     }
   }
 
@@ -291,6 +384,10 @@ class IuranRepository {
     result.remove('entity_id');
     result.remove('operation');
     result.remove('local_queue_id');
+    result.remove('_sync_operation');
+    result.remove('_sync_status');
+    result.remove('_created_offline_at');
+    result.remove('_local_file_path');
     return result;
   }
 
@@ -324,14 +421,46 @@ class IuranRepository {
     return IuranRWDetail.fromJson(data);
   }
 
-  Future<void> createTransaksi(Transaksi transaksi) async {
-    final token = await _requireToken();
+  Future<void> createTransaksi(
+    Transaksi transaksi, {
+    String? localFilePath,
+  }) async {
+    try {
+      final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.createTransaksi(transaksi.toJson(), token),
+      final result = await _safeCall(
+        () => service.createTransaksi(transaksi.toJson(), token),
+      );
+
+      _validateStatus(result);
+    } catch (e) {
+      if (_canUseCache(e)) {
+        await _createTransaksiOffline(transaksi, localFilePath: localFilePath);
+        return;
+      }
+
+      rethrow;
+    }
+  }
+
+  Future<void> _createTransaksiOffline(
+    Transaksi transaksi, {
+    String? localFilePath,
+  }) async {
+    final tempId = -DateTime.now().microsecondsSinceEpoch;
+    final raw = transaksi.toJson();
+    raw['id'] = tempId;
+    raw['_sync_operation'] = 'transaksi_create';
+    raw['_sync_status'] = 'pending';
+    raw['_created_offline_at'] = DateTime.now().toIso8601String();
+    if (localFilePath != null) {
+      raw['_local_file_path'] = localFilePath;
+    }
+
+    await syncQueue.queueCreateTransaksi(
+      tempId: tempId,
+      payload: raw,
     );
-
-    _validateStatus(result);
   }
 
   Future<String> _requireToken() async {
@@ -349,10 +478,8 @@ class IuranRepository {
   ) async {
     try {
       return await fn();
-    } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? "Terjadi kesalahan";
-
-      throw Exception(message);
+    } on DioException {
+      rethrow;
     } catch (e) {
       throw Exception(e.toString().replaceAll("Exception: ", ""));
     }

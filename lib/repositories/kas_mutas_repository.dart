@@ -112,10 +112,8 @@ class KasMutasiRepository {
   ) async {
     try {
       return await fn();
-    } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? "Terjadi kesalahan";
-
-      throw Exception(message);
+    } on DioException {
+      rethrow;
     } catch (e) {
       throw Exception(e.toString().replaceAll("Exception: ", ""));
     }

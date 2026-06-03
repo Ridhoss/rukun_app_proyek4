@@ -43,12 +43,12 @@ class IuranLocalCacheService {
 
   Future<void> removeIuran(int id) async {
     final box = await HiveService().openBox<dynamic>(_allBoxName);
-    await box.delete(id);
+    await box.delete(id.toString());
   }
 
   Future<void> removeIuranRw(int rwId, int id) async {
     final box = await HiveService().openBox<dynamic>(_rwBoxName(rwId));
-    await box.delete(id);
+    await box.delete(id.toString());
   }
 
   Future<void> _upsertCollection({
@@ -63,7 +63,7 @@ class IuranLocalCacheService {
         continue;
       }
 
-      await box.put(id, Map<String, dynamic>.from(item));
+      await box.put(id.toString(), Map<String, dynamic>.from(item));
     }
   }
 

@@ -37,6 +37,8 @@ class AuthRepository {
 
     final user = User.fromJson(userData);
 
+    await local.saveUserJson(userData);
+
     return AuthResponse(token: token, user: user);
   }
 
@@ -57,7 +59,7 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
-    await local.clearToken();
+    await local.clear();
   }
 
   Future<String?> getToken() async {
@@ -69,7 +71,16 @@ class AuthRepository {
 
     _validateStatus(result);
 
-    return User.fromJson(result['data']);
+    final userData = result['data'] as Map<String, dynamic>;
+    await local.saveUserJson(userData);
+
+    return User.fromJson(userData);
+  }
+
+  Future<User?> getCachedUser() async {
+    final json = await local.getUserJson();
+    if (json == null) return null;
+    return User.fromJson(json);
   }
 
   Future<User?> getUserByWargaId(int wargaId) async {
@@ -115,18 +126,8 @@ class AuthRepository {
       }
 
       throw Exception("Response bukan Map: ${res.runtimeType}");
-    } on DioException catch (e) {
-      final data = e.response?.data;
-
-      String message = "Terjadi kesalahan";
-
-      if (data is Map<String, dynamic>) {
-        message = data['message'] ?? message;
-      } else if (data is String) {
-        message = data;
-      }
-
-      throw Exception(message);
+    } on DioException {
+      rethrow;
     }
   }
 

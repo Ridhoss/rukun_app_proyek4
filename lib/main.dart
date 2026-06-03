@@ -116,6 +116,7 @@ void main() async {
           create: (context) => IuranRepository(
             context.read<CloudIuranService>(),
             context.read<AuthLocalService>(),
+            context.read<CloudinaryService>(),
           ),
         ),
         // local iuran cache & sync services
@@ -184,6 +185,8 @@ void main() async {
             ctx.read<SuratRepository>(),
             ctx.read<WargaRepository>(),
             ctx.read<SetoranIuranRtRepository>(),
+            ctx.read<KKRepository>(),
+            ctx.read<KegiatanRepository>(),
           )..start(),
         ),
 

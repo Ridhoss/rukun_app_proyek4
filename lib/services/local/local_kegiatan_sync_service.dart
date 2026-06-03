@@ -1,11 +1,11 @@
 import 'package:hive/hive.dart';
-import 'package:rukun_app_proyek4/services/local/offline_sync_status_service.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
+import 'package:rukun_app_proyek4/services/local/offline_sync_status_service.dart';
 
-class IuranLocalSyncService {
-  static const String _queueBoxName = 'offline_sync_iuran';
+class KegiatanLocalSyncService {
+  static const String _queueBoxName = 'offline_sync_kegiatan';
 
-  Future<void> queueCreateIuran({
+  Future<void> queueCreateKegiatan({
     required int tempId,
     required Map<String, dynamic> payload,
   }) async {
@@ -14,7 +14,7 @@ class IuranLocalSyncService {
     await box.put(tempId.toString(), {
       'queue_id': tempId.toString(),
       'operation': 'create',
-      'entity': 'iuran',
+      'entity': 'kegiatan',
       'entity_id': tempId,
       'payload': Map<String, dynamic>.from(payload),
       'created_at': DateTime.now().toIso8601String(),
@@ -23,7 +23,7 @@ class IuranLocalSyncService {
     await OfflineSyncStatusService.instance.refresh();
   }
 
-  Future<void> queueUpdateIuran({
+  Future<void> queueUpdateKegiatan({
     required int entityId,
     required Map<String, dynamic> payload,
   }) async {
@@ -47,7 +47,7 @@ class IuranLocalSyncService {
     await box.put(queueId, {
       'queue_id': queueId,
       'operation': 'update',
-      'entity': 'iuran',
+      'entity': 'kegiatan',
       'entity_id': entityId,
       'payload': Map<String, dynamic>.from(payload),
       'created_at': DateTime.now().toIso8601String(),
@@ -56,7 +56,7 @@ class IuranLocalSyncService {
     await OfflineSyncStatusService.instance.refresh();
   }
 
-  Future<void> queueDeleteIuran({required int entityId}) async {
+  Future<void> queueDeleteKegiatan({required int entityId}) async {
     final box = await HiveService().openBox<dynamic>(_queueBoxName);
     final existingCreate = _findCreateEntry(box, entityId);
 
@@ -71,27 +71,9 @@ class IuranLocalSyncService {
     await box.put(queueId, {
       'queue_id': queueId,
       'operation': 'delete',
-      'entity': 'iuran',
+      'entity': 'kegiatan',
       'entity_id': entityId,
       'payload': const <String, dynamic>{},
-      'created_at': DateTime.now().toIso8601String(),
-    });
-
-    await OfflineSyncStatusService.instance.refresh();
-  }
-
-  Future<void> queueCreateTransaksi({
-    required int tempId,
-    required Map<String, dynamic> payload,
-  }) async {
-    final box = await HiveService().openBox<dynamic>(_queueBoxName);
-
-    await box.put('transaksi_$tempId', {
-      'queue_id': 'transaksi_$tempId',
-      'operation': 'transaksi_create',
-      'entity': 'transaksi',
-      'entity_id': tempId,
-      'payload': Map<String, dynamic>.from(payload),
       'created_at': DateTime.now().toIso8601String(),
     });
 
@@ -142,18 +124,11 @@ class IuranLocalSyncService {
     }
   }
 
-  Future<void> clear() async {
-    final box = await HiveService().openBox<dynamic>(_queueBoxName);
-    await box.clear();
-
-    await OfflineSyncStatusService.instance.refresh();
-  }
-
   Map<String, dynamic>? _findCreateEntry(Box<dynamic> box, int entityId) {
     for (final value in box.values) {
       if (value is Map) {
         final mapped = Map<String, dynamic>.from(value);
-        if (mapped['entity'] == 'iuran' &&
+        if (mapped['entity'] == 'kegiatan' &&
             mapped['operation'] == 'create' &&
             (mapped['entity_id'] as num?)?.toInt() == entityId) {
           return mapped;

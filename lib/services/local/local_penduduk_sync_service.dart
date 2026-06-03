@@ -28,7 +28,7 @@ class PendudukLocalSyncService {
     required Map<String, dynamic> payload,
   }) async {
     final box = await HiveService().openBox<dynamic>(_queueBoxName);
-    final existingCreate = _findCreateEntry(box, entityId);
+    final existingCreate = _findCreateEntry(box, entityId, 'warga');
 
     if (existingCreate != null) {
       final mergedPayload = Map<String, dynamic>.from(
@@ -58,7 +58,7 @@ class PendudukLocalSyncService {
 
   Future<void> queueDeleteWarga({required int entityId}) async {
     final box = await HiveService().openBox<dynamic>(_queueBoxName);
-    final existingCreate = _findCreateEntry(box, entityId);
+    final existingCreate = _findCreateEntry(box, entityId, 'warga');
 
     if (existingCreate != null) {
       await box.delete(existingCreate['queue_id'].toString());
@@ -72,6 +72,83 @@ class PendudukLocalSyncService {
       'queue_id': queueId,
       'operation': 'delete',
       'entity': 'warga',
+      'entity_id': entityId,
+      'payload': const <String, dynamic>{},
+      'created_at': DateTime.now().toIso8601String(),
+    });
+
+    await OfflineSyncStatusService.instance.refresh();
+  }
+
+  // --- KK (Keluarga) queue methods ---
+
+  Future<void> queueCreateKK({
+    required int tempId,
+    required Map<String, dynamic> payload,
+  }) async {
+    final box = await HiveService().openBox<dynamic>(_queueBoxName);
+
+    await box.put(tempId.toString(), {
+      'queue_id': tempId.toString(),
+      'operation': 'create',
+      'entity': 'keluarga',
+      'entity_id': tempId,
+      'payload': Map<String, dynamic>.from(payload),
+      'created_at': DateTime.now().toIso8601String(),
+    });
+
+    await OfflineSyncStatusService.instance.refresh();
+  }
+
+  Future<void> queueUpdateKK({
+    required int entityId,
+    required Map<String, dynamic> payload,
+  }) async {
+    final box = await HiveService().openBox<dynamic>(_queueBoxName);
+    final existingCreate = _findCreateEntry(box, entityId, 'keluarga');
+
+    if (existingCreate != null) {
+      final mergedPayload = Map<String, dynamic>.from(
+        (existingCreate['payload'] as Map?)?.cast<String, dynamic>() ?? {},
+      )..addAll(payload);
+
+      existingCreate['payload'] = mergedPayload;
+      existingCreate['updated_at'] = DateTime.now().toIso8601String();
+      await box.put(existingCreate['queue_id'].toString(), existingCreate);
+      await OfflineSyncStatusService.instance.refresh();
+      return;
+    }
+
+    final queueId = '${entityId}_${DateTime.now().microsecondsSinceEpoch}';
+
+    await box.put(queueId, {
+      'queue_id': queueId,
+      'operation': 'update',
+      'entity': 'keluarga',
+      'entity_id': entityId,
+      'payload': Map<String, dynamic>.from(payload),
+      'created_at': DateTime.now().toIso8601String(),
+    });
+
+    await OfflineSyncStatusService.instance.refresh();
+  }
+
+  Future<void> queueDeleteKK({required int entityId}) async {
+    final box = await HiveService().openBox<dynamic>(_queueBoxName);
+    final existingCreate = _findCreateEntry(box, entityId, 'keluarga');
+
+    if (existingCreate != null) {
+      await box.delete(existingCreate['queue_id'].toString());
+      await OfflineSyncStatusService.instance.refresh();
+      return;
+    }
+
+    final queueId = '${entityId}_${DateTime.now().microsecondsSinceEpoch}';
+
+    await box.put(queueId, {
+      'queue_id': queueId,
+      'operation': 'delete',
+      'entity': 'keluarga',
       'entity_id': entityId,
       'payload': const <String, dynamic>{},
       'created_at': DateTime.now().toIso8601String(),
@@ -110,6 +187,20 @@ class PendudukLocalSyncService {
     await OfflineSyncStatusService.instance.refresh();
   }
 
+  Future<void> updateActionAttempts(
+    String queueId,
+    int attempts,
+  ) async {
+    final box = await HiveService().openBox<dynamic>(_queueBoxName);
+    final raw = box.get(queueId);
+    if (raw is Map) {
+      final action = Map<String, dynamic>.from(raw);
+      action['attempts'] = attempts;
+      action['last_attempt_at'] = DateTime.now().toIso8601String();
+      await box.put(queueId, action);
+    }
+  }
+
   Future<void> clear() async {
     final box = await HiveService().openBox<dynamic>(_queueBoxName);
     await box.clear();
@@ -117,11 +208,15 @@ class PendudukLocalSyncService {
     await OfflineSyncStatusService.instance.refresh();
   }
 
-  Map<String, dynamic>? _findCreateEntry(Box<dynamic> box, int entityId) {
+  Map<String, dynamic>? _findCreateEntry(
+    Box<dynamic> box,
+    int entityId,
+    String entity,
+  ) {
     for (final value in box.values) {
       if (value is Map) {
         final mapped = Map<String, dynamic>.from(value);
-        if (mapped['entity'] == 'warga' &&
+        if (mapped['entity'] == entity &&
             mapped['operation'] == 'create' &&
             (mapped['entity_id'] as num?)?.toInt() == entityId) {
           return mapped;

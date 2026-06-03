@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repository.dart';
+import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
+import 'package:rukun_app_proyek4/repositories/kegiatan_repository.dart';
 import 'package:rukun_app_proyek4/repositories/surat_repository.dart';
 import 'package:rukun_app_proyek4/repositories/warga_repository.dart';
 import 'package:rukun_app_proyek4/repositories/setoran_iuran_repository.dart';
@@ -15,6 +17,8 @@ class SyncCoordinator {
   final SuratRepository _suratRepo;
   final WargaRepository _wargaRepo;
   final SetoranIuranRtRepository _setoranRepo;
+  final KKRepository _kkRepo;
+  final KegiatanRepository _kegiatanRepo;
 
   StreamSubscription<dynamic>? _sub;
 
@@ -24,6 +28,8 @@ class SyncCoordinator {
     this._suratRepo,
     this._wargaRepo,
     this._setoranRepo,
+    this._kkRepo,
+    this._kegiatanRepo,
   );
 
   void start() {
@@ -64,6 +70,18 @@ class SyncCoordinator {
 
     try {
       await _setoranRepo.syncPending();
+    } catch (_) {
+      anyFailed = true;
+    }
+
+    try {
+      await _kkRepo.syncPending();
+    } catch (_) {
+      anyFailed = true;
+    }
+
+    try {
+      await _kegiatanRepo.syncPending();
     } catch (_) {
       anyFailed = true;
     }
