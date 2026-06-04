@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rukun_app_proyek4/models/keluarga_model.dart';
 import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
 
@@ -14,9 +15,10 @@ class DetailRTViewmodel extends ChangeNotifier {
 
   int? currentRtId;
 
-  Future<void> init(int rtId) async {
+  void init(int rtId) {
     currentRtId = rtId;
-    await loadKK(rtId);
+    // Delay loading until after build phase completes
+    Future.microtask(() => loadKK(rtId));
   }
 
   Future<void> loadKK(int? rtId) async {

@@ -36,6 +36,11 @@ class EditKKViewModel extends ChangeNotifier {
   String alamat = '';
   String kodePos = '';
 
+  // Text editing controllers for two-way binding
+  final TextEditingController noKKController = TextEditingController();
+  final TextEditingController alamatController = TextEditingController();
+  final TextEditingController kodePosController = TextEditingController();
+
   Future<void> getDetailKK() async {
     try {
       isLoading = true;
@@ -55,12 +60,42 @@ class EditKKViewModel extends ChangeNotifier {
       alamat = result.alamat ?? '';
       kodePos = result.kodePos ?? '';
 
+      // Update controllers
+      noKKController.text = noKK;
+      alamatController.text = alamat;
+      kodePosController.text = kodePos;
+
       fotoKKUrl = result.imgRef;
     } catch (e) {
       errorMessage = e.toString().replaceAll("Exception: ", "");
     }
 
     isLoading = false;
+    notifyListeners();
+  }
+
+  /// Apply scan results to form fields
+  void applyScanResults({
+    String? scannedNoKK,
+    String? scannedAlamat,
+    String? scannedKodePos,
+    File? scannedFoto,
+  }) {
+    if (scannedNoKK != null && scannedNoKK.isNotEmpty) {
+      noKK = scannedNoKK;
+      noKKController.text = scannedNoKK;
+    }
+    if (scannedAlamat != null && scannedAlamat.isNotEmpty) {
+      alamat = scannedAlamat;
+      alamatController.text = scannedAlamat;
+    }
+    if (scannedKodePos != null && scannedKodePos.isNotEmpty) {
+      kodePos = scannedKodePos;
+      kodePosController.text = scannedKodePos;
+    }
+    if (scannedFoto != null) {
+      fotoKK = scannedFoto;
+    }
     notifyListeners();
   }
 
@@ -118,5 +153,13 @@ class EditKKViewModel extends ChangeNotifier {
 
     isSaving = false;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    noKKController.dispose();
+    alamatController.dispose();
+    kodePosController.dispose();
+    super.dispose();
   }
 }

@@ -9,6 +9,17 @@ class AddWargaViewModel extends ChangeNotifier {
   bool isSaving = false;
   String? errorMessage;
 
+  // TextEditingControllers for two-way binding
+  final TextEditingController namaController = TextEditingController();
+  final TextEditingController nikController = TextEditingController();
+  final TextEditingController tempatLahirController = TextEditingController();
+  final TextEditingController pekerjaanController = TextEditingController();
+  final TextEditingController namaAyahController = TextEditingController();
+  final TextEditingController namaIbuController = TextEditingController();
+  final TextEditingController negaraController = TextEditingController();
+  final TextEditingController noPasporController = TextEditingController();
+  final TextEditingController noKitapController = TextEditingController();
+
   String nama = '';
   String nik = '';
   String tempatLahir = '';
@@ -34,6 +45,64 @@ class AddWargaViewModel extends ChangeNotifier {
   final int kkId;
 
   AddWargaViewModel({required this.repo, required this.kkId});
+
+  /// Apply scan results from KTP
+  void applyScanResults({
+    String? scannedNik,
+    String? scannedNama,
+    String? scannedTempatLahir,
+    String? scannedTanggalLahir,
+    String? scannedJenisKelamin,
+    String? scannedAlamat,
+    String? scannedAgama,
+    String? scannedStatusPerkawinan,
+    String? scannedPekerjaan,
+    String? scannedKewarganegaraan,
+  }) {
+    if (scannedNik != null && scannedNik.isNotEmpty) {
+      nik = scannedNik;
+      nikController.text = scannedNik;
+    }
+    if (scannedNama != null && scannedNama.isNotEmpty) {
+      nama = scannedNama;
+      namaController.text = scannedNama;
+    }
+    if (scannedTempatLahir != null && scannedTempatLahir.isNotEmpty) {
+      tempatLahir = scannedTempatLahir;
+      tempatLahirController.text = scannedTempatLahir;
+    }
+    if (scannedTanggalLahir != null && scannedTanggalLahir.isNotEmpty) {
+      // Parse date from DD-MM-YYYY format
+      final parts = scannedTanggalLahir.split('-');
+      if (parts.length == 3) {
+        try {
+          final day = int.parse(parts[0]);
+          final month = int.parse(parts[1]);
+          final year = int.parse(parts[2]);
+          tanggalLahir = DateTime(year, month, day);
+        } catch (e) {
+          print('Failed to parse date: $scannedTanggalLahir');
+        }
+      }
+    }
+    if (scannedJenisKelamin != null && scannedJenisKelamin.isNotEmpty) {
+      jenisKelamin = scannedJenisKelamin;
+    }
+    if (scannedAgama != null && scannedAgama.isNotEmpty) {
+      agama = scannedAgama;
+    }
+    if (scannedStatusPerkawinan != null && scannedStatusPerkawinan.isNotEmpty) {
+      statusPerkawinan = scannedStatusPerkawinan;
+    }
+    if (scannedPekerjaan != null && scannedPekerjaan.isNotEmpty) {
+      pekerjaan = scannedPekerjaan;
+      pekerjaanController.text = scannedPekerjaan;
+    }
+    if (scannedKewarganegaraan != null && scannedKewarganegaraan.isNotEmpty) {
+      kewarganegaraan = scannedKewarganegaraan;
+    }
+    notifyListeners();
+  }
 
   void setNama(String v) => _set(() => nama = v);
   void setNik(String v) => _set(() => nik = v);
@@ -200,5 +269,19 @@ class AddWargaViewModel extends ChangeNotifier {
       isSaving = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    namaController.dispose();
+    nikController.dispose();
+    tempatLahirController.dispose();
+    pekerjaanController.dispose();
+    namaAyahController.dispose();
+    namaIbuController.dispose();
+    negaraController.dispose();
+    noPasporController.dispose();
+    noKitapController.dispose();
+    super.dispose();
   }
 }

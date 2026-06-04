@@ -6,6 +6,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/kartukeluarga/edit_kk_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/widgets/scan_kk_widget.dart';
 
 class EditKKPage extends StatelessWidget {
   final int idKK;
@@ -51,6 +52,10 @@ class _EditKKView extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               children: [
                 _buildHeader(),
+
+                const SizedBox(height: 16),
+
+                _buildScanCard(context, vm),
 
                 const SizedBox(height: 16),
 
@@ -109,33 +114,75 @@ class _EditKKView extends StatelessWidget {
     );
   }
 
+  Widget _buildScanCard(BuildContext context, EditKKViewModel vm) {
+    return _buildCard(
+      header: _buildSectionHeader('Scan Kartu Keluarga', Icons.document_scanner_outlined),
+      child: ScanKKWidget(
+        onConfirmed: ({String? noKK, String? alamat, String? kodePos, fotoKK}) {
+          vm.applyScanResults(
+            scannedNoKK: noKK,
+            scannedAlamat: alamat,
+            scannedKodePos: kodePos,
+            scannedFoto: fotoKK,
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildFormCard(BuildContext context, EditKKViewModel vm) {
     return _buildCard(
       header: _buildSectionHeader('Data Kartu Keluarga', Icons.home_outlined),
       child: Column(
         children: [
           TextFormField(
-            initialValue: vm.noKK,
+            controller: vm.noKKController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'No KK'),
+            decoration: const InputDecoration(
+              labelText: 'No KK',
+              hintText: 'Masukkan 16 digit nomor KK',
+            ),
             onChanged: (value) => vm.noKK = value,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'No KK wajib diisi';
+              }
+              final cleaned = value.replaceAll(RegExp(r'[\s\-]'), '');
+              if (cleaned.length != 16) {
+                return 'No KK harus 16 digit';
+              }
+              return null;
+            },
           ),
 
           const SizedBox(height: 12),
 
           TextFormField(
-            initialValue: vm.alamat,
-            decoration: const InputDecoration(labelText: 'Alamat'),
+            controller: vm.alamatController,
+            decoration: const InputDecoration(
+              labelText: 'Alamat',
+              hintText: 'Masukkan alamat lengkap',
+            ),
             onChanged: (value) => vm.alamat = value,
+            maxLines: 2,
           ),
 
           const SizedBox(height: 12),
 
           TextFormField(
-            initialValue: vm.kodePos,
+            controller: vm.kodePosController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Kode Pos'),
+            decoration: const InputDecoration(
+              labelText: 'Kode Pos',
+              hintText: 'Masukkan 5 digit kode pos',
+            ),
             onChanged: (value) => vm.kodePos = value,
+            validator: (value) {
+              if (value != null && value.isNotEmpty && value.length != 5) {
+                return 'Kode Pos harus 5 digit';
+              }
+              return null;
+            },
           ),
 
           const SizedBox(height: 16),

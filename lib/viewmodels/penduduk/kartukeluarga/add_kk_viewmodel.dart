@@ -28,6 +28,36 @@ class AddKKViewModel extends ChangeNotifier {
   String alamat = '';
   String kodePos = '';
 
+  // Text editing controllers for two-way binding
+  final TextEditingController noKKController = TextEditingController();
+  final TextEditingController alamatController = TextEditingController();
+  final TextEditingController kodePosController = TextEditingController();
+
+  /// Apply scan results to form fields
+  void applyScanResults({
+    String? scannedNoKK,
+    String? scannedAlamat,
+    String? scannedKodePos,
+    File? scannedFoto,
+  }) {
+    if (scannedNoKK != null && scannedNoKK.isNotEmpty) {
+      noKK = scannedNoKK;
+      noKKController.text = scannedNoKK;
+    }
+    if (scannedAlamat != null && scannedAlamat.isNotEmpty) {
+      alamat = scannedAlamat;
+      alamatController.text = scannedAlamat;
+    }
+    if (scannedKodePos != null && scannedKodePos.isNotEmpty) {
+      kodePos = scannedKodePos;
+      kodePosController.text = scannedKodePos;
+    }
+    if (scannedFoto != null) {
+      fotoKK = scannedFoto;
+    }
+    notifyListeners();
+  }
+
   Future<void> pickFotoKK() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(
@@ -82,5 +112,13 @@ class AddKKViewModel extends ChangeNotifier {
 
     isSaving = false;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    noKKController.dispose();
+    alamatController.dispose();
+    kodePosController.dispose();
+    super.dispose();
   }
 }

@@ -5,6 +5,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/warga/add_warga_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/widgets/scan_ktp_widget.dart';
 
 class AddWargaPage extends StatelessWidget {
   final Keluarga keluarga;
@@ -32,6 +33,41 @@ class AddWargaPage extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
         children: [
           _header(),
+
+          const SizedBox(height: 16),
+
+          // Scan KTP Section
+          _buildSection(
+            'Scan KTP',
+            Icons.document_scanner_outlined,
+            ScanKTPWidget(
+              onConfirmed: ({
+                String? nik,
+                String? nama,
+                String? tempatLahir,
+                String? tanggalLahir,
+                String? jenisKelamin,
+                String? alamat,
+                String? agama,
+                String? statusPerkawinan,
+                String? pekerjaan,
+                String? kewarganegaraan,
+              }) {
+                vm.applyScanResults(
+                  scannedNik: nik,
+                  scannedNama: nama,
+                  scannedTempatLahir: tempatLahir,
+                  scannedTanggalLahir: tanggalLahir,
+                  scannedJenisKelamin: jenisKelamin,
+                  scannedAlamat: alamat,
+                  scannedAgama: agama,
+                  scannedStatusPerkawinan: statusPerkawinan,
+                  scannedPekerjaan: pekerjaan,
+                  scannedKewarganegaraan: kewarganegaraan,
+                );
+              },
+            ),
+          ),
 
           const SizedBox(height: 16),
 
@@ -131,8 +167,8 @@ class AddWargaPage extends StatelessWidget {
   Widget _dataPribadi(BuildContext context, AddWargaViewModel vm) {
     return Column(
       children: [
-        _textField('Nama Lengkap', onChanged: vm.setNama),
-        _textField('NIK', keyboard: TextInputType.number, onChanged: vm.setNik),
+        _textField('Nama Lengkap', controller: vm.namaController, onChanged: vm.setNama),
+        _textField('NIK', controller: vm.nikController, keyboard: TextInputType.number, onChanged: vm.setNik),
 
         _dropdown(
           'Jenis Kelamin',
@@ -144,7 +180,7 @@ class AddWargaPage extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _textField('Tempat Lahir', onChanged: vm.setTempatLahir),
+              child: _textField('Tempat Lahir', controller: vm.tempatLahirController, onChanged: vm.setTempatLahir),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -178,7 +214,7 @@ class AddWargaPage extends StatelessWidget {
           onChanged: vm.setPendidikan,
         ),
 
-        _textField('Pekerjaan', onChanged: vm.setPekerjaan),
+        _textField('Pekerjaan', controller: vm.pekerjaanController, onChanged: vm.setPekerjaan),
 
         _dropdown(
           'Golongan Darah',
@@ -394,6 +430,7 @@ class AddWargaPage extends StatelessWidget {
 
   Widget _textField(
     String label, {
+    TextEditingController? controller,
     TextInputType keyboard = TextInputType.text,
     Function(String)? onChanged,
   }) {
@@ -403,6 +440,7 @@ class AddWargaPage extends StatelessWidget {
         Text(label),
         const SizedBox(height: 6),
         TextField(
+          controller: controller,
           keyboardType: keyboard,
           onChanged: onChanged,
           decoration: _input(),

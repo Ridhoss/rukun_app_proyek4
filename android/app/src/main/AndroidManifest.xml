@@ -7,12 +7,6 @@
         android:label="RukunApp"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
-        <!-- WorkManager initializer provider -->
-        <provider
-            android:name="androidx.work.impl.WorkManagerInitializer"
-            android:authorities="${applicationId}.workmanager-init"
-            android:exported="false"
-            tools:node="merge" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
