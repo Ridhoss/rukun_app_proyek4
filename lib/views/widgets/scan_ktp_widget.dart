@@ -4,19 +4,8 @@ import 'package:provider/provider.dart';
 import '../../utils/colors_utils.dart';
 import '../../viewmodels/scan_ktp_viewmodel.dart';
 
-/// Callback when KTP scan result is confirmed
-typedef OnKtpScanConfirmed = void Function({
-  String? nik,
-  String? nama,
-  String? tempatLahir,
-  String? tanggalLahir,
-  String? jenisKelamin,
-  String? alamat,
-  String? agama,
-  String? statusPerkawinan,
-  String? pekerjaan,
-  String? kewarganegaraan,
-});
+/// Callback when KTP scan result is confirmed — only NIK
+typedef OnKtpScanConfirmed = void Function({String? nik});
 
 /// Widget for scanning KTP with camera or gallery
 class ScanKTPWidget extends StatelessWidget {
@@ -66,13 +55,14 @@ class _ScanKTPView extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton.icon(
-            onPressed: vm.isScanning ? null : () => vm.scanWithCamera(),
-            icon: const Icon(Icons.camera_alt_outlined),
-            label: const Text('Foto KTP'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              side: const BorderSide(color: ColorsUtils.b500),
+          child: ElevatedButton.icon(
+            onPressed: vm.isScanning ? null : () => vm.scanDocument(),
+            icon: const Icon(Icons.document_scanner_outlined),
+            label: const Text('Scan KTP'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorsUtils.b500,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -82,11 +72,11 @@ class _ScanKTPView extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: vm.isScanning ? null : () => vm.scanFromGallery(),
+            onPressed: vm.isScanning ? null : () => vm.pickFromGallery(),
             icon: const Icon(Icons.photo_library_outlined),
-            label: const Text('Dari Galeri'),
+            label: const Text('Galeri'),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               side: const BorderSide(color: ColorsUtils.b500),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -158,6 +148,7 @@ class _ScanKTPView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Header
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -172,59 +163,44 @@ class _ScanKTPView extends StatelessWidget {
                 Icon(Icons.check_circle, color: Colors.green.shade700, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Data KTP Terdeteksi',
+                  'NIK Terdeteksi',
                   style: TextStyle(
                     color: Colors.green.shade700,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  '${(result.confidence * 100).round()}% akurasi',
-                  style: TextStyle(
-                    color: Colors.green.shade600,
-                    fontSize: 12,
-                  ),
-                ),
               ],
             ),
           ),
 
+          // NIK
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                if (result.hasNik) _buildResultField('NIK', result.nik!, Icons.credit_card),
-                if (result.hasNama) _buildResultField('Nama', result.nama!, Icons.person),
-                if (result.hasTempatLahir || result.hasTanggalLahir)
-                  _buildResultField(
-                    'TTL',
-                    '${result.tempatLahir ?? ""}, ${result.tanggalLahir ?? ""}',
-                    Icons.cake,
+                Icon(Icons.credit_card, size: 16, color: Colors.green.shade600),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('NIK', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                      Text(
+                        result.nik!,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Colors.green.shade800,
+                        ),
+                      ),
+                    ],
                   ),
-                if (result.hasJenisKelamin) _buildResultField('JK', result.jenisKelamin!, Icons.wc),
-                if (result.hasAlamat) _buildResultField('Alamat', result.alamat!, Icons.location_on),
+                ),
               ],
             ),
           ),
 
-          if (vm.scannedImage != null) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  vm.scannedImage!,
-                  height: 100,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-
+          // Action buttons
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -245,18 +221,7 @@ class _ScanKTPView extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      onConfirmed(
-                        nik: result.nik,
-                        nama: result.nama,
-                        tempatLahir: result.tempatLahir,
-                        tanggalLahir: result.tanggalLahir,
-                        jenisKelamin: result.jenisKelamin,
-                        alamat: result.alamat,
-                        agama: result.agama,
-                        statusPerkawinan: result.statusPerkawinan,
-                        pekerjaan: result.pekerjaan,
-                        kewarganegaraan: result.kewarganegaraan,
-                      );
+                      onConfirmed(nik: result.nik);
                       vm.clearResults();
                     },
                     style: ElevatedButton.styleFrom(
@@ -267,38 +232,7 @@ class _ScanKTPView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Gunakan Data'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultField(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: Colors.green.shade600),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                ),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.green.shade800,
+                    child: const Text('Gunakan NIK'),
                   ),
                 ),
               ],

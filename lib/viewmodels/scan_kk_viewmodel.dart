@@ -1,15 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as img;
-import 'package:path_provider/path_provider.dart';
 
 import '../../services/ocr/kk_parser_helper.dart';
 import '../../services/ocr/mlkit_ocr_service.dart';
 import '../../services/ocr/ocr_service.dart';
 
-/// State management for KK scanning feature - LIGHTWEIGHT VERSION
+/// State management for KK scanning feature
 class ScanKKViewModel extends ChangeNotifier {
   final OcrService _ocrService;
 
@@ -26,30 +25,60 @@ class ScanKKViewModel extends ChangeNotifier {
   File? get scannedImage => _scannedImage;
   KkParseResult? get parseResult => _parseResult;
 
-  /// Scan with camera
-  Future<void> scanWithCamera() async {
-    await _scan(ImageSource.camera);
-  }
-
-  /// Pick from gallery
-  Future<void> scanFromGallery() async {
-    await _scan(ImageSource.gallery);
-  }
-
-  Future<void> _scan(ImageSource source) async {
+  /// Open ML Kit Document Scanner
+  Future<void> scanDocument() async {
     try {
       _isScanning = true;
       _errorMessage = null;
       _parseResult = null;
       notifyListeners();
 
-      // Pick image with lower quality for faster processing
+      final options = DocumentScannerOptions(
+        documentFormats: {DocumentFormat.jpeg},
+        mode: ScannerMode.filter,
+        pageLimit: 1,
+        isGalleryImport: true,
+      );
+
+      final scanner = DocumentScanner(options: options);
+      final result = await scanner.scanDocument();
+      scanner.close();
+
+      final images = result.images;
+      if (images == null || images.isEmpty) {
+        _isScanning = false;
+        notifyListeners();
+        return;
+      }
+
+      _scannedImage = File(images.first);
+      notifyListeners();
+
+      await _performOcr();
+    } catch (e) {
+      _errorMessage =
+          'Gagal memindai: ${e.toString().replaceAll("Exception: ", "")}';
+      _parseResult = null;
+    } finally {
+      _isScanning = false;
+      notifyListeners();
+    }
+  }
+
+  /// Pick image from gallery
+  Future<void> pickFromGallery() async {
+    try {
+      _isScanning = true;
+      _errorMessage = null;
+      _parseResult = null;
+      notifyListeners();
+
       final picker = ImagePicker();
       final picked = await picker.pickImage(
-        source: source,
-        imageQuality: 70, // Lower quality = smaller file = faster OCR
-        maxWidth: 1200,    // Limit width
-        maxHeight: 1200,   // Limit height
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 1600,
+        maxHeight: 1600,
       );
 
       if (picked == null) {
@@ -59,29 +88,12 @@ class ScanKKViewModel extends ChangeNotifier {
       }
 
       _scannedImage = File(picked.path);
-      
-      // Compress image further if still too large
-      final compressedFile = await _compressImage(_scannedImage!);
-      if (compressedFile != null) {
-        _scannedImage = compressedFile;
-      }
-      
       notifyListeners();
 
-      // Perform OCR with timeout
-      final ocrResult = await _ocrService.recognizeText(_scannedImage!)
-          .timeout(const Duration(seconds: 30), onTimeout: () {
-        throw Exception('OCR timeout - coba foto lebih kecil');
-      });
-
-      // Parse KK data
-      _parseResult = KkParserHelper.parse(ocrResult);
-
-      if (!_parseResult!.hasAnyData) {
-        _errorMessage = 'Tidak dapat membaca data KK. Coba foto lebih jelas.';
-      }
+      await _performOcr();
     } catch (e) {
-      _errorMessage = 'Gagal memindai: ${e.toString().replaceAll("Exception: ", "")}';
+      _errorMessage =
+          'Gagal memindai: ${e.toString().replaceAll("Exception: ", "")}';
       _parseResult = null;
     } finally {
       _isScanning = false;
@@ -89,32 +101,19 @@ class ScanKKViewModel extends ChangeNotifier {
     }
   }
 
-  /// Compress image to reduce memory usage
-  Future<File?> _compressImage(File file) async {
-    try {
-      final bytes = await file.readAsBytes();
-      final decoded = img.decodeImage(bytes);
-      
-      if (decoded == null) return null;
+  /// Perform OCR
+  Future<void> _performOcr() async {
+    final ocrResult = await _ocrService
+        .recognizeText(_scannedImage!, documentType: DocumentType.kk)
+        .timeout(const Duration(seconds: 30), onTimeout: () {
+      throw Exception('OCR timeout - coba foto lebih kecil');
+    });
 
-      // Resize if too large
-      var resized = decoded;
-      if (decoded.width > 1200 || decoded.height > 1200) {
-        resized = img.copyResize(decoded, width: 1200, height: 1200);
-      }
+    _parseResult = KkParserHelper.parse(ocrResult);
 
-      // Convert to grayscale (reduces memory)
-      final grayscale = img.grayscale(resized);
-
-      // Save compressed
-      final tempDir = await getTemporaryDirectory();
-      final compressedFile = File('${tempDir.path}/kk_compressed.jpg');
-      await compressedFile.writeAsBytes(img.encodeJpg(grayscale, quality: 80));
-      
-      return compressedFile;
-    } catch (e) {
-      print('Compression failed: $e');
-      return null;
+    if (!_parseResult!.hasAnyData) {
+      _errorMessage =
+          'Tidak dapat membaca data KK. Coba scan lebih jelas.';
     }
   }
 

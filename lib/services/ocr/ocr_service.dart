@@ -1,5 +1,13 @@
 import 'dart:io';
 
+/// Document type for OCR preprocessing
+///
+/// Each type has different ROI cropping behavior:
+/// - kk:   crop top 35% (header only: No KK, Alamat, Kode Pos)
+/// - ktp:  no crop (full card: NIK, Nama, TTL, Alamat, etc.)
+/// - general: no crop (default)
+enum DocumentType { ktp, kk, general }
+
 /// Result of OCR text recognition
 class OcrResult {
   final String fullText;
@@ -17,8 +25,13 @@ class OcrBlock {
 
 /// Abstract interface for OCR services
 abstract class OcrService {
-  /// Recognize text from an image file
-  Future<OcrResult> recognizeText(File imageFile);
+  /// Recognize text from an image file (whole image OCR)
+  ///
+  /// [documentType] controls preprocessing behavior:
+  /// - DocumentType.kk: crops top 35% to focus on header
+  /// - DocumentType.ktp / DocumentType.general: no cropping
+  Future<OcrResult> recognizeText(File imageFile,
+      {DocumentType documentType = DocumentType.general});
 
   /// Dispose resources
   void dispose();

@@ -5,8 +5,18 @@ import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 
 import 'ocr_service.dart';
+import 'ocr_post_processor.dart';
 
-/// ML Kit implementation of OcrService - optimized for speed
+/// ML Kit implementation of OcrService — minimal preprocessing
+///
+/// The ML Kit Document Scanner already handles:
+/// - Perspective correction
+/// - Edge detection
+/// - Filter/enhance
+/// - Orientation
+///
+/// So we only do: resize (if too large) → send to ML Kit OCR.
+/// No grayscale, no Otsu, no orientation check — let ML Kit handle it.
 class MlkitOcrService implements OcrService {
   TextRecognizer? _textRecognizer;
 
@@ -16,22 +26,22 @@ class MlkitOcrService implements OcrService {
   }
 
   @override
-  Future<OcrResult> recognizeText(File imageFile) async {
-    print('=== OCR START ===');
+  Future<OcrResult> recognizeText(File imageFile,
+      {DocumentType documentType = DocumentType.general}) async {
+    print('=== OCR START (${documentType.name}) ===');
 
-    // Resize image for faster processing
-    final processedFile = await _preprocessImage(imageFile);
-    
-    // Single OCR pass on optimized image
+    final processedFile =
+        await _preprocessImage(imageFile, documentType: documentType);
+
     final text = await _recognizeText(processedFile);
-    
-    print('Text length: ${text.length}');
+
+    // Correct common OCR mistakes
+    final corrected = OcrPostProcessor.correctOcrText(text);
+
+    print('Text length: ${corrected.length}');
     print('=== OCR END ===\n');
 
-    return OcrResult(
-      fullText: text,
-      blocks: [],
-    );
+    return OcrResult(fullText: corrected, blocks: []);
   }
 
   Future<String> _recognizeText(File file) async {
@@ -40,36 +50,41 @@ class MlkitOcrService implements OcrService {
     return recognizedText.text;
   }
 
-  /// Preprocess image - single optimized version for speed
-  Future<File> _preprocessImage(File inputFile) async {
+  /// Minimal preprocessing — just resize if too large
+  ///
+  /// For scanner output: already clean, just send to OCR.
+  /// For gallery output: resize to reasonable size.
+  Future<File> _preprocessImage(File inputFile,
+      {DocumentType documentType = DocumentType.general}) async {
     try {
       final bytes = await inputFile.readAsBytes();
-      final decoded = img.decodeImage(bytes);
-
+      var decoded = img.decodeImage(bytes);
       if (decoded == null) return inputFile;
 
-      // Fix orientation
-      final oriented = img.bakeOrientation(decoded);
+      // Fix EXIF orientation
+      decoded = img.bakeOrientation(decoded);
 
-      // Resize to max 1600px width (balance between quality and speed)
-      final targetWidth = oriented.width > 1600 ? 1600 : oriented.width;
-      final resized = targetWidth == oriented.width
-          ? oriented
-          : img.copyResize(oriented, width: targetWidth);
+      // Force portrait for KTP/KK
+      if (decoded.width > decoded.height) {
+        decoded = img.copyRotate(decoded, angle: 90);
+      }
 
-      // Simple grayscale - fast and good for OCR
-      final grayscale = img.grayscale(resized);
+      // Resize only if very large (keep quality for ML Kit)
+      if (decoded.width > 2000) {
+        decoded = img.copyResize(decoded, width: 2000);
+      }
 
-      // Save to temp file
+      // Save as high quality JPEG
       final tempDir = await getTemporaryDirectory();
-      final path = '${tempDir.path}${Platform.pathSeparator}kk_optimized.jpg';
+      final path =
+          '${tempDir.path}${Platform.pathSeparator}${documentType.name}_ocr.jpg';
       final file = File(path);
-      await file.writeAsBytes(img.encodeJpg(grayscale, quality: 90), flush: true);
-      
-      print('Optimized: ${oriented.width}x${oriented.height} -> ${resized.width}x${resized.height}');
+      await file.writeAsBytes(img.encodeJpg(decoded, quality: 95), flush: true);
+
+      print('Preprocessed: ${decoded.width}x${decoded.height}');
       return file;
     } catch (e) {
-      print('Preprocessing failed, using original: $e');
+      print('Preprocessing failed: $e');
       return inputFile;
     }
   }
