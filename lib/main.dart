@@ -39,6 +39,8 @@ import 'package:rukun_app_proyek4/services/local/local_setoran_iuran_cache_servi
 import 'package:rukun_app_proyek4/services/local/local_setoran_iuran_sync_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:rukun_app_proyek4/services/local/sync_coordinator.dart';
+import 'package:rukun_app_proyek4/services/local/proactive_cache_service.dart';
+import 'package:rukun_app_proyek4/services/local/connectivity_service.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:rukun_app_proyek4/services/local/background_sync.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
@@ -178,6 +180,9 @@ void main() async {
 
         // connectivity + background sync coordinator
         Provider(create: (_) => Connectivity()),
+        ChangeNotifierProvider(
+          create: (ctx) => ConnectivityService(ctx.read<Connectivity>()),
+        ),
         Provider(
           create: (ctx) => SyncCoordinator(
             ctx.read<Connectivity>(),
@@ -190,8 +195,32 @@ void main() async {
           )..start(),
         ),
 
+        Provider(
+          create: (ctx) => ProactiveCacheService(
+            ctx.read<WargaRepository>(),
+            ctx.read<KKRepository>(),
+            ctx.read<IuranRepository>(),
+            ctx.read<SuratRepository>(),
+            ctx.read<KegiatanRepository>(),
+            ctx.read<SetoranIuranRtRepository>(),
+            ctx.read<RTRWRepository>(),
+          ),
+        ),
+
         ChangeNotifierProvider(
-          create: (context) => AuthViewModel(context.read()),
+          create: (context) {
+            final authVm = AuthViewModel(context.read());
+            authVm.onAuthSuccess = () {
+              final user = authVm.currentUser;
+              final rwId = user?.rw?.id;
+              final rtId = user?.rt?.id;
+              context.read<ProactiveCacheService>().cacheAllData(
+                    rwId: rwId,
+                    rtId: rtId,
+                  );
+            };
+            return authVm;
+          },
         ),
 
         ChangeNotifierProvider(

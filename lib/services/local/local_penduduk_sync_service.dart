@@ -5,14 +5,17 @@ import 'package:rukun_app_proyek4/services/local/offline_sync_status_service.dar
 class PendudukLocalSyncService {
   static const String _queueBoxName = 'offline_sync_penduduk';
 
+  static String _safeKey(int id) => 'id_$id';
+
   Future<void> queueCreateWarga({
     required int tempId,
     required Map<String, dynamic> payload,
   }) async {
     final box = await HiveService().openBox<dynamic>(_queueBoxName);
+    final key = _safeKey(tempId);
 
-    await box.put(tempId.toString(), {
-      'queue_id': tempId.toString(),
+    await box.put(key, {
+      'queue_id': key,
       'operation': 'create',
       'entity': 'warga',
       'entity_id': tempId,

@@ -7,10 +7,15 @@ class CloudWargaService {
   Future<Map<String, dynamic>> getAllWarga(
     String token, {
     Map<String, dynamic>? queryParameters,
+    String? search,
   }) async {
+    final params = <String, dynamic>{
+      if (queryParameters != null) ...queryParameters,
+      if (search != null && search.isNotEmpty) 'search': search,
+    };
     final response = await _dio.get(
       '/warga',
-      queryParameters: queryParameters,
+      queryParameters: params.isNotEmpty ? params : null,
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 

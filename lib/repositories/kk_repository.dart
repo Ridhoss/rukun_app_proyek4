@@ -34,7 +34,7 @@ class KKRepository {
       return items;
     } catch (e) {
       final cached = await _getCachedKeluarga();
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -58,7 +58,7 @@ class KKRepository {
       return items;
     } catch (e) {
       final cached = await _getCachedKeluargaByRt(rtId);
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -84,7 +84,7 @@ class KKRepository {
       return item;
     } catch (e) {
       final cached = await _getCachedKeluargaById(id);
-      if (cached != null && _canUseCache(e)) {
+      if (cached != null) {
         return cached;
       }
 

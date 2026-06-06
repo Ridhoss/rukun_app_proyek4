@@ -1,5 +1,6 @@
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class IuranLocalCacheService {
   static const String _allBoxName = 'offline_cache_iuran_all';
@@ -43,13 +44,15 @@ class IuranLocalCacheService {
 
   Future<void> removeIuran(int id) async {
     final box = await HiveService().openBox<dynamic>(_allBoxName);
-    await box.delete(id.toString());
+    await box.delete(_safeKey(id));
   }
 
   Future<void> removeIuranRw(int rwId, int id) async {
     final box = await HiveService().openBox<dynamic>(_rwBoxName(rwId));
-    await box.delete(id.toString());
+    await box.delete(_safeKey(id));
   }
+
+  static String _safeKey(int id) => 'id_$id';
 
   Future<void> _upsertCollection({
     required String boxName,
@@ -63,7 +66,7 @@ class IuranLocalCacheService {
         continue;
       }
 
-      await box.put(id.toString(), Map<String, dynamic>.from(item));
+      await box.put(_safeKey(id), Map<String, dynamic>.from(item));
     }
   }
 
@@ -73,7 +76,7 @@ class IuranLocalCacheService {
 
     for (final value in box.values) {
       if (value is Map) {
-        final mapped = Map<String, dynamic>.from(value);
+        final mapped = deepCastMap(value);
         if (mapped['is_deleted'] == true) {
           continue;
         }

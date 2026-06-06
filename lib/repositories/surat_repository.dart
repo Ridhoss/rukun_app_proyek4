@@ -39,8 +39,9 @@ class SuratRepository {
 
       return items;
     } catch (e) {
-      if (_canUseCache(e)) {
-        return _getCachedSuratAll();
+      final cached = await _getCachedSuratAll();
+      if (cached.isNotEmpty) {
+        return cached;
       }
 
       rethrow;
@@ -66,8 +67,9 @@ class SuratRepository {
 
       return items;
     } catch (e) {
-      if (_canUseCache(e)) {
-        return _getCachedSuratSaya();
+      final cached = await _getCachedSuratSaya();
+      if (cached.isNotEmpty) {
+        return cached;
       }
 
       rethrow;
@@ -95,8 +97,9 @@ class SuratRepository {
 
       return surat;
     } catch (e) {
-      if (_canUseCache(e)) {
-        return _getCachedSuratById(id);
+      final cached = await _getCachedSuratById(id);
+      if (cached != null) {
+        return cached;
       }
 
       rethrow;
@@ -122,8 +125,9 @@ class SuratRepository {
 
       return items;
     } catch (e) {
-      if (_canUseCache(e)) {
-        return _getCachedSuratByRt(rtId);
+      final cached = await _getCachedSuratByRt(rtId);
+      if (cached.isNotEmpty) {
+        return cached;
       }
 
       rethrow;
@@ -149,8 +153,9 @@ class SuratRepository {
 
       return items;
     } catch (e) {
-      if (_canUseCache(e)) {
-        return _getCachedSuratByRw(rwId);
+      final cached = await _getCachedSuratByRw(rwId);
+      if (cached.isNotEmpty) {
+        return cached;
       }
 
       rethrow;
@@ -319,12 +324,13 @@ class SuratRepository {
           if (ctx != null)
             NotificationUtils.showSuccess(ctx, 'Surat berhasil disinkron');
         } else if (operation == 'update' && entityId != null) {
+          final targetId = tempIdMap[entityId] ?? entityId;
           final result = await _safeCall(
-            () => service.updateSurat(entityId, payload, token),
+            () => service.updateSurat(targetId, payload, token),
           );
 
           _validateStatus(result);
-          await _updateCachedSurat(entityId, payload, syncStatus: 'synced');
+          await _updateCachedSurat(targetId, payload, syncStatus: 'synced');
           final ctx = NavigationService.context;
           debugPrint('Surat update queue $queueId synced');
           if (ctx != null)
@@ -333,12 +339,13 @@ class SuratRepository {
               'Perubahan surat berhasil disinkron',
             );
         } else if (operation == 'delete' && entityId != null) {
+          final targetId = tempIdMap[entityId] ?? entityId;
           final result = await _safeCall(
-            () => service.deleteSurat(entityId, token),
+            () => service.deleteSurat(targetId, token),
           );
 
           _validateStatus(result);
-          await _removeCachedSurat(entityId);
+          await _removeCachedSurat(targetId);
           final ctx = NavigationService.context;
           debugPrint('Surat delete queue $queueId synced');
           if (ctx != null)

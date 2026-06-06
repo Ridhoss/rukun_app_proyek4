@@ -15,7 +15,7 @@ class WargaRepository {
 
   WargaRepository(this.service, this.local);
 
-  Future<List<Warga>> getAllWarga() async {
+  Future<List<Warga>> getAllWarga({String? search}) async {
     final token = await local.getToken();
 
     if (token == null) {
@@ -25,7 +25,7 @@ class WargaRepository {
     try {
       await _syncPendingWarga(token);
 
-      final result = await _safeCall(() => service.getAllWarga(token));
+      final result = await _safeCall(() => service.getAllWarga(token, search: search));
 
       _validateStatus(result);
 
@@ -37,7 +37,7 @@ class WargaRepository {
       return items;
     } catch (e) {
       final cached = await _getCachedWarga();
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -65,7 +65,7 @@ class WargaRepository {
       return item;
     } catch (e) {
       final cached = await _getCachedWargaById(id);
-      if (cached != null && _canUseCache(e)) {
+      if (cached != null) {
         return cached;
       }
 
@@ -92,7 +92,7 @@ class WargaRepository {
       return items;
     } catch (e) {
       final cached = await _getCachedWargaByKeluarga(keluargaId);
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -321,7 +321,9 @@ class WargaRepository {
         final targetId = tempIdMap[entityId] ?? entityId;
 
         if (operation == 'update') {
-          final cleanPayload = _stripSyncFields(payload)..remove('id');
+          final cleanPayload = _stripSyncFields(payload);
+          cleanPayload.remove('id');
+          cleanPayload['id'] = targetId;
           final result = await _safeCall(
             () => service.updateWarga(targetId, cleanPayload, token),
           );

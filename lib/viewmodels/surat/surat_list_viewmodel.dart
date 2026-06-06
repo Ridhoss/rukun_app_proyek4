@@ -188,9 +188,16 @@ class SuratListViewModel extends ChangeNotifier {
     bool? isSigned,
     String? catatan,
   }) {
-    final index = _allData.indexWhere((e) => e.id == id);
+    var index = _allData.indexWhere((e) => e.id == id);
 
-    if (index == -1) return;
+    if (index == -1) {
+      index = _allData.indexWhere((e) => e.clientTempId == id);
+    }
+
+    if (index == -1) {
+      notifyListeners();
+      return;
+    }
 
     _allData[index] = _allData[index].copyWith(
       status: status,

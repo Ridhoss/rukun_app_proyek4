@@ -48,7 +48,7 @@ class SetoranIuranRtRepository {
     } catch (e) {
       // fallback to cache if network error
       final cached = await _getCachedSetoran();
-      if (cached.isNotEmpty && _canUseCache(e)) return cached;
+      if (cached.isNotEmpty) return cached;
       rethrow;
     }
   }
@@ -72,7 +72,7 @@ class SetoranIuranRtRepository {
       return SetoranIuranRt.fromJson(raw);
     } catch (e) {
       final cached = await _getCachedSetoranById(id);
-      if (cached != null && _canUseCache(e)) return cached;
+      if (cached != null) return cached;
 
       rethrow;
     }

@@ -10,6 +10,8 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_iuran_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_iuran_cache_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_iuran_sync_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
+import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class IuranRepository {
   final CloudIuranService service;
@@ -46,7 +48,7 @@ class IuranRepository {
       return rawItems.map(Iuran.fromJson).toList();
     } catch (e) {
       final cached = await _getCachedIuran();
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -57,13 +59,40 @@ class IuranRepository {
   Future<List<IuranSaya>> getIuranSaya() async {
     final token = await _requireToken();
 
-    final result = await _safeCall(() => service.getIuranSaya(token));
+    try {
+      final result = await _safeCall(() => service.getIuranSaya(token));
 
-    _validateStatus(result);
+      _validateStatus(result);
 
-    final List data = result['data'] ?? [];
+      final List data = result['data'] ?? [];
+      final items = data.map((e) => IuranSaya.fromJson(e)).toList();
+      await _cacheIuranSayaRaw(data);
+      return items;
+    } catch (e) {
+      if (_canUseCache(e)) {
+        return _getCachedIuranSaya();
+      }
+      rethrow;
+    }
+  }
 
-    return data.map((e) => IuranSaya.fromJson(e)).toList();
+  static const String _iuranSayaCacheBox = 'offline_cache_iuran_saya';
+
+  Future<void> _cacheIuranSayaRaw(List<dynamic> data) async {
+    final box = await HiveService().openBox<dynamic>(_iuranSayaCacheBox);
+    await box.put('all', data);
+  }
+
+  Future<List<IuranSaya>> _getCachedIuranSaya() async {
+    final box = await HiveService().openBox<dynamic>(_iuranSayaCacheBox);
+    final raw = box.get('all');
+    if (raw is List) {
+      return raw
+          .whereType<Map>()
+          .map((e) => IuranSaya.fromJson(deepCastMap(e)))
+          .toList();
+    }
+    return [];
   }
 
   Future<Iuran?> getIuranById(int id) async {
@@ -85,7 +114,7 @@ class IuranRepository {
       return Iuran.fromJson(raw);
     } catch (e) {
       final cached = await _getCachedIuranById(id);
-      if (cached != null && _canUseCache(e)) return cached;
+      if (cached != null) return cached;
 
       rethrow;
     }

@@ -38,8 +38,8 @@ class KegiatanRepository {
 
       return rawItems.map(Kegiatan.fromJson).toList();
     } catch (e) {
-      if (_canUseCache(e)) {
-        final cached = await cache.readKegiatanRaw();
+      final cached = await cache.readKegiatanRaw();
+      if (cached.isNotEmpty) {
         return cached.map(Kegiatan.fromJson).toList();
       }
       rethrow;
@@ -65,12 +65,10 @@ class KegiatanRepository {
 
       return item;
     } catch (e) {
-      if (_canUseCache(e)) {
-        final cached = await cache.readKegiatanRaw();
-        for (final item in cached) {
-          if ((item['id'] as num?)?.toInt() == id) {
-            return Kegiatan.fromJson(item);
-          }
+      final cached = await cache.readKegiatanRaw();
+      for (final item in cached) {
+        if ((item['id'] as num?)?.toInt() == id) {
+          return Kegiatan.fromJson(item);
         }
       }
       rethrow;
@@ -96,8 +94,8 @@ class KegiatanRepository {
 
       return rawItems.map(Kegiatan.fromJson).toList();
     } catch (e) {
-      if (_canUseCache(e)) {
-        final cached = await cache.readKegiatanRaw();
+      final cached = await cache.readKegiatanRaw();
+      if (cached.isNotEmpty) {
         return cached
             .where((item) => (item['rw_id'] as num?)?.toInt() == rwId)
             .map(Kegiatan.fromJson)
@@ -260,6 +258,8 @@ class KegiatanRepository {
           final data = result['data'];
           if (data is Map) {
             await cache.upsertKegiatanRaw(Map<String, dynamic>.from(data));
+          } else {
+            await cache.upsertKegiatanRaw({...cleanPayload, 'id': targetId});
           }
 
           await syncQueue.removeAction(queueId);

@@ -26,14 +26,14 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // WorkManager requires a sufficiently recent runtime; pin minSdk to 23 to
         // ensure background scheduling behaves reliably across devices.
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     dependencies {
-        implementation("androidx.work:work-runtime-ktx:2.8.1")
+        implementation("androidx.work:work-runtime-ktx:2.9.1")
     }
 
     buildTypes {
