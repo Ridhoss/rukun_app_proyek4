@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
 import 'package:rukun_app_proyek4/services/local/offline_sync_status_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class SuratLocalSyncService {
   static const String _queueBoxName = 'offline_sync_surat';
@@ -115,7 +116,7 @@ class SuratLocalSyncService {
 
     for (final value in box.values) {
       if (value is Map) {
-        actions.add(Map<String, dynamic>.from(value));
+        actions.add(deepCastMap(value));
       }
     }
 

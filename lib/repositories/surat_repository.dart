@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/services/local/local_surat_sync_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/services/local/navigation_service.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
+import 'package:rukun_app_proyek4/utils/connectivity_helper.dart';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 
@@ -25,6 +26,10 @@ class SuratRepository {
     final token = await local.getToken();
 
     if (token == null) {
+      return _getCachedSuratAll();
+    }
+
+    if (await ConnectivityHelper.isOffline()) {
       return _getCachedSuratAll();
     }
 
@@ -325,12 +330,13 @@ class SuratRepository {
             NotificationUtils.showSuccess(ctx, 'Surat berhasil disinkron');
         } else if (operation == 'update' && entityId != null) {
           final targetId = tempIdMap[entityId] ?? entityId;
+          final cleanPayload = _stripSyncFields(payload);
           final result = await _safeCall(
-            () => service.updateSurat(targetId, payload, token),
+            () => service.updateSurat(targetId, cleanPayload, token),
           );
 
           _validateStatus(result);
-          await _updateCachedSurat(targetId, payload, syncStatus: 'synced');
+          await _updateCachedSurat(targetId, cleanPayload, syncStatus: 'synced');
           final ctx = NavigationService.context;
           debugPrint('Surat update queue $queueId synced');
           if (ctx != null)
@@ -638,6 +644,22 @@ class SuratRepository {
     }
 
     return PengajuanSurat.fromJson(raw);
+  }
+
+  Map<String, dynamic> _stripSyncFields(Map<String, dynamic> raw) {
+    final result = Map<String, dynamic>.from(raw);
+    result.remove('sync_status');
+    result.remove('queue_id');
+    result.remove('created_at');
+    result.remove('updated_at');
+    result.remove('entity');
+    result.remove('entity_id');
+    result.remove('operation');
+    result.remove('local_queue_id');
+    result.remove('client_temp_id');
+    result.remove('attempts');
+    result.remove('last_attempt_at');
+    return result;
   }
 
   bool _canUseCache(Object error) {

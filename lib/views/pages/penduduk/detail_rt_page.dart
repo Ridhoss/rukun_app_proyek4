@@ -50,7 +50,9 @@ class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
       _isInitialized = true;
 
       final rtId = widget.rt.id;
-      context.read<DetailRTViewmodel>().init(rtId!);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<DetailRTViewmodel>().init(rtId!);
+      });
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
 import 'package:rukun_app_proyek4/services/local/offline_sync_status_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class SetoranIuranLocalSyncService {
   final HiveService _hive = HiveService();
@@ -84,7 +85,7 @@ class SetoranIuranLocalSyncService {
     final list = (box.get('pending') as List?) ?? [];
     return list
         .whereType<Map>()
-        .map((e) => Map<String, dynamic>.from(e))
+        .map((e) => deepCastMap(e))
         .toList();
   }
 

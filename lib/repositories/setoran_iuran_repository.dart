@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/services/local/local_setoran_iuran_cache_servi
 import 'package:rukun_app_proyek4/services/local/local_setoran_iuran_sync_service.dart';
 import 'package:rukun_app_proyek4/services/local/navigation_service.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
+import 'package:rukun_app_proyek4/utils/connectivity_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:math';
 
@@ -27,6 +28,10 @@ class SetoranIuranRtRepository {
     final token = await local.getToken();
 
     if (token == null) {
+      return _getCachedSetoran();
+    }
+
+    if (await ConnectivityHelper.isOffline()) {
       return _getCachedSetoran();
     }
 
@@ -360,7 +365,7 @@ class SetoranIuranRtRepository {
         final targetId = tempIdMap[entityId] ?? entityId;
 
         if (operation == 'update') {
-          final cleanPayload = _stripSyncFields(payload);
+          final cleanPayload = _stripSyncFields(payload)..remove('id');
           final result = await _safeCall(
             () => service.updateSetoran(targetId, cleanPayload, token),
           );
@@ -456,6 +461,9 @@ class SetoranIuranRtRepository {
     result.remove('entity_id');
     result.remove('operation');
     result.remove('local_queue_id');
+    result.remove('local_document_path');
+    result.remove('attempts');
+    result.remove('last_attempt_at');
     return result;
   }
 

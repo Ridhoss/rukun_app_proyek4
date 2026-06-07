@@ -41,6 +41,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:rukun_app_proyek4/services/local/sync_coordinator.dart';
 import 'package:rukun_app_proyek4/services/local/proactive_cache_service.dart';
 import 'package:rukun_app_proyek4/services/local/connectivity_service.dart';
+import 'package:rukun_app_proyek4/utils/connectivity_helper.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:rukun_app_proyek4/services/local/background_sync.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
@@ -179,20 +180,32 @@ void main() async {
         Provider(create: (_) => SetoranIuranLocalSyncService()),
 
         // connectivity + background sync coordinator
-        Provider(create: (_) => Connectivity()),
+        Provider(create: (_) {
+          final connectivity = Connectivity();
+          ConnectivityHelper.init(connectivity);
+          return connectivity;
+        }),
         ChangeNotifierProvider(
           create: (ctx) => ConnectivityService(ctx.read<Connectivity>()),
         ),
         Provider(
-          create: (ctx) => SyncCoordinator(
-            ctx.read<Connectivity>(),
-            ctx.read<IuranRepository>(),
-            ctx.read<SuratRepository>(),
-            ctx.read<WargaRepository>(),
-            ctx.read<SetoranIuranRtRepository>(),
-            ctx.read<KKRepository>(),
-            ctx.read<KegiatanRepository>(),
-          )..start(),
+          create: (ctx) {
+            final coordinator = SyncCoordinator(
+              ctx.read<Connectivity>(),
+              ctx.read<IuranRepository>(),
+              ctx.read<SuratRepository>(),
+              ctx.read<WargaRepository>(),
+              ctx.read<SetoranIuranRtRepository>(),
+              ctx.read<KKRepository>(),
+              ctx.read<KegiatanRepository>(),
+            )..start();
+
+            OfflineSyncStatusService.instance.onQueueChanged = () {
+              SyncCoordinator.notifyQueueChanged();
+            };
+
+            return coordinator;
+          },
         ),
 
         Provider(

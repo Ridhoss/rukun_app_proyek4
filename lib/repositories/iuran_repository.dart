@@ -12,6 +12,7 @@ import 'package:rukun_app_proyek4/services/local/local_iuran_sync_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
 import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
+import 'package:rukun_app_proyek4/utils/connectivity_helper.dart';
 
 class IuranRepository {
   final CloudIuranService service;
@@ -27,6 +28,10 @@ class IuranRepository {
     final token = await local.getToken();
 
     if (token == null) {
+      return _getCachedIuran();
+    }
+
+    if (await ConnectivityHelper.isOffline()) {
       return _getCachedIuran();
     }
 
@@ -423,17 +428,27 @@ class IuranRepository {
   Future<List<Iuran>> getIuranByRWId(int idRw) async {
     final token = await _requireToken();
 
+    if (await ConnectivityHelper.isOffline()) {
+      final cached = await cache.readIuranRwRaw(idRw);
+      return cached.map(Iuran.fromJson).toList();
+    }
+
     final result = await _safeCall(() => service.getIuranByRW(idRw, token));
 
     _validateStatus(result);
 
     final List data = result['data'] ?? [];
-
-    return data.map((e) => Iuran.fromJson(e)).toList();
+    final items = data.map((e) => Iuran.fromJson(e)).toList();
+    await cache.cacheIuranRwList(idRw, items);
+    return items;
   }
 
   Future<IuranRWDetail> getIuranRWDetail(int id) async {
     final token = await _requireToken();
+
+    if (await ConnectivityHelper.isOffline()) {
+      throw Exception('Tidak dapat memuat detail iuran saat offline');
+    }
 
     final result = await _safeCall(
       () => service.getIuranDetailWithRT(id, token),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/avatar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/services/local/connectivity_service.dart';
 import 'package:rukun_app_proyek4/services/local/offline_sync_status_service.dart';
+import 'package:rukun_app_proyek4/services/local/sync_coordinator.dart';
 
 class AppBarUtils {
   static PreferredSizeWidget buildAppBar({
@@ -37,7 +40,6 @@ class AppBarUtils {
       elevation: 0,
       toolbarHeight: 90,
 
-      // automaticallyImplyLeading: false,
       leading: finalLeading,
 
       leadingWidth: finalLeading != null ? 60 : 0,
@@ -96,7 +98,7 @@ class AppBarUtils {
                 trailing,
               ] else if (showSyncBadge) ...[
                 const SizedBox(width: 8),
-                const _OfflineSyncBadge(),
+                const _AppBarSyncIndicator(),
               ],
             ],
           ),
@@ -142,47 +144,101 @@ class AppBarUtils {
   }
 }
 
-class _OfflineSyncBadge extends StatelessWidget {
-  const _OfflineSyncBadge();
+class _AppBarSyncIndicator extends StatefulWidget {
+  const _AppBarSyncIndicator();
+
+  @override
+  State<_AppBarSyncIndicator> createState() => _AppBarSyncIndicatorState();
+}
+
+class _AppBarSyncIndicatorState extends State<_AppBarSyncIndicator> {
+  bool _isSyncing = false;
+
+  Future<void> _sync() async {
+    if (_isSyncing) return;
+    setState(() => _isSyncing = true);
+
+    try {
+      await context.read<SyncCoordinator>().syncNow();
+    } catch (_) {}
+
+    if (mounted) setState(() => _isSyncing = false);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final connectivity = context.watch<ConnectivityService>();
+
     return ValueListenableBuilder<int>(
       valueListenable: OfflineSyncStatusService.instance.pendingCount,
       builder: (context, count, _) {
         final hasPending = count > 0;
+        final isOffline = connectivity.isOffline;
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: hasPending
-                ? ColorsUtils.white.withValues(alpha: 0.16)
-                : ColorsUtils.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: ColorsUtils.white.withValues(alpha: 0.22),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                hasPending ? Icons.sync : Icons.cloud_done_outlined,
-                size: 16,
-                color: ColorsUtils.white,
+        return GestureDetector(
+          onTap: hasPending && !isOffline ? _sync : null,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: isOffline
+                  ? Colors.orange.withValues(alpha: 0.3)
+                  : hasPending
+                      ? Colors.amber.withValues(alpha: 0.3)
+                      : ColorsUtils.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: isOffline
+                    ? Colors.orange.withValues(alpha: 0.5)
+                    : hasPending
+                        ? Colors.amber.withValues(alpha: 0.5)
+                        : ColorsUtils.white.withValues(alpha: 0.22),
               ),
-              if (hasPending) ...[
-                const SizedBox(width: 6),
-                Text(
-                  '$count',
-                  style: const TextStyle(
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isSyncing)
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: ColorsUtils.white,
+                    ),
+                  )
+                else
+                  Icon(
+                    isOffline
+                        ? Icons.cloud_off
+                        : hasPending
+                            ? Icons.sync_problem
+                            : Icons.cloud_done_outlined,
+                    size: 16,
                     color: ColorsUtils.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
                   ),
-                ),
+                if (isOffline) ...[
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Offline',
+                    style: TextStyle(
+                      color: ColorsUtils.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ] else if (hasPending) ...[
+                  const SizedBox(width: 6),
+                  Text(
+                    '$count',
+                    style: const TextStyle(
+                      color: ColorsUtils.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },
