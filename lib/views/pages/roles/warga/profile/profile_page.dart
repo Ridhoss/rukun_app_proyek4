@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/repositories/auth_repository.dart';
 import 'package:rukun_app_proyek4/utils/avatar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/logout_dialog_utils.dart';
@@ -86,7 +87,9 @@ class WargaProfilePage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => ChangeNotifierProvider(
-                        create: (_) => KelolaProfileViewModel(),
+                        create: (context) => KelolaProfileViewModel(
+                          context.read<AuthRepository>(),
+                        ),
                         child: const KelolaProfilePage(),
                       ),
                     ),

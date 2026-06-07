@@ -14,7 +14,6 @@ import 'package:rukun_app_proyek4/views/pages/roles/rw/dashboard/widgets/rw_summ
 
 import 'package:rukun_app_proyek4/views/pages/roles/rw/profile/export_data_page.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rw/profile/rw_profile_page.dart';
-import 'package:rukun_app_proyek4/views/pages/roles/rw/profile/struktur_kepengurusan_page.dart';
 import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
 class RwDashboard extends StatelessWidget {
@@ -42,12 +41,6 @@ class RwDashboard extends StatelessWidget {
         showGreeting: true,
 
         settingsWidget: RwSettingsUtils(
-          onStructure: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const StructurePage()),
-            );
-          },
 
           onExport: () {
             Navigator.push(

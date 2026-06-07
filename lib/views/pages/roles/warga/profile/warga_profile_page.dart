@@ -168,13 +168,17 @@ class KelolaProfilePage extends StatelessWidget {
                       : () async {
                           await vm.submit();
 
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(vm.successMessage ?? "Berhasil"),
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                vm.errorMessage ??
+                                    vm.successMessage ??
+                                    "Terjadi kesalahan",
                               ),
-                            );
-                          }
+                            ),
+                          );
                         },
                   child: vm.isLoading
                       ? const CircularProgressIndicator(

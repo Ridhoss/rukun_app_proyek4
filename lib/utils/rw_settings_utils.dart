@@ -5,14 +5,12 @@ class RwSettingsUtils extends StatelessWidget {
   final VoidCallback onLogout;
   final VoidCallback onProfile;
   final VoidCallback onExport;
-  final VoidCallback onStructure;
 
   const RwSettingsUtils({
     super.key,
     required this.onLogout,
     required this.onProfile,
     required this.onExport,
-    required this.onStructure,
   });
 
   @override
@@ -21,9 +19,6 @@ class RwSettingsUtils extends StatelessWidget {
       icon: const Icon(Icons.settings, color: ColorsUtils.white),
       onSelected: (value) {
         switch (value) {
-          case "structure":
-            onStructure();
-            break;
           case "export":
             onExport();
             break;
@@ -36,7 +31,6 @@ class RwSettingsUtils extends StatelessWidget {
         }
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(value: "structure", child: Text("Struktur")),
         const PopupMenuItem(value: "export", child: Text("Export Laporan")),
         const PopupMenuItem(value: "profile", child: Text("Info Akun")),
         const PopupMenuDivider(),
