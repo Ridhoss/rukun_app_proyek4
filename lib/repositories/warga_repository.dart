@@ -123,12 +123,7 @@ class WargaRepository {
         await cache.upsertWargaRaw(_normalizeWargaMap(warga.toJson()));
       }
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _createWargaOffline(warga);
-        return;
-      }
-
-      rethrow;
+      await _createWargaOffline(warga);
     }
   }
 
@@ -152,12 +147,7 @@ class WargaRepository {
         );
       }
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _updateWargaOffline(id, warga);
-        return;
-      }
-
-      rethrow;
+      await _updateWargaOffline(id, warga);
     }
   }
 
@@ -172,12 +162,7 @@ class WargaRepository {
 
       await cache.removeWarga(id);
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _deleteWargaOffline(id);
-        return;
-      }
-
-      rethrow;
+      await _deleteWargaOffline(id);
     }
   }
 

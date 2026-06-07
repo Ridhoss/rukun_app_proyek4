@@ -113,11 +113,7 @@ class KKRepository {
         await cache.upsertKeluargaRaw(Map<String, dynamic>.from(data));
       }
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _createKKOffline(kk);
-        return;
-      }
-      rethrow;
+      await _createKKOffline(kk);
     }
   }
 
@@ -133,11 +129,7 @@ class KKRepository {
         await cache.upsertKeluargaRaw(Map<String, dynamic>.from(resData));
       }
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _updateKKOffline(id, data);
-        return;
-      }
-      rethrow;
+      await _updateKKOffline(id, data);
     }
   }
 
@@ -150,11 +142,7 @@ class KKRepository {
 
       await cache.removeKeluarga(id);
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _deleteKKOffline(id);
-        return;
-      }
-      rethrow;
+      await _deleteKKOffline(id);
     }
   }
 

@@ -27,10 +27,10 @@ class RtModel {
 
   factory RtModel.fromJson(Map<String, dynamic> json) {
     return RtModel(
-      id: json['id'],
-      noRt: json['no_rt'],
-      rwId: json['rw_id'],
-      saldoKas: json['saldo_kas'],
+      id: json['id'] as int?,
+      noRt: json['no_rt']?.toString() ?? '',
+      rwId: (json['rw_id'] as num?)?.toInt() ?? 0,
+      saldoKas: (json['saldo_kas'] as num?)?.toInt() ?? 0,
 
       ketua: json['ketua'],
       bendahara: json['bendahara'],

@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/repositories/kk_repository.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
+import 'package:rukun_app_proyek4/utils/sync_refresh_mixin.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/kartukeluarga/add_kk_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/penduduk/detail_rt_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
@@ -31,8 +32,16 @@ class DetailRTPage extends StatefulWidget {
   State<DetailRTPage> createState() => _DetailRTPageState();
 }
 
-class _DetailRTPageState extends State<DetailRTPage> with RouteAware {
+class _DetailRTPageState extends State<DetailRTPage> with RouteAware, SyncRefreshMixin {
   bool _isInitialized = false;
+
+  @override
+  void onSyncComplete(bool success) {
+    if (success) {
+      final rtId = widget.rt.id;
+      context.read<DetailRTViewmodel>().loadKK(rtId);
+    }
+  }
 
   @override
   void didPopNext() {

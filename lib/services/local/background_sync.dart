@@ -51,9 +51,7 @@ void callbackDispatcher() {
       try {
         await iuranRepo.syncPending();
       } catch (_) {}
-      try {
-        await suratRepo.syncPending();
-      } catch (_) {}
+      // surat & kegiatan are cache-only, no sync needed
       try {
         await wargaRepo.syncPending();
       } catch (_) {}
@@ -62,9 +60,6 @@ void callbackDispatcher() {
       } catch (_) {}
       try {
         await kkRepo.syncPending();
-      } catch (_) {}
-      try {
-        await kegiatanRepo.syncPending();
       } catch (_) {}
 
       return Future.value(true);

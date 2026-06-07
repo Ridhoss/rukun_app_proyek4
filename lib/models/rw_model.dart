@@ -31,12 +31,12 @@ class RwModel {
   factory RwModel.fromJson(Map<String, dynamic> json) {
     return RwModel(
       id: json['id'] as int?,
-      noRw: json['no_rw'],
-      kelurahanDesa: json['kelurahan_desa'],
-      kecamatan: json['kecamatan'],
-      kabupatenKota: json['kabupaten_kota'],
-      provinsi: json['provinsi'],
-      saldoKas: json['saldo_kas'],
+      noRw: json['no_rw']?.toString() ?? '',
+      kelurahanDesa: json['kelurahan_desa']?.toString() ?? '',
+      kecamatan: json['kecamatan']?.toString() ?? '',
+      kabupatenKota: json['kabupaten_kota']?.toString() ?? '',
+      provinsi: json['provinsi']?.toString() ?? '',
+      saldoKas: (json['saldo_kas'] as num?)?.toInt() ?? 0,
 
       waktuDibuat: json['waktu_dibuat'] != null
           ? DateTime.tryParse(json['waktu_dibuat'])

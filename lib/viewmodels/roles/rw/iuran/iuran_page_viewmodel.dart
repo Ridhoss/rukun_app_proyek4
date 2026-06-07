@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/repositories/iuran_repository.dart';
+import 'package:rukun_app_proyek4/services/local/local_iuran_cache_service.dart';
 
 enum IuranFilter { semua, rutin, khusus }
 
@@ -10,6 +11,8 @@ class RwIuranViewModel extends ChangeNotifier {
   final IuranRepository repository;
 
   RwIuranViewModel({required this.repository});
+
+  final IuranLocalCacheService _cache = IuranLocalCacheService();
 
   List<Iuran> _iurans = [];
   bool _isLoading = false;
@@ -66,10 +69,31 @@ class RwIuranViewModel extends ChangeNotifier {
     try {
       _iurans = await repository.getIuranByRWId(rwId);
     } catch (e) {
-      _error = e.toString();
+      debugPrint('[RwIuranVM] fetchDashboard error: $e');
+      _iurans = await _getCachedIuran(rwId);
+      if (_iurans.isEmpty) {
+        _error = e.toString();
+      }
     }
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<List<Iuran>> _getCachedIuran(int rwId) async {
+    try {
+      final cached = await _cache.readIuranRwRaw(rwId);
+      if (cached.isNotEmpty) {
+        return cached.map(Iuran.fromJson).toList();
+      }
+
+      final allCached = await _cache.readIuranRaw();
+      return allCached
+          .where((item) => (item['rw_id'] as num?)?.toInt() == rwId)
+          .map(Iuran.fromJson)
+          .toList();
+    } catch (_) {
+      return [];
+    }
   }
 }

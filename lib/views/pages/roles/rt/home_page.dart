@@ -5,6 +5,7 @@ import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/logout_dialog_utils.dart';
 import 'package:rukun_app_proyek4/utils/rt_settings_utils.dart';
+import 'package:rukun_app_proyek4/utils/sync_refresh_mixin.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
@@ -18,7 +19,14 @@ class RtHomePage extends StatefulWidget {
   State<RtHomePage> createState() => _RtHomePageState();
 }
 
-class _RtHomePageState extends State<RtHomePage> {
+class _RtHomePageState extends State<RtHomePage> with SyncRefreshMixin {
+  @override
+  void onSyncComplete(bool success) {
+    if (success) {
+      context.read<RtDashboardViewModel>().fetchDashboard();
+    }
+  }
+
   @override
   void initState() {
     super.initState();

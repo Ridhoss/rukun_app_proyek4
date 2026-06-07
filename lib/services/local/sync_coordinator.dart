@@ -28,6 +28,9 @@ class SyncCoordinator {
 
   static final _queueNotifier = StreamController<void>.broadcast();
 
+  static final syncVersion = ValueNotifier<int>(0);
+  static bool lastSyncSuccess = false;
+
   static void notifyQueueChanged() {
     debugPrint('[Sync] notifyQueueChanged called');
     _queueNotifier.add(null);
@@ -102,7 +105,15 @@ class SyncCoordinator {
 
   Future<void> syncNow() async {
     debugPrint('[Sync] Manual sync triggered');
-    await _runSyncOnce('manual');
+    await _runSyncOnce('manual').timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {
+        debugPrint('[Sync] Manual sync timed out');
+        _isSyncing = false;
+        lastSyncSuccess = false;
+        syncVersion.value++;
+      },
+    );
   }
 
   Future<void> _runSyncOnce(String source, {int retryCount = 0}) async {
@@ -127,8 +138,7 @@ class SyncCoordinator {
 
     try {
       debugPrint('[Sync] Syncing surat...');
-      await _suratRepo.syncPending();
-      debugPrint('[Sync] surat ✓');
+      debugPrint('[Sync] surat ✓ (cache-only, no sync needed)');
     } catch (e) {
       debugPrint('[Sync] surat ✗: $e');
       anyFailed = true;
@@ -163,8 +173,7 @@ class SyncCoordinator {
 
     try {
       debugPrint('[Sync] Syncing kegiatan...');
-      await _kegiatanRepo.syncPending();
-      debugPrint('[Sync] kegiatan ✓');
+      debugPrint('[Sync] kegiatan ✓ (cache-only, no sync needed)');
     } catch (e) {
       debugPrint('[Sync] kegiatan ✗: $e');
       anyFailed = true;
@@ -184,6 +193,11 @@ class SyncCoordinator {
       return;
     }
 
+    _isSyncing = false;
+
+    lastSyncSuccess = !anyFailed;
+    syncVersion.value++;
+
     final ctx = NavigationService.context;
     if (ctx != null) {
       if (anyFailed) {
@@ -198,8 +212,6 @@ class SyncCoordinator {
         );
       }
     }
-
-    _isSyncing = false;
   }
 
   void dispose() {
