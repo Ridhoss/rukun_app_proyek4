@@ -418,11 +418,12 @@ class _KegiatanPageState extends State<KegiatanPage> {
 
       decoration: BoxDecoration(
         color: ColorsUtils.white,
-        borderRadius: BorderRadius.circular(22),
+
+        borderRadius: BorderRadius.circular(24),
 
         boxShadow: [
           BoxShadow(
-            color: ColorsUtils.black.withOpacity(0.03),
+            color: ColorsUtils.black.withValues(alpha: 0.16),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
