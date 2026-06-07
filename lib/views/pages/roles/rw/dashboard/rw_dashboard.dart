@@ -41,7 +41,6 @@ class RwDashboard extends StatelessWidget {
         showGreeting: true,
 
         settingsWidget: RwSettingsUtils(
-
           onExport: () {
             Navigator.push(
               context,
@@ -157,7 +156,7 @@ class RwDashboard extends StatelessWidget {
                   padding: const EdgeInsets.all(18),
 
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: ColorsUtils.white,
                     borderRadius: BorderRadius.circular(24),
                   ),
 
@@ -200,7 +199,7 @@ class RwDashboard extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 14),
-                vm.kegiatan.isEmpty
+                vm.kegiatanAktual.isEmpty
                     ? Container(
                         padding: const EdgeInsets.all(20),
                         alignment: Alignment.center,
@@ -208,7 +207,7 @@ class RwDashboard extends StatelessWidget {
                         child: const Text("Belum ada kegiatan berlangsung"),
                       )
                     : Column(
-                        children: vm.kegiatan.map((item) {
+                        children: vm.kegiatanAktual.take(5).map((item) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 14),
 

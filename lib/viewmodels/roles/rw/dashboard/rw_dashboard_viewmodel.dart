@@ -81,4 +81,20 @@ class DashboardRwViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  List<Kegiatan> get kegiatanAktual {
+    final list = dashboard?.kegiatan ?? [];
+
+    return list.where((k) {
+      final now = DateTime.now();
+      final end = k.tanggalSelesai ?? k.tanggalMulai;
+
+      final isValid =
+          k.status == KegiatanStatus.dibatalkan ||
+          now.isBefore(end) ||
+          now.isAfter(k.tanggalMulai);
+
+      return isValid;
+    }).toList();
+  }
 }
