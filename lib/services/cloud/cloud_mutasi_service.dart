@@ -6,7 +6,7 @@ class CloudKasMutasiService {
 
   Future<Map<String, dynamic>> getAllKasMutasi(String token) async {
     final response = await _dio.get(
-      '/kas-mutasi',
+      '/mutasi',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -18,7 +18,7 @@ class CloudKasMutasiService {
     String token,
   ) async {
     final response = await _dio.get(
-      '/kas-mutasi/$id',
+      '/mutasi/$id',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -30,7 +30,7 @@ class CloudKasMutasiService {
     String token,
   ) async {
     final response = await _dio.get(
-      '/kas-mutasi/rt/$rtId',
+      '/mutasi/rt/$rtId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -42,7 +42,7 @@ class CloudKasMutasiService {
     String token,
   ) async {
     final response = await _dio.get(
-      '/kas-mutasi/rw/$rwId',
+      '/mutasi/rw/$rwId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
@@ -54,7 +54,7 @@ class CloudKasMutasiService {
     String token,
   ) async {
     final response = await _dio.post(
-      '/kas-mutasi',
+      '/mutasi',
       data: data,
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
@@ -68,7 +68,7 @@ class CloudKasMutasiService {
     String token,
   ) async {
     final response = await _dio.put(
-      '/kas-mutasi/$id',
+      '/mutasi/$id',
       data: data,
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
@@ -81,7 +81,7 @@ class CloudKasMutasiService {
     String token,
   ) async {
     final response = await _dio.delete(
-      '/kas-mutasi/$id',
+      '/mutasi/$id',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 

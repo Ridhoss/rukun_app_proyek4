@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/models/dashboard_model.dart';
+import 'package:rukun_app_proyek4/models/kas_mutasi_model.dart';
 import 'package:rukun_app_proyek4/models/kegiatan_model.dart';
 import 'package:rukun_app_proyek4/repositories/dashboard_repository.dart';
+import 'package:rukun_app_proyek4/repositories/kas_mutasi_repository.dart';
 
 class DashboardRwViewModel extends ChangeNotifier {
   final DashboardRepository repository;
+  final KasMutasiRepository kasRepository;
 
-  DashboardRwViewModel(this.repository);
+  DashboardRwViewModel(this.repository, this.kasRepository);
 
   bool isLoading = false;
   String? errorMessage;
@@ -58,6 +61,24 @@ class DashboardRwViewModel extends ChangeNotifier {
       return kegiatan.firstWhere((e) => e.isBerlangsung);
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<void> tambahKas({required KasMutasi kas}) async {
+    try {
+      isLoading = true;
+      errorMessage = null;
+      notifyListeners();
+
+      await kasRepository.createKasMutasi(kas);
+
+      await fetchDashboard();
+    } catch (e) {
+      errorMessage = e.toString();
+      debugPrint("ERROR CREATE KAS: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 }

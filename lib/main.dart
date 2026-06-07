@@ -1,8 +1,10 @@
 import 'package:rukun_app_proyek4/repositories/dashboard_repository.dart';
+import 'package:rukun_app_proyek4/repositories/kas_mutasi_repository.dart';
 import 'package:rukun_app_proyek4/repositories/kegiatan_repository.dart';
 import 'package:rukun_app_proyek4/repositories/setoran_iuran_repository.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_dashboard_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kegiatan_service.dart';
+import 'package:rukun_app_proyek4/services/cloud/cloud_mutasi_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_setoran_iuran_service.dart';
 import 'package:rukun_app_proyek4/viewmodels/kegiatan/kegiatan_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewmodel.dart';
@@ -179,12 +181,21 @@ void main() async {
         Provider(create: (_) => SetoranIuranLocalCacheService()),
         Provider(create: (_) => SetoranIuranLocalSyncService()),
 
+        Provider(
+          create: (context) => KasMutasiRepository(
+            CloudKasMutasiService(),
+            context.read<AuthLocalService>(),
+          ),
+        ),
+
         // connectivity + background sync coordinator
-        Provider(create: (_) {
-          final connectivity = Connectivity();
-          ConnectivityHelper.init(connectivity);
-          return connectivity;
-        }),
+        Provider(
+          create: (_) {
+            final connectivity = Connectivity();
+            ConnectivityHelper.init(connectivity);
+            return connectivity;
+          },
+        ),
         ChangeNotifierProvider(
           create: (ctx) => ConnectivityService(ctx.read<Connectivity>()),
         ),
@@ -228,9 +239,9 @@ void main() async {
               final rwId = user?.rw?.id;
               final rtId = user?.rt?.id;
               context.read<ProactiveCacheService>().cacheAllData(
-                    rwId: rwId,
-                    rtId: rtId,
-                  );
+                rwId: rwId,
+                rtId: rtId,
+              );
             };
             return authVm;
           },
@@ -335,9 +346,10 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) =>
-              DashboardRwViewModel(context.read<DashboardRepository>())
-                ..fetchDashboard(),
+          create: (context) => DashboardRwViewModel(
+            context.read<DashboardRepository>(),
+            context.read<KasMutasiRepository>(),
+          )..fetchDashboard(),
         ),
       ],
 
