@@ -286,8 +286,10 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) =>
-              RtDashboardViewModel(context.read<DashboardRepository>()),
+          create: (context) => RtDashboardViewModel(
+            context.read<DashboardRepository>(),
+            context.read<KasMutasiRepository>(),
+          ),
         ),
 
         ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),

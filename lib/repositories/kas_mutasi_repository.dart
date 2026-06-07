@@ -12,9 +12,7 @@ class KasMutasiRepository {
   Future<List<KasMutasi>> getAllKasMutasi() async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getAllKasMutasi(token),
-    );
+    final result = await _safeCall(() => service.getAllKasMutasi(token));
 
     _validateStatus(result);
 
@@ -26,9 +24,7 @@ class KasMutasiRepository {
   Future<KasMutasi?> getKasMutasiById(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getKasMutasiById(id, token),
-    );
+    final result = await _safeCall(() => service.getKasMutasiById(id, token));
 
     _validateStatus(result);
 
@@ -42,9 +38,7 @@ class KasMutasiRepository {
   Future<List<KasMutasi>> getKasMutasiByRT(int rtId) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getKasMutasiByRT(rtId, token),
-    );
+    final result = await _safeCall(() => service.getKasMutasiByRT(rtId, token));
 
     _validateStatus(result);
 
@@ -56,9 +50,7 @@ class KasMutasiRepository {
   Future<List<KasMutasi>> getKasMutasiByRW(int rwId) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.getKasMutasiByRW(rwId, token),
-    );
+    final result = await _safeCall(() => service.getKasMutasiByRW(rwId, token));
 
     _validateStatus(result);
 
@@ -90,9 +82,7 @@ class KasMutasiRepository {
   Future<void> deleteKasMutasi(int id) async {
     final token = await _requireToken();
 
-    final result = await _safeCall(
-      () => service.deleteKasMutasi(id, token),
-    );
+    final result = await _safeCall(() => service.deleteKasMutasi(id, token));
 
     _validateStatus(result);
   }
@@ -112,8 +102,12 @@ class KasMutasiRepository {
   ) async {
     try {
       return await fn();
-    } on DioException {
-      rethrow;
+    } on DioException catch (e) {
+      throw Exception(
+        e.response?.data?['message'] ??
+            e.message ??
+            "Terjadi kesalahan jaringan",
+      );
     } catch (e) {
       throw Exception(e.toString().replaceAll("Exception: ", ""));
     }

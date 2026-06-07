@@ -207,12 +207,17 @@ class RwKasCard extends StatelessWidget {
                                   nominalController.text.replaceAll('.', ''),
                                 );
 
-                                if (nominal == null) return;
+                                if (nominal == null) {
+                                  NotificationUtils.showError(
+                                    context,
+                                    "Nominal tidak valid",
+                                  );
+                                  return;
+                                }
 
                                 setState(() => isLoading = true);
 
-                                final vm = modalContext
-                                    .read<DashboardRwViewModel>();
+                                final vm = context.read<DashboardRwViewModel>();
 
                                 final kas = KasMutasi(
                                   level: KasLevel.rw,
@@ -224,30 +229,23 @@ class RwKasCard extends StatelessWidget {
                                   rwId: rw.id,
                                 );
 
-                                try {
-                                  await vm.tambahKas(kas: kas);
+                                final result = await vm.tambahKas(kas: kas);
 
-                                  if (!modalContext.mounted) return;
+                                setState(() => isLoading = false);
 
-                                  setState(() => isLoading = false);
-
-                                  nominalController.clear();
-                                  keteranganController.clear();
-
-                                  Navigator.pop(modalContext);
-
-                                  NotificationUtils.showSuccess(
-                                    context,
-                                    "Kas berhasil ditambahkan",
-                                  );
-                                } catch (e) {
-                                  setState(() => isLoading = false);
-
-                                  NotificationUtils.showError(
-                                    context,
-                                    "Gagal menambahkan kas",
-                                  );
+                                if (result != null) {
+                                  NotificationUtils.showError(context, result);
+                                  return;
                                 }
+
+                                if (!modalContext.mounted) return;
+
+                                Navigator.pop(modalContext);
+
+                                NotificationUtils.showSuccess(
+                                  context,
+                                  "Kas berhasil ditambahkan",
+                                );
                               },
                         child: isLoading
                             ? const SizedBox(
