@@ -38,7 +38,7 @@ class _WargaIuranPageState extends State<WargaIuranPage> {
     return ChangeNotifierProvider.value(
       value: vm,
       child: Scaffold(
-        backgroundColor: ColorsUtils.white,
+        backgroundColor: ColorsUtils.lightgray,
 
         appBar: AppBarUtils.buildAppBar(
           context: context,
@@ -147,42 +147,58 @@ class _WargaIuranPageState extends State<WargaIuranPage> {
   Widget _typeToggle(IuranwargaViewmodel vm) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: ColorsUtils.lightgray,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            _typeItem(vm, "Wajib", IuranType.reguler),
-            _typeItem(vm, "Sedekah", IuranType.insidentil),
-          ],
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _toggleButton(
+              selected: vm.selectedType == IuranType.reguler,
+              label: "Wajib",
+              onTap: () => vm.setType(IuranType.reguler),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _toggleButton(
+              selected: vm.selectedType == IuranType.insidentil,
+              label: "Sedekah",
+              onTap: () => vm.setType(IuranType.insidentil),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _typeItem(IuranwargaViewmodel vm, String text, IuranType type) {
-    final selected = vm.selectedType == type;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => vm.setType(type),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: selected ? ColorsUtils.b400 : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
+  Widget _toggleButton({
+    required bool selected,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        height: 48,
+        decoration: BoxDecoration(
+          color: selected ? ColorsUtils.b300 : ColorsUtils.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: ColorsUtils.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(
+            color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
           ),
-          child: Center(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: selected ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w600,
-              ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? ColorsUtils.white : ColorsUtils.black,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -213,32 +229,29 @@ class _WargaIuranPageState extends State<WargaIuranPage> {
 
     return GestureDetector(
       onTap: () => vm.setStatus(status),
+
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        margin: const EdgeInsets.only(right: 10),
+
+        margin: const EdgeInsets.only(right: 10, top: 8, bottom: 8),
+
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+
         decoration: BoxDecoration(
-          color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
+          color: selected ? ColorsUtils.b300 : ColorsUtils.white,
+
           borderRadius: BorderRadius.circular(30),
+
           border: Border.all(
-            color: selected ? Colors.transparent : Colors.grey.shade300,
+            color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
           ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    // ignore: deprecated_member_use
-                    color: Colors.blue.withOpacity(0.15),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
         ),
+
         child: Text(
           text,
           style: TextStyle(
-            color: selected ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.w600,
+            color: selected ? ColorsUtils.white : ColorsUtils.black,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),

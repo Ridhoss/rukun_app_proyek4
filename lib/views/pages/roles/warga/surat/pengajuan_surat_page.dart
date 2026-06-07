@@ -35,6 +35,8 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
     final nama = authVM.currentUser?.warga?.nama ?? "-";
 
     return Scaffold(
+      backgroundColor: ColorsUtils.lightgray,
+
       appBar: AppBarUtils.buildAppBar(
         context: context,
         name: nama,
@@ -185,20 +187,31 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
       onTap: () => vm.setFilter(filter),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        margin: const EdgeInsets.only(right: 10),
+        margin: const EdgeInsets.only(right: 10, top: 8, bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+
         decoration: BoxDecoration(
-          color: selected ? ColorsUtils.b300 : Colors.grey.shade100,
+          color: selected ? ColorsUtils.b300 : ColorsUtils.white,
           borderRadius: BorderRadius.circular(30),
+
           border: Border.all(
-            color: selected ? Colors.transparent : Colors.grey.shade300,
+            color: selected ? ColorsUtils.b300 : ColorsUtils.lightgray,
           ),
+
+          boxShadow: [
+            BoxShadow(
+              color: ColorsUtils.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
+
         child: Text(
           text,
           style: TextStyle(
-            color: selected ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.w600,
+            color: selected ? ColorsUtils.white : ColorsUtils.black,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
