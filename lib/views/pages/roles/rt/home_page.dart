@@ -9,6 +9,7 @@ import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rt/profile_page.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rt/widgets/rt_kas_card.dart';
 import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
 class RtHomePage extends StatefulWidget {
@@ -31,6 +32,7 @@ class _RtHomePageState extends State<RtHomePage> {
   Widget build(BuildContext context) {
     final authVM = context.watch<AuthViewModel>();
     final namaUser = authVM.currentUser?.warga?.nama ?? "Ketua RT";
+    final rt = authVM.currentUser?.rt;
 
     return Scaffold(
       backgroundColor: ColorsUtils.lightgray,
@@ -56,7 +58,9 @@ class _RtHomePageState extends State<RtHomePage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Memproses file Excel...")),
               );
-              final success = await vm.exportDataKependudukan(authVM.currentUser!);
+              final success = await vm.exportDataKependudukan(
+                authVM.currentUser!,
+              );
               if (context.mounted) {
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -112,68 +116,22 @@ class _RtHomePageState extends State<RtHomePage> {
           }
 
           final int totalGender = viewModel.totalWanita + viewModel.totalPria;
-          final double progressWanita =
-              totalGender > 0 ? viewModel.totalWanita / totalGender : 0.0;
+          final double progressWanita = totalGender > 0
+              ? viewModel.totalWanita / totalGender
+              : 0.0;
 
           return RefreshIndicator(
             onRefresh: viewModel.fetchDashboard,
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                // 1. KAS CARD (GRADIENT)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: const LinearGradient(
-                      colors: [ColorsUtils.b300, ColorsUtils.b500],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Saldo Kas RT",
-                          style: TextStyle(color: Colors.white70, fontSize: 14)),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Rp ${NumberFormat('#,###', 'id_ID').format(viewModel.saldoKas.toInt())}",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _kasInfo(
-                            "Kas Masuk",
-                            "+ Rp ${NumberFormat('#,###', 'id_ID').format(viewModel.kasMasuk.toInt())}",
-                          ),
-                          _kasInfo(
-                            "Kas Keluar",
-                            "- Rp ${NumberFormat('#,###', 'id_ID').format(viewModel.kasKeluar.toInt())}",
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: const [
-                              Text("Diperbarui",
-                                  style: TextStyle(
-                                      color: Colors.white60, fontSize: 10)),
-                              Text("Hari Ini",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 11)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                RtKasCard(
+                  saldo: viewModel.saldoKas,
+                  masuk: viewModel.kasMasuk,
+                  keluar: viewModel.kasKeluar,
+                  rt: rt!,
                 ),
+
                 const SizedBox(height: 25),
 
                 // 2. STATS GRID (2x2)
@@ -185,26 +143,41 @@ class _RtHomePageState extends State<RtHomePage> {
                   mainAxisSpacing: 15,
                   childAspectRatio: 1.6,
                   children: [
-                    _statCard("Total Penduduk", viewModel.totalPenduduk.toString()),
+                    _statCard(
+                      "Total Penduduk",
+                      viewModel.totalPenduduk.toString(),
+                    ),
                     _statCard("Jumlah KK", viewModel.jumlahKk.toString()),
-                    _statCard("Surat Pending", viewModel.suratPending.toString()),
-                    _statCard("Surat Diproses", viewModel.suratDiproses.toString()),
+                    _statCard(
+                      "Surat Pending",
+                      viewModel.suratPending.toString(),
+                    ),
+                    _statCard(
+                      "Surat Diproses",
+                      viewModel.suratDiproses.toString(),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 30),
 
                 // 3. DEMOGRAFI UMUM
-                const Text("Demografi Umum",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  "Demografi Umum",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     const Icon(Icons.female, color: Colors.pink, size: 18),
-                    Text(" Wanita (${viewModel.totalWanita})",
-                        style: const TextStyle(fontSize: 13)),
+                    Text(
+                      " Wanita (${viewModel.totalWanita})",
+                      style: const TextStyle(fontSize: 13),
+                    ),
                     const Spacer(),
-                    Text("Pria (${viewModel.totalPria}) ",
-                        style: const TextStyle(fontSize: 13)),
+                    Text(
+                      "Pria (${viewModel.totalPria}) ",
+                      style: const TextStyle(fontSize: 13),
+                    ),
                     const Icon(Icons.male, color: ColorsUtils.b300, size: 18),
                   ],
                 ),
@@ -215,22 +188,37 @@ class _RtHomePageState extends State<RtHomePage> {
                     value: progressWanita,
                     minHeight: 10,
                     backgroundColor: ColorsUtils.b200,
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.pinkAccent,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 25),
 
                 // 4. BERDASARKAN USIA
-                const Text("Berdasarkan Usia",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  "Berdasarkan Usia",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 15),
-                _ageRow(Icons.child_care, "Anak", "(0-15 tahun)",
-                    viewModel.totalAnak.toString()),
-                _ageRow(Icons.accessibility_new, "Usia Produktif", "(15-64 tahun)",
-                    viewModel.totalProduktif.toString()),
-                _ageRow(Icons.elderly, "Lansia", "(>64 tahun)",
-                    viewModel.totalLansia.toString()),
+                _ageRow(
+                  Icons.child_care,
+                  "Anak",
+                  "(0-15 tahun)",
+                  viewModel.totalAnak.toString(),
+                ),
+                _ageRow(
+                  Icons.accessibility_new,
+                  "Usia Produktif",
+                  "(15-64 tahun)",
+                  viewModel.totalProduktif.toString(),
+                ),
+                _ageRow(
+                  Icons.elderly,
+                  "Lansia",
+                  "(>64 tahun)",
+                  viewModel.totalLansia.toString(),
+                ),
                 const SizedBox(height: 30),
 
                 // 5. KEGIATAN BERLANGSUNG
@@ -238,9 +226,13 @@ class _RtHomePageState extends State<RtHomePage> {
                   children: const [
                     Icon(Icons.calendar_month, color: ColorsUtils.b300),
                     SizedBox(width: 10),
-                    Text("Kegiatan Berlangsung",
-                        style:
-                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(
+                      "Kegiatan Berlangsung",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 15),
@@ -258,14 +250,21 @@ class _RtHomePageState extends State<RtHomePage> {
                     final bool isUpcoming =
                         item.tanggalMulai.isAfter(now) && !isBerlangsung;
 
-                    final String statusText =
-                        isBerlangsung ? "BERLANGSUNG" : (isUpcoming ? "UPCOMING" : item.status.name.toUpperCase());
-                    final Color statusColor =
-                        isBerlangsung ? ColorsUtils.green : ColorsUtils.b300;
+                    final String statusText = isBerlangsung
+                        ? "BERLANGSUNG"
+                        : (isUpcoming
+                              ? "UPCOMING"
+                              : item.status.name.toUpperCase());
+                    final Color statusColor = isBerlangsung
+                        ? ColorsUtils.green
+                        : ColorsUtils.b300;
 
                     final String dateRange = item.tanggalSelesai != null
                         ? "${DateFormat('dd MMM yyyy', 'id_ID').format(item.tanggalMulai)} - ${DateFormat('dd MMM yyyy', 'id_ID').format(item.tanggalSelesai!)}"
-                        : DateFormat('dd MMM yyyy', 'id_ID').format(item.tanggalMulai);
+                        : DateFormat(
+                            'dd MMM yyyy',
+                            'id_ID',
+                          ).format(item.tanggalMulai);
 
                     return _kegiatanCard(
                       status: statusText,
@@ -276,7 +275,9 @@ class _RtHomePageState extends State<RtHomePage> {
                     );
                   }).toList(),
 
-                const SizedBox(height: 80), // Jarak biar nggak nabrak bottom nav
+                const SizedBox(
+                  height: 80,
+                ), // Jarak biar nggak nabrak bottom nav
               ],
             ),
           );
@@ -291,10 +292,18 @@ class _RtHomePageState extends State<RtHomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white60, fontSize: 11)),
-        Text(amount,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white60, fontSize: 11),
+        ),
+        Text(
+          amount,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
@@ -307,20 +316,29 @@ class _RtHomePageState extends State<RtHomePage> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 5))
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(label, style: const TextStyle(color: ColorsUtils.gray, fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(color: ColorsUtils.gray, fontSize: 13),
+          ),
           const SizedBox(height: 5),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black)),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
         ],
       ),
     );
@@ -342,10 +360,15 @@ class _RtHomePageState extends State<RtHomePage> {
             const SizedBox(width: 12),
             Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(width: 5),
-            Text(range, style: const TextStyle(color: ColorsUtils.gray, fontSize: 12)),
+            Text(
+              range,
+              style: const TextStyle(color: ColorsUtils.gray, fontSize: 12),
+            ),
             const Spacer(),
-            Text(count,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              count,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),
@@ -376,23 +399,169 @@ class _RtHomePageState extends State<RtHomePage> {
               color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(5),
             ),
-            child: Text(status,
-                style: TextStyle(
-                    color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
+            child: Text(
+              status,
+              style: TextStyle(
+                color: statusColor,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(height: 10),
-          Text(title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 5),
-          Text(desc,
-              style: const TextStyle(color: ColorsUtils.gray, fontSize: 13),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis),
+          Text(
+            desc,
+            style: const TextStyle(color: ColorsUtils.gray, fontSize: 13),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           const SizedBox(height: 10),
-          Text(date,
-              style: const TextStyle(color: ColorsUtils.darkgray, fontSize: 12)),
+          Text(
+            date,
+            style: const TextStyle(color: ColorsUtils.darkgray, fontSize: 12),
+          ),
         ],
       ),
+    );
+  }
+
+  void showKasModal(BuildContext context) {
+    final nominalController = TextEditingController();
+    final keteranganController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (modalContext) {
+        bool isLoading = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: MediaQuery.of(modalContext).viewInsets.bottom + 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+
+                    const Text(
+                      "Tambah Kas RT",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    TextFormField(
+                      controller: nominalController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Nominal',
+                        prefixText: 'Rp ',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    TextFormField(
+                      controller: keteranganController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Keterangan',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () async {
+                                final nominal = int.tryParse(
+                                  nominalController.text.replaceAll('.', ''),
+                                );
+
+                                if (nominal == null) return;
+
+                                setState(() => isLoading = true);
+
+                                try {
+                                  final vm = context
+                                      .read<RtDashboardViewModel>();
+
+                                  // await vm.tambahKas(
+                                  //   nominal: nominal,
+                                  //   keterangan: keteranganController.text,
+                                  // );
+
+                                  if (modalContext.mounted) {
+                                    Navigator.pop(modalContext);
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("Kas berhasil disimpan"),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Gagal: $e"),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                } finally {
+                                  setState(() => isLoading = false);
+                                }
+                              },
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text("Simpan"),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

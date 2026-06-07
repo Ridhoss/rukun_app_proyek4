@@ -64,18 +64,18 @@ class DashboardRwViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> tambahKas({required KasMutasi kas}) async {
+  Future<String?> tambahKas({required KasMutasi kas}) async {
     try {
       isLoading = true;
-      errorMessage = null;
       notifyListeners();
 
       await kasRepository.createKasMutasi(kas);
-
       await fetchDashboard();
+
+      return null;
     } catch (e) {
-      errorMessage = e.toString();
       debugPrint("ERROR CREATE KAS: $e");
+      return e.toString();
     } finally {
       isLoading = false;
       notifyListeners();

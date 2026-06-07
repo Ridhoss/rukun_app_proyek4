@@ -170,6 +170,20 @@ class AuthRepository {
     _validateStatus(result);
   }
 
+  Future<void> changePassword(String password, String newpassword) async {
+    final token = await local.getToken();
+
+    if (token == null) {
+      throw Exception("Token tidak ditemukan. Silakan login ulang.");
+    }
+
+    final result = await _safeCall(
+      () => service.changePassword(password, newpassword, token),
+    );
+
+    _validateStatus(result);
+  }
+
   Future<Map<String, dynamic>> _safeCall(Future<dynamic> Function() fn) async {
     try {
       final res = await fn();

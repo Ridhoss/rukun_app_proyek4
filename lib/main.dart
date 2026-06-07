@@ -289,14 +289,16 @@ void main() async {
         ),
 
         ChangeNotifierProvider(
-          create: (context) =>
-              KelolaProfileViewModel(context.read<AuthRepository>()),
-          child: const KelolaProfilePage(),
+          create: (context) => RtDashboardViewModel(
+            context.read<DashboardRepository>(),
+            context.read<KasMutasiRepository>(),
+          ),
         ),
 
         ChangeNotifierProvider(
           create: (context) =>
-              RtDashboardViewModel(context.read<DashboardRepository>()),
+              KelolaProfileViewModel(context.read<AuthRepository>()),
+          child: const KelolaProfilePage(),
         ),
 
         ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),

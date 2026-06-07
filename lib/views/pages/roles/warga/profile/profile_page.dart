@@ -87,7 +87,7 @@ class WargaProfilePage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => ChangeNotifierProvider(
-                        create: (context) => KelolaProfileViewModel(
+                        create: (_) => KelolaProfileViewModel(
                           context.read<AuthRepository>(),
                         ),
                         child: const KelolaProfilePage(),

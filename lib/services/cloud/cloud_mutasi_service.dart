@@ -13,10 +13,7 @@ class CloudKasMutasiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getKasMutasiById(
-    int id,
-    String token,
-  ) async {
+  Future<Map<String, dynamic>> getKasMutasiById(int id, String token) async {
     final response = await _dio.get(
       '/mutasi/$id',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -25,10 +22,7 @@ class CloudKasMutasiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getKasMutasiByRT(
-    int rtId,
-    String token,
-  ) async {
+  Future<Map<String, dynamic>> getKasMutasiByRT(int rtId, String token) async {
     final response = await _dio.get(
       '/mutasi/rt/$rtId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -37,10 +31,7 @@ class CloudKasMutasiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> getKasMutasiByRW(
-    int rwId,
-    String token,
-  ) async {
+  Future<Map<String, dynamic>> getKasMutasiByRW(int rwId, String token) async {
     final response = await _dio.get(
       '/mutasi/rw/$rwId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -53,13 +44,20 @@ class CloudKasMutasiService {
     Map<String, dynamic> data,
     String token,
   ) async {
-    final response = await _dio.post(
-      '/mutasi',
-      data: data,
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
+    try {
+      final response = await _dio.post(
+        '/mutasi',
+        data: data,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
 
-    return response.data;
+      return response.data;
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? e.message ?? "Request gagal";
+
+      throw Exception(message);
+    }
   }
 
   Future<Map<String, dynamic>> updateKasMutasi(
@@ -76,10 +74,7 @@ class CloudKasMutasiService {
     return response.data;
   }
 
-  Future<Map<String, dynamic>> deleteKasMutasi(
-    int id,
-    String token,
-  ) async {
+  Future<Map<String, dynamic>> deleteKasMutasi(int id, String token) async {
     final response = await _dio.delete(
       '/mutasi/$id',
       options: Options(headers: {'Authorization': 'Bearer $token'}),

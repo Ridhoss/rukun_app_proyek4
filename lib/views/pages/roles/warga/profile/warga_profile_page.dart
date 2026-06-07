@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
+import 'package:rukun_app_proyek4/utils/notification_utils.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/warga/profile/kelola_profile_viewmodel.dart';
 
@@ -141,7 +142,7 @@ class KelolaProfilePage extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "• Minimal 8 karakter\n• Gunakan kombinasi huruf dan angka",
+                  "• Minimal 6 karakter\n• Gunakan kombinasi huruf dan angka",
                   style: TextStyle(
                     fontSize: 12,
                     color: ColorsUtils.darkgray,
@@ -166,19 +167,23 @@ class KelolaProfilePage extends StatelessWidget {
                   onPressed: vm.isLoading
                       ? null
                       : () async {
-                          await vm.submit();
+                          final success = await vm.submit();
 
                           if (!context.mounted) return;
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                vm.errorMessage ??
-                                    vm.successMessage ??
-                                    "Terjadi kesalahan",
-                              ),
-                            ),
-                          );
+                          if (success) {
+                            NotificationUtils.showSuccess(
+                              context,
+                              vm.successMessage ?? "Password berhasil diubah",
+                            );
+
+                            Navigator.pop(context);
+                          } else {
+                            NotificationUtils.showError(
+                              context,
+                              vm.errorMessage ?? "Terjadi kesalahan",
+                            );
+                          }
                         },
                   child: vm.isLoading
                       ? const CircularProgressIndicator(

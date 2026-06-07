@@ -61,4 +61,18 @@ class CloudAuthService {
 
     return response.data;
   }
+
+  Future<Map<String, dynamic>> changePassword(
+    String password,
+    String newpassword,
+    String token,
+  ) async {
+    final response = await _dio.put(
+      '/user/change-password',
+      data: {"old_password": password, "new_password": newpassword},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+
+    return response.data;
+  }
 }
