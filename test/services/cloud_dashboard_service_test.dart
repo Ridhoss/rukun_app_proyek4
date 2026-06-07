@@ -16,7 +16,7 @@ void main() {
 
   setUp(() {
     mockDio = MockDio();
-    dashboardService = CloudDashboardService(dio: mockDio);
+    dashboardService = CloudDashboardService();
   });
 
   setUpAll(() {

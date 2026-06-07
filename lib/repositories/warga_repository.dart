@@ -6,6 +6,7 @@ import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_penduduk_cache_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_penduduk_sync_service.dart';
+import 'package:rukun_app_proyek4/utils/connectivity_helper.dart';
 
 class WargaRepository {
   final CloudWargaService service;
@@ -15,17 +16,21 @@ class WargaRepository {
 
   WargaRepository(this.service, this.local);
 
-  Future<List<Warga>> getAllWarga() async {
+  Future<List<Warga>> getAllWarga({String? search}) async {
     final token = await local.getToken();
 
     if (token == null) {
       return _getCachedWarga();
     }
 
+    if (await ConnectivityHelper.isOffline()) {
+      return _getCachedWarga();
+    }
+
     try {
       await _syncPendingWarga(token);
 
-      final result = await _safeCall(() => service.getAllWarga(token));
+      final result = await _safeCall(() => service.getAllWarga(token, search: search));
 
       _validateStatus(result);
 
@@ -37,7 +42,7 @@ class WargaRepository {
       return items;
     } catch (e) {
       final cached = await _getCachedWarga();
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -65,7 +70,7 @@ class WargaRepository {
       return item;
     } catch (e) {
       final cached = await _getCachedWargaById(id);
-      if (cached != null && _canUseCache(e)) {
+      if (cached != null) {
         return cached;
       }
 
@@ -92,7 +97,7 @@ class WargaRepository {
       return items;
     } catch (e) {
       final cached = await _getCachedWargaByKeluarga(keluargaId);
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -264,6 +269,8 @@ class WargaRepository {
 
   Future<void> _syncPendingWarga(String token) async {
     final pending = await syncQueue.readPendingActions();
+    debugPrint('[WargaSync] Pending actions: ${pending.length}');
+
     if (pending.isEmpty) {
       return;
     }
@@ -272,17 +279,20 @@ class WargaRepository {
 
     for (final action in pending) {
       if (action['entity'] != 'warga') {
+        debugPrint('[WargaSync] Skip: entity=${action['entity']}');
         continue;
       }
 
       final queueId = action['queue_id'] as String?;
       if (queueId == null) {
+        debugPrint('[WargaSync] Skip: no queueId');
         continue;
       }
 
       final operation = action['operation'] as String?;
       final entityId = (action['entity_id'] as num?)?.toInt();
       if (entityId == null) {
+        debugPrint('[WargaSync] Skip: no entityId');
         continue;
       }
 
@@ -290,15 +300,19 @@ class WargaRepository {
         (action['payload'] as Map?)?.cast<String, dynamic>() ?? {},
       );
 
+      debugPrint('[WargaSync] Processing: op=$operation, entityId=$entityId, queueId=$queueId');
+
       try {
         if (operation == 'create') {
           final cleanPayload = _stripSyncFields(payload)..remove('id');
+          debugPrint('[WargaSync] Create payload: $cleanPayload');
 
           final result = await _safeCall(
             () => service.createWarga(cleanPayload, token),
           );
 
           _validateStatus(result);
+          debugPrint('[WargaSync] Create response: ${result['status']}');
 
           final data = result['data'];
           if (data is Map) {
@@ -309,19 +323,23 @@ class WargaRepository {
             final serverId = (serverRaw['id'] as num?)?.toInt();
             if (serverId != null) {
               tempIdMap[entityId] = serverId;
+              debugPrint('[WargaSync] Mapped tempId=$entityId → serverId=$serverId');
             }
           } else {
             await cache.removeWarga(entityId);
           }
 
           await syncQueue.removeAction(queueId);
+          debugPrint('[WargaSync] ✓ Create synced, queue removed');
           continue;
         }
 
         final targetId = tempIdMap[entityId] ?? entityId;
 
         if (operation == 'update') {
-          final cleanPayload = _stripSyncFields(payload)..remove('id');
+          final cleanPayload = _stripSyncFields(payload);
+          cleanPayload.remove('id');
+          cleanPayload['id'] = targetId;
           final result = await _safeCall(
             () => service.updateWarga(targetId, cleanPayload, token),
           );
@@ -349,14 +367,22 @@ class WargaRepository {
           await syncQueue.removeAction(queueId);
         }
       } catch (e) {
-        debugPrint('Warga sync action $operation for $entityId failed: $e');
+        debugPrint('[WargaSync] ✗ FAILED: op=$operation, entityId=$entityId');
+        debugPrint('[WargaSync] Error: $e');
+        if (e is DioException) {
+          debugPrint('[WargaSync] DioException type: ${e.type}');
+          debugPrint('[WargaSync] DioException status: ${e.response?.statusCode}');
+          debugPrint('[WargaSync] DioException data: ${e.response?.data}');
+        }
+
         try {
           final currentAttempts = (action['attempts'] as int?) ?? 0;
           final nextAttempts = currentAttempts + 1;
+          debugPrint('[WargaSync] Attempt $nextAttempts of 3');
           if (nextAttempts >= 3) {
             await syncQueue.removeAction(queueId);
             debugPrint(
-              'Warga queue $queueId failed permanently after $nextAttempts attempts',
+              '[WargaSync] ✗✗✗ PERMANENTLY FAILED after 3 attempts. Removed from queue.',
             );
           } else {
             await syncQueue.updateActionAttempts(queueId, nextAttempts);
@@ -398,6 +424,8 @@ class WargaRepository {
     result.remove('entity_id');
     result.remove('operation');
     result.remove('local_queue_id');
+    result.remove('attempts');
+    result.remove('last_attempt_at');
     return result;
   }
 

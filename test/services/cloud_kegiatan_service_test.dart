@@ -22,7 +22,7 @@ void main() {
 
   setUp(() {
     mockDio = MockDio();
-    kegiatanService = CloudKegiatanService(dio: mockDio);
+    kegiatanService = CloudKegiatanService();
   });
 
   setUpAll(() {

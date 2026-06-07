@@ -19,6 +19,8 @@ class AuthViewModel extends ChangeNotifier {
   bool _isLocked = false;
   int _lockSeconds = 0;
 
+  VoidCallback? onAuthSuccess;
+
   bool get isLoggedIn => authData != null;
   User? get currentUser => authData?.user;
   bool get isLocked => _isLocked;
@@ -50,6 +52,10 @@ class AuthViewModel extends ChangeNotifier {
       _failedLoginCount = 0;
       errorMessage = null;
       authData = result;
+
+      if (authData != null) {
+        onAuthSuccess?.call();
+      }
     } catch (e, st) {
       final message = e.toString().replaceAll("Exception: ", "");
       _onLoginFailed(message);
@@ -137,6 +143,10 @@ class AuthViewModel extends ChangeNotifier {
       authData = AuthResponse(token: token, user: user);
 
       debugPrint("AUTH SUCCESS");
+
+      if (authData != null) {
+        onAuthSuccess?.call();
+      }
     } catch (e, st) {
       debugPrint("AUTH ERROR: $e");
 
@@ -146,6 +156,7 @@ class AuthViewModel extends ChangeNotifier {
         if (token != null && cachedUser != null) {
           authData = AuthResponse(token: token, user: cachedUser);
           debugPrint("AUTH FALLBACK TO CACHED USER");
+          onAuthSuccess?.call();
         } else {
           authData = null;
         }

@@ -16,7 +16,7 @@ void main() {
 
   setUp(() {
     mockDio = MockDio();
-    iuranService = CloudIuranService(dio: mockDio);
+    iuranService = CloudIuranService();
   });
 
   setUpAll(() {

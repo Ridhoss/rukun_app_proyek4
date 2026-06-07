@@ -1,18 +1,22 @@
 import 'package:hive/hive.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
 import 'package:rukun_app_proyek4/services/local/offline_sync_status_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class KegiatanLocalSyncService {
   static const String _queueBoxName = 'offline_sync_kegiatan';
+
+  static String _safeKey(int id) => 'id_$id';
 
   Future<void> queueCreateKegiatan({
     required int tempId,
     required Map<String, dynamic> payload,
   }) async {
     final box = await HiveService().openBox<dynamic>(_queueBoxName);
+    final key = _safeKey(tempId);
 
-    await box.put(tempId.toString(), {
-      'queue_id': tempId.toString(),
+    await box.put(key, {
+      'queue_id': key,
       'operation': 'create',
       'entity': 'kegiatan',
       'entity_id': tempId,
@@ -86,7 +90,7 @@ class KegiatanLocalSyncService {
 
     for (final value in box.values) {
       if (value is Map) {
-        actions.add(Map<String, dynamic>.from(value));
+        actions.add(deepCastMap(value));
       }
     }
 

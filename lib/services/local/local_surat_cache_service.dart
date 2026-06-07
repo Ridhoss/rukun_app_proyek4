@@ -1,5 +1,6 @@
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class SuratLocalCacheService {
   static const String _allBoxName = 'offline_cache_surat_all';
@@ -68,24 +69,26 @@ class SuratLocalCacheService {
     return _readCollection(_rwBoxName(rwId));
   }
 
+  static String _safeKey(int id) => 'id_$id';
+
   Future<void> removeSuratAll(int id) async {
     final box = await HiveService().openBox<dynamic>(_allBoxName);
-    await box.delete(id.toString());
+    await box.delete(_safeKey(id));
   }
 
   Future<void> removeSuratSaya(int id) async {
     final box = await HiveService().openBox<dynamic>(_sayaBoxName);
-    await box.delete(id.toString());
+    await box.delete(_safeKey(id));
   }
 
   Future<void> removeSuratRt(int rtId, int id) async {
     final box = await HiveService().openBox<dynamic>(_rtBoxName(rtId));
-    await box.delete(id.toString());
+    await box.delete(_safeKey(id));
   }
 
   Future<void> removeSuratRw(int rwId, int id) async {
     final box = await HiveService().openBox<dynamic>(_rwBoxName(rwId));
-    await box.delete(id.toString());
+    await box.delete(_safeKey(id));
   }
 
   Future<void> _upsertCollection({
@@ -100,7 +103,7 @@ class SuratLocalCacheService {
         continue;
       }
 
-      await box.put(id.toString(), Map<String, dynamic>.from(item));
+      await box.put(_safeKey(id), Map<String, dynamic>.from(item));
     }
   }
 
@@ -110,7 +113,7 @@ class SuratLocalCacheService {
 
     for (final value in box.values) {
       if (value is Map) {
-        final mapped = Map<String, dynamic>.from(value);
+        final mapped = deepCastMap(value);
         if (mapped['is_deleted'] == true) {
           continue;
         }

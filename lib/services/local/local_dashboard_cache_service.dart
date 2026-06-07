@@ -1,4 +1,5 @@
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class DashboardLocalCacheService {
   final HiveService _hive = HiveService();
@@ -13,7 +14,7 @@ class DashboardLocalCacheService {
     final box = await _hive.openBox(_boxName);
     final raw = box.get(key);
     if (raw is Map) {
-      return Map<String, dynamic>.from(raw);
+      return deepCastMap(raw);
     }
     return null;
   }

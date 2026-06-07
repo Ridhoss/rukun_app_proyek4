@@ -16,8 +16,15 @@ class OfflineSyncStatusService {
 
   final ValueNotifier<int> pendingCount = ValueNotifier<int>(0);
 
+  VoidCallback? onQueueChanged;
+
   Future<void> refresh() async {
+    final oldCount = pendingCount.value;
     pendingCount.value = await _countPendingActions();
+
+    if (pendingCount.value > oldCount) {
+      onQueueChanged?.call();
+    }
   }
 
   Future<int> _countPendingActions() async {

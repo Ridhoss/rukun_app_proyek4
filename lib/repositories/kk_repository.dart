@@ -5,6 +5,7 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_kk_service.dart';
 import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_penduduk_cache_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_penduduk_sync_service.dart';
+import 'package:rukun_app_proyek4/utils/connectivity_helper.dart';
 
 class KKRepository {
   final CloudKKService service;
@@ -21,6 +22,10 @@ class KKRepository {
       return _getCachedKeluarga();
     }
 
+    if (await ConnectivityHelper.isOffline()) {
+      return _getCachedKeluarga();
+    }
+
     try {
       final result = await _safeCall(() => service.getAllKK(token));
 
@@ -34,7 +39,7 @@ class KKRepository {
       return items;
     } catch (e) {
       final cached = await _getCachedKeluarga();
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -43,6 +48,10 @@ class KKRepository {
   }
 
   Future<List<Keluarga>> getKKByRT(int rtId) async {
+    if (await ConnectivityHelper.isOffline()) {
+      return _getCachedKeluargaByRt(rtId);
+    }
+
     try {
       final token = await _requireToken();
 
@@ -58,7 +67,7 @@ class KKRepository {
       return items;
     } catch (e) {
       final cached = await _getCachedKeluargaByRt(rtId);
-      if (cached.isNotEmpty && _canUseCache(e)) {
+      if (cached.isNotEmpty) {
         return cached;
       }
 
@@ -84,7 +93,7 @@ class KKRepository {
       return item;
     } catch (e) {
       final cached = await _getCachedKeluargaById(id);
-      if (cached != null && _canUseCache(e)) {
+      if (cached != null) {
         return cached;
       }
 
@@ -196,9 +205,7 @@ class KKRepository {
 
       try {
         if (operation == 'create') {
-          final cleanPayload = Map<String, dynamic>.from(payload)
-            ..remove('id')
-            ..remove('sync_status');
+          final cleanPayload = _stripSyncFields(payload)..remove('id');
 
           final result = await _safeCall(
             () => service.createKK(cleanPayload, token),
@@ -222,9 +229,7 @@ class KKRepository {
         final targetId = tempIdMap[entityId] ?? entityId;
 
         if (operation == 'update') {
-          final cleanPayload = Map<String, dynamic>.from(payload)
-            ..remove('id')
-            ..remove('sync_status');
+          final cleanPayload = _stripSyncFields(payload)..remove('id');
 
           final result = await _safeCall(
             () => service.updateKK(targetId, cleanPayload, token),
@@ -314,6 +319,21 @@ class KKRepository {
     }
 
     return null;
+  }
+
+  Map<String, dynamic> _stripSyncFields(Map<String, dynamic> raw) {
+    final result = Map<String, dynamic>.from(raw);
+    result.remove('sync_status');
+    result.remove('queue_id');
+    result.remove('created_at');
+    result.remove('updated_at');
+    result.remove('entity');
+    result.remove('entity_id');
+    result.remove('operation');
+    result.remove('local_queue_id');
+    result.remove('attempts');
+    result.remove('last_attempt_at');
+    return result;
   }
 
   bool _canUseCache(Object error) {

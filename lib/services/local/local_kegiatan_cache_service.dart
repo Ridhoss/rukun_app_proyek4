@@ -1,15 +1,18 @@
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class KegiatanLocalCacheService {
   final HiveService _hive = HiveService();
   final String _boxName = 'offline_cache_kegiatan';
+
+  static String _safeKey(int id) => 'id_$id';
 
   Future<void> cacheKegiatanRawList(List<Map<String, dynamic>> items) async {
     final box = await _hive.openBox(_boxName);
     for (final item in items) {
       final id = (item['id'] as num?)?.toInt();
       if (id == null) continue;
-      await box.put(id.toString(), Map<String, dynamic>.from(item));
+      await box.put(_safeKey(id), Map<String, dynamic>.from(item));
     }
   }
 
@@ -17,7 +20,7 @@ class KegiatanLocalCacheService {
     final box = await _hive.openBox(_boxName);
     final id = (item['id'] as num?)?.toInt();
     if (id == null) return;
-    await box.put(id.toString(), Map<String, dynamic>.from(item));
+    await box.put(_safeKey(id), Map<String, dynamic>.from(item));
   }
 
   Future<List<Map<String, dynamic>>> readKegiatanRaw() async {
@@ -25,7 +28,7 @@ class KegiatanLocalCacheService {
     final items = <Map<String, dynamic>>[];
     for (final value in box.values) {
       if (value is Map) {
-        final map = Map<String, dynamic>.from(value);
+        final map = deepCastMap(value);
         if (map['waktu_dihapus'] == null) {
           items.add(map);
         }
@@ -41,6 +44,6 @@ class KegiatanLocalCacheService {
 
   Future<void> removeKegiatan(int id) async {
     final box = await _hive.openBox(_boxName);
-    await box.delete(id.toString());
+    await box.delete(_safeKey(id));
   }
 }

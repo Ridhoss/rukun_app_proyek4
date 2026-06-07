@@ -28,7 +28,7 @@ void main() {
 
   setUp(() {
     mockDio = MockDio();
-    authService = CloudAuthService(dio: mockDio);
+    authService = CloudAuthService();
   });
 
   setUpAll(() {

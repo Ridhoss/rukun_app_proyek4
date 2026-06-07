@@ -5,6 +5,7 @@ import 'package:rukun_app_proyek4/services/auth/auth_local_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_kegiatan_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_kegiatan_cache_service.dart';
 import 'package:rukun_app_proyek4/services/local/local_kegiatan_sync_service.dart';
+import 'package:rukun_app_proyek4/utils/connectivity_helper.dart';
 
 class KegiatanRepository {
   final CloudKegiatanService service;
@@ -18,6 +19,11 @@ class KegiatanRepository {
     final token = await local.getToken();
 
     if (token == null) {
+      final cached = await cache.readKegiatanRaw();
+      return cached.map(Kegiatan.fromJson).toList();
+    }
+
+    if (await ConnectivityHelper.isOffline()) {
       final cached = await cache.readKegiatanRaw();
       return cached.map(Kegiatan.fromJson).toList();
     }
@@ -38,8 +44,8 @@ class KegiatanRepository {
 
       return rawItems.map(Kegiatan.fromJson).toList();
     } catch (e) {
-      if (_canUseCache(e)) {
-        final cached = await cache.readKegiatanRaw();
+      final cached = await cache.readKegiatanRaw();
+      if (cached.isNotEmpty) {
         return cached.map(Kegiatan.fromJson).toList();
       }
       rethrow;
@@ -65,12 +71,10 @@ class KegiatanRepository {
 
       return item;
     } catch (e) {
-      if (_canUseCache(e)) {
-        final cached = await cache.readKegiatanRaw();
-        for (final item in cached) {
-          if ((item['id'] as num?)?.toInt() == id) {
-            return Kegiatan.fromJson(item);
-          }
+      final cached = await cache.readKegiatanRaw();
+      for (final item in cached) {
+        if ((item['id'] as num?)?.toInt() == id) {
+          return Kegiatan.fromJson(item);
         }
       }
       rethrow;
@@ -96,8 +100,8 @@ class KegiatanRepository {
 
       return rawItems.map(Kegiatan.fromJson).toList();
     } catch (e) {
-      if (_canUseCache(e)) {
-        final cached = await cache.readKegiatanRaw();
+      final cached = await cache.readKegiatanRaw();
+      if (cached.isNotEmpty) {
         return cached
             .where((item) => (item['rw_id'] as num?)?.toInt() == rwId)
             .map(Kegiatan.fromJson)
@@ -222,9 +226,7 @@ class KegiatanRepository {
 
       try {
         if (operation == 'create') {
-          final cleanPayload = Map<String, dynamic>.from(payload)
-            ..remove('id')
-            ..remove('sync_status');
+          final cleanPayload = _stripSyncFields(payload)..remove('id');
 
           final result = await _safeCall(
             () => service.createKegiatan(cleanPayload, token),
@@ -248,9 +250,7 @@ class KegiatanRepository {
         final targetId = tempIdMap[entityId] ?? entityId;
 
         if (operation == 'update') {
-          final cleanPayload = Map<String, dynamic>.from(payload)
-            ..remove('id')
-            ..remove('sync_status');
+          final cleanPayload = _stripSyncFields(payload)..remove('id');
 
           final result = await _safeCall(
             () => service.updateKegiatan(targetId, cleanPayload, token),
@@ -260,6 +260,8 @@ class KegiatanRepository {
           final data = result['data'];
           if (data is Map) {
             await cache.upsertKegiatanRaw(Map<String, dynamic>.from(data));
+          } else {
+            await cache.upsertKegiatanRaw({...cleanPayload, 'id': targetId});
           }
 
           await syncQueue.removeAction(queueId);
@@ -316,6 +318,21 @@ class KegiatanRepository {
     } catch (e) {
       throw Exception(e.toString().replaceAll("Exception: ", ""));
     }
+  }
+
+  Map<String, dynamic> _stripSyncFields(Map<String, dynamic> raw) {
+    final result = Map<String, dynamic>.from(raw);
+    result.remove('sync_status');
+    result.remove('queue_id');
+    result.remove('created_at');
+    result.remove('updated_at');
+    result.remove('entity');
+    result.remove('entity_id');
+    result.remove('operation');
+    result.remove('local_queue_id');
+    result.remove('attempts');
+    result.remove('last_attempt_at');
+    return result;
   }
 
   bool _canUseCache(Object error) {

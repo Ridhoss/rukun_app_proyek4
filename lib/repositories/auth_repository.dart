@@ -11,35 +11,82 @@ class AuthRepository {
   AuthRepository(this.service, this.local);
 
   Future<AuthResponse> login(String nik, String password) async {
-    final result = await _safeCall(() => service.login(nik, password));
+    try {
+      final result = await _safeCall(() => service.login(nik, password));
 
-    _validateStatus(result);
+      _validateStatus(result);
 
-    final data = result['data'];
+      final data = result['data'];
 
-    if (data is! Map<String, dynamic>) {
-      throw Exception("Format login response tidak valid");
+      if (data is! Map<String, dynamic>) {
+        throw Exception("Format login response tidak valid");
+      }
+
+      final token = data['token'];
+
+      await local.saveToken(token);
+      await local.saveCredentials(nik, password);
+
+      final me = await service.getMe(token);
+
+      _validateStatus(me);
+
+      final userData = me['data'];
+
+      if (userData is! Map<String, dynamic>) {
+        throw Exception("Format user tidak valid");
+      }
+
+      final user = User.fromJson(userData);
+
+      await local.saveUserJson(userData);
+
+      return AuthResponse(token: token, user: user);
+    } on DioException catch (e) {
+      if (_isNetworkError(e)) {
+        return _loginOffline(nik, password);
+      }
+      rethrow;
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('socketexception') ||
+          msg.contains('failed host lookup') ||
+          msg.contains('connection refused') ||
+          msg.contains('network is unreachable')) {
+        return _loginOffline(nik, password);
+      }
+      rethrow;
+    }
+  }
+
+  Future<AuthResponse> _loginOffline(String nik, String password) async {
+    final valid = await local.verifyCredentials(nik, password);
+    if (!valid) {
+      throw Exception("Kredensial tidak cocok. Silakan online untuk login.");
     }
 
-    final token = data['token'];
+    final token = await local.getToken();
+    final userJson = await local.getUserJson();
 
-    await local.saveToken(token);
-
-    final me = await service.getMe(token);
-
-    _validateStatus(me);
-
-    final userData = me['data'];
-
-    if (userData is! Map<String, dynamic>) {
-      throw Exception("Format user tidak valid");
+    if (token == null || userJson == null) {
+      throw Exception("Data session tidak ditemukan. Silakan online untuk login.");
     }
 
-    final user = User.fromJson(userData);
+    return AuthResponse(token: token, user: User.fromJson(userJson));
+  }
 
-    await local.saveUserJson(userData);
-
-    return AuthResponse(token: token, user: user);
+  bool _isNetworkError(Object error) {
+    if (error is DioException) {
+      return switch (error.type) {
+        DioExceptionType.connectionError ||
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.receiveTimeout ||
+        DioExceptionType.sendTimeout ||
+        DioExceptionType.unknown => true,
+        _ => false,
+      };
+    }
+    return false;
   }
 
   Future<void> register({

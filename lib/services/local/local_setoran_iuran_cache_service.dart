@@ -1,4 +1,5 @@
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
+import 'package:rukun_app_proyek4/utils/hive_cast_utils.dart';
 
 class SetoranIuranLocalCacheService {
   final HiveService _hive = HiveService();
@@ -15,7 +16,7 @@ class SetoranIuranLocalCacheService {
     if (raw is List) {
       return raw
           .whereType<Map>()
-          .map((e) => Map<String, dynamic>.from(e))
+          .map((e) => deepCastMap(e))
           .toList();
     }
     return [];
