@@ -69,10 +69,16 @@ class AuthRepository {
     final userJson = await local.getUserJson();
 
     if (token == null || userJson == null) {
-      throw Exception("Data session tidak ditemukan. Silakan online untuk login.");
+      throw Exception(
+        "Data session tidak ditemukan. Silakan online untuk login.",
+      );
     }
 
     return AuthResponse(token: token, user: User.fromJson(userJson));
+  }
+
+  Future<String?> getSavedPassword() async {
+    return await local.getSavedPassword();
   }
 
   bool _isNetworkError(Object error) {

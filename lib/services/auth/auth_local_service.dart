@@ -46,6 +46,12 @@ class AuthLocalService {
     await box.put('cred_pass', password);
   }
 
+  Future<String?> getSavedPassword() async {
+    final box = await _box();
+
+    return box.get('cred_pass') as String?;
+  }
+
   Future<String?> getSavedNik() async {
     final box = await _box();
     return box.get('cred_nik') as String?;

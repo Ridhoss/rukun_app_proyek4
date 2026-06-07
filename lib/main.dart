@@ -11,7 +11,9 @@ import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewm
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/rt_upload_setoran_rw_viewmodel.dart';
 
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/warga/profile/kelola_profile_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/warga/profile/warga_profile_page.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -290,6 +292,12 @@ void main() async {
             context.read<DashboardRepository>(),
             context.read<KasMutasiRepository>(),
           ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) =>
+              KelolaProfileViewModel(context.read<AuthRepository>()),
+          child: const KelolaProfilePage(),
         ),
 
         ChangeNotifierProvider(create: (_) => KegiatanRtViewModel()),
