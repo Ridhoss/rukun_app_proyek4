@@ -11,6 +11,7 @@ import 'package:rukun_app_proyek4/viewmodels/roles/rt/kegiatan/kegiatan_rt_viewm
 import 'package:rukun_app_proyek4/viewmodels/roles/rt/rt_upload_setoran_rw_viewmodel.dart';
 
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/dashboard/rw_dashboard_viewmodel.dart';
+import 'package:rukun_app_proyek4/viewmodels/roles/warga/home/aktivitas_warga_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/warga/profile/kelola_profile_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/warga/profile/warga_profile_page.dart';
@@ -321,6 +322,14 @@ void main() async {
           create: (context) => DataKKViewModel(
             kkRepository: context.read<KKRepository>(),
             wargaRepository: context.read<WargaRepository>(),
+          ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) => AktivitasWargaViewModel(
+            suratRepository: context.read<SuratRepository>(),
+            iuranRepository: context.read<IuranRepository>(),
+            kegiatanRepository: context.read<KegiatanRepository>(),
           ),
         ),
 
