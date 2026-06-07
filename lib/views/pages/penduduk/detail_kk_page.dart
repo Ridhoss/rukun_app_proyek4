@@ -373,19 +373,54 @@ class _DetailKKView extends StatelessWidget {
 
           const SizedBox(height: 12),
 
+          if (vm.anggota.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: TextField(
+                onChanged: vm.setSearch,
+                decoration: InputDecoration(
+                  hintText: 'Cari nama warga...',
+                  prefixIcon: const Icon(Icons.search),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: ColorsUtils.b50),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: ColorsUtils.b500),
+                  ),
+                ),
+              ),
+            ),
+
           if (vm.isLoadingAnggota)
             const Center(child: CircularProgressIndicator())
           else if (vm.anggotaError != null)
             Text(vm.anggotaError!)
           else if (vm.anggota.isEmpty)
             _buildEmptyState(context, kk, vm)
+          else if (vm.filteredAnggota.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(
+                  'Warga tidak ditemukan',
+                  style: TextStyle(color: ColorsUtils.gray),
+                ),
+              ),
+            )
           else
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: vm.anggota.length,
+              itemCount: vm.filteredAnggota.length,
               itemBuilder: (context, i) {
-                final warga = vm.anggota[i];
+                final warga = vm.filteredAnggota[i];
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -414,9 +449,36 @@ class _DetailKKView extends StatelessWidget {
                       child: Icon(Icons.person, color: ColorsUtils.b500),
                     ),
                     title: Text(warga.nama),
-                    subtitle: Text(
-                      warga.nik,
-                      style: const TextStyle(fontSize: 12),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(warga.nik, style: const TextStyle(fontSize: 12)),
+                        if (warga.isPendingSync) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF7ED),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: const Color(0xFFF59E0B),
+                              ),
+                            ),
+                            child: const Text(
+                              'Menunggu sinkron',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFB45309),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     trailing: const Icon(Icons.chevron_right),
                   ),

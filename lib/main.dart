@@ -30,7 +30,20 @@ import 'package:rukun_app_proyek4/services/cloud/cloud_rtrw_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_surat_service.dart';
 import 'package:rukun_app_proyek4/services/cloud/cloud_warga_service.dart';
 import 'package:rukun_app_proyek4/services/utils/hive_service.dart';
+import 'package:rukun_app_proyek4/services/local/offline_sync_status_service.dart';
+import 'package:rukun_app_proyek4/services/local/navigation_service.dart';
 import 'package:rukun_app_proyek4/services/utils/cloudinary_service.dart';
+import 'package:rukun_app_proyek4/services/local/local_iuran_cache_service.dart';
+import 'package:rukun_app_proyek4/services/local/local_iuran_sync_service.dart';
+import 'package:rukun_app_proyek4/services/local/local_setoran_iuran_cache_service.dart';
+import 'package:rukun_app_proyek4/services/local/local_setoran_iuran_sync_service.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:rukun_app_proyek4/services/local/sync_coordinator.dart';
+import 'package:rukun_app_proyek4/services/local/proactive_cache_service.dart';
+import 'package:rukun_app_proyek4/services/local/connectivity_service.dart';
+import 'package:rukun_app_proyek4/utils/connectivity_helper.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:rukun_app_proyek4/services/local/background_sync.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
 import 'package:rukun_app_proyek4/services/utils/excel_export_service.dart';
@@ -56,6 +69,18 @@ void main() async {
 
   final hiveService = HiveService();
   await hiveService.init();
+
+  await OfflineSyncStatusService.instance.refresh();
+
+  // initialize background worker (periodic sync)
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+
+  // register a periodic background sync (every 1 hour)
+  Workmanager().registerPeriodicTask(
+    'rukun_background_sync',
+    'rukun_sync',
+    frequency: const Duration(hours: 1),
+  );
 
   runApp(
     MultiProvider(
@@ -94,8 +119,12 @@ void main() async {
           create: (context) => IuranRepository(
             context.read<CloudIuranService>(),
             context.read<AuthLocalService>(),
+            context.read<CloudinaryService>(),
           ),
         ),
+        // local iuran cache & sync services
+        Provider(create: (_) => IuranLocalCacheService()),
+        Provider(create: (_) => IuranLocalSyncService()),
 
         Provider(
           create: (context) => KKRepository(
@@ -115,6 +144,7 @@ void main() async {
           create: (context) => SuratRepository(
             context.read<CloudSuratService>(),
             context.read<AuthLocalService>(),
+            context.read<CloudinaryService>(),
           ),
         ),
 
@@ -143,11 +173,67 @@ void main() async {
           create: (context) => SetoranIuranRtRepository(
             context.read<CloudSetoranIuranRtService>(),
             context.read<AuthLocalService>(),
+            context.read<CloudinaryService>(),
+          ),
+        ),
+        Provider(create: (_) => SetoranIuranLocalCacheService()),
+        Provider(create: (_) => SetoranIuranLocalSyncService()),
+
+        // connectivity + background sync coordinator
+        Provider(create: (_) {
+          final connectivity = Connectivity();
+          ConnectivityHelper.init(connectivity);
+          return connectivity;
+        }),
+        ChangeNotifierProvider(
+          create: (ctx) => ConnectivityService(ctx.read<Connectivity>()),
+        ),
+        Provider(
+          create: (ctx) {
+            final coordinator = SyncCoordinator(
+              ctx.read<Connectivity>(),
+              ctx.read<IuranRepository>(),
+              ctx.read<SuratRepository>(),
+              ctx.read<WargaRepository>(),
+              ctx.read<SetoranIuranRtRepository>(),
+              ctx.read<KKRepository>(),
+              ctx.read<KegiatanRepository>(),
+            )..start();
+
+            OfflineSyncStatusService.instance.onQueueChanged = () {
+              SyncCoordinator.notifyQueueChanged();
+            };
+
+            return coordinator;
+          },
+        ),
+
+        Provider(
+          create: (ctx) => ProactiveCacheService(
+            ctx.read<WargaRepository>(),
+            ctx.read<KKRepository>(),
+            ctx.read<IuranRepository>(),
+            ctx.read<SuratRepository>(),
+            ctx.read<KegiatanRepository>(),
+            ctx.read<SetoranIuranRtRepository>(),
+            ctx.read<RTRWRepository>(),
           ),
         ),
 
         ChangeNotifierProvider(
-          create: (context) => AuthViewModel(context.read()),
+          create: (context) {
+            final authVm = AuthViewModel(context.read());
+            authVm.onAuthSuccess = () {
+              final user = authVm.currentUser;
+              final rwId = user?.rw?.id;
+              final rtId = user?.rt?.id;
+              context.read<ProactiveCacheService>().cacheAllData(
+                    rwId: rwId,
+                    rtId: rtId,
+                  );
+            };
+            return authVm;
+          },
         ),
 
         ChangeNotifierProvider(
@@ -268,6 +354,7 @@ class MyApp extends StatelessWidget {
     return ShadcnApp(
       title: 'RukunApp',
       debugShowCheckedModeBanner: false,
+      navigatorKey: NavigationService.navigatorKey,
       navigatorObservers: [routeObserver],
       home: const SplashPage(),
     );

@@ -13,11 +13,7 @@ class SuratActionViewModel extends ChangeNotifier {
   final CloudinaryService cloudinaryService;
   final AuthViewModel authVm;
 
-  SuratActionViewModel(
-    this.suratRepo,
-    this.cloudinaryService,
-    this.authVm,
-  );
+  SuratActionViewModel(this.suratRepo, this.cloudinaryService, this.authVm);
 
   bool isUploading = false;
 
@@ -30,9 +26,23 @@ class SuratActionViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final resolvedId = await suratRepo.resolveSuratUploadId(id);
+
+      if (resolvedId == null) {
+        debugPrint("SURAT BELUM TERSINKRON: $id - queueing upload");
+        await suratRepo.queueFileUploadSurat(
+          entityId: id,
+          localFilePath: file.path,
+          uploadType: 'draft',
+          extra: {'disetujui_oleh': authVm.currentUser?.id},
+        );
+
+        return true;
+      }
+
       final url = await cloudinaryService.uploadFile(
         file,
-        folder: 'surat/pengajuan/$id',
+        folder: 'surat/pengajuan/$resolvedId',
       );
 
       if (url == null) return false;
@@ -44,10 +54,10 @@ class SuratActionViewModel extends ChangeNotifier {
         "disetujui_oleh": authVm.currentUser?.id,
       };
 
-      await suratRepo.updateSurat(id, body);
+      await suratRepo.updateSurat(resolvedId, body);
 
       listVm.updateSuratLocal(
-        id: id,
+        id: resolvedId,
         status: SuratStatus.disetujui,
         docRef: url,
         isSigned: false,
@@ -72,9 +82,22 @@ class SuratActionViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final resolvedId = await suratRepo.resolveSuratUploadId(id);
+
+      if (resolvedId == null) {
+        debugPrint("SURAT BELUM TERSINKRON: $id - queueing upload");
+        await suratRepo.queueFileUploadSurat(
+          entityId: id,
+          localFilePath: file.path,
+          uploadType: 'signed',
+        );
+
+        return true;
+      }
+
       final url = await cloudinaryService.uploadFile(
         file,
-        folder: 'surat/pengajuan/$id',
+        folder: 'surat/pengajuan/$resolvedId',
       );
 
       if (url == null) return false;
@@ -85,10 +108,10 @@ class SuratActionViewModel extends ChangeNotifier {
         "is_signed": true,
       };
 
-      await suratRepo.updateSurat(id, body);
+      await suratRepo.updateSurat(resolvedId, body);
 
       listVm.updateSuratLocal(
-        id: id,
+        id: resolvedId,
         status: SuratStatus.selesai,
         docRef: url,
         isSigned: true,
@@ -113,10 +136,7 @@ class SuratActionViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final body = {
-        "status": "Ditolak",
-        "catatan": catatan,
-      };
+      final body = {"status": "Ditolak", "catatan": catatan};
 
       await suratRepo.updateSurat(id, body);
 

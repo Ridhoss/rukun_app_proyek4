@@ -273,7 +273,34 @@ class _PengajuanSuratPageState extends State<PengajuanSuratPage> {
                           ),
                         ),
 
-                        _badge(item.status),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if ((item.id ?? 0) < 0 || item.isPendingSync)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text(
+                                  'Sinkronisasi',
+                                  style: TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+
+                            const SizedBox(width: 8),
+
+                            _badge(item.status),
+                          ],
+                        ),
                       ],
                     ),
 

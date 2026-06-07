@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:rukun_app_proyek4/helpers/log_helper.dart';
 import 'package:rukun_app_proyek4/models/auth_response_model.dart';
@@ -17,6 +18,8 @@ class AuthViewModel extends ChangeNotifier {
   int _failedLoginCount = 0;
   bool _isLocked = false;
   int _lockSeconds = 0;
+
+  VoidCallback? onAuthSuccess;
 
   bool get isLoggedIn => authData != null;
   User? get currentUser => authData?.user;
@@ -49,6 +52,10 @@ class AuthViewModel extends ChangeNotifier {
       _failedLoginCount = 0;
       errorMessage = null;
       authData = result;
+
+      if (authData != null) {
+        onAuthSuccess?.call();
+      }
     } catch (e, st) {
       final message = e.toString().replaceAll("Exception: ", "");
       _onLoginFailed(message);
@@ -136,8 +143,26 @@ class AuthViewModel extends ChangeNotifier {
       authData = AuthResponse(token: token, user: user);
 
       debugPrint("AUTH SUCCESS");
+
+      if (authData != null) {
+        onAuthSuccess?.call();
+      }
     } catch (e, st) {
       debugPrint("AUTH ERROR: $e");
+
+      if (_isNetworkError(e)) {
+        final token = await _authRepository.getToken();
+        final cachedUser = await _authRepository.getCachedUser();
+        if (token != null && cachedUser != null) {
+          authData = AuthResponse(token: token, user: cachedUser);
+          debugPrint("AUTH FALLBACK TO CACHED USER");
+          onAuthSuccess?.call();
+        } else {
+          authData = null;
+        }
+      } else {
+        authData = null;
+      }
 
       await LogHelper.writeLog(
         "CheckAuth gagal: $e",
@@ -146,7 +171,6 @@ class AuthViewModel extends ChangeNotifier {
         error: e,
         stackTrace: st,
       );
-      authData = null;
     } finally {
       isLoading = false;
 
@@ -154,6 +178,25 @@ class AuthViewModel extends ChangeNotifier {
 
       debugPrint("CHECK AUTH DONE");
     }
+  }
+
+  bool _isNetworkError(Object error) {
+    if (error is DioException) {
+      return switch (error.type) {
+        DioExceptionType.connectionError ||
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.receiveTimeout ||
+        DioExceptionType.sendTimeout ||
+        DioExceptionType.unknown => true,
+        _ => false,
+      };
+    }
+
+    final message = error.toString().toLowerCase();
+    return message.contains('socketexception') ||
+        message.contains('failed host lookup') ||
+        message.contains('connection refused') ||
+        message.contains('network is unreachable');
   }
 
   void _onLoginFailed(String message) {

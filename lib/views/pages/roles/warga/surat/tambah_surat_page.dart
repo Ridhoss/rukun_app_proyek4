@@ -247,7 +247,7 @@ class _TambahSuratPageState extends State<TambahSuratPage> {
           SizedBox(width: 10),
           Expanded(
             child: Text(
-              "Pengajuan akan diproses oleh pengurus. Pastikan data sudah benar sebelum mengajukan surat.",
+              "Pengajuan akan diproses oleh pengurus. Jika koneksi putus, pengajuan tetap disimpan dan disinkronkan saat online.",
               style: TextStyle(fontSize: 13),
             ),
           ),

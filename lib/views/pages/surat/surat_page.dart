@@ -36,7 +36,9 @@ class _SuratPageState extends State<SuratPage> {
     super.initState();
 
     Future.microtask(() {
-      context.read<SuratListViewModel>().fetchSurat(rwId: widget.user.rw?.id ?? 0);
+      context.read<SuratListViewModel>().fetchSurat(
+        rwId: widget.user.rw?.id ?? 0,
+      );
     });
   }
 
@@ -154,7 +156,7 @@ class _SuratPageState extends State<SuratPage> {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: ColorsUtils.black.withOpacity(0.05),
+            color: ColorsUtils.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -301,7 +303,9 @@ class _SuratPageState extends State<SuratPage> {
     final isAct = permission.canAct;
 
     debugPrint("=== SURAT CARD DEBUG id=${surat.id} ===");
-    debugPrint("level: $level | status: ${surat.status} | canAct: $isAct | permission: ${permission.canViewDetail}");
+    debugPrint(
+      "level: $level | status: ${surat.status} | canAct: $isAct | permission: ${permission.canViewDetail}",
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -315,7 +319,7 @@ class _SuratPageState extends State<SuratPage> {
 
         boxShadow: [
           BoxShadow(
-            color: ColorsUtils.black.withOpacity(0.16),
+            color: ColorsUtils.black.withValues(alpha: 0.16),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -369,7 +373,16 @@ class _SuratPageState extends State<SuratPage> {
                 ),
               ),
 
-              _statusBadge(status),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _statusBadge(status),
+                  if (surat.isPendingSync) ...[
+                    const SizedBox(height: 8),
+                    _syncBadge(),
+                  ],
+                ],
+              ),
             ],
           ),
 
@@ -448,7 +461,7 @@ class _SuratPageState extends State<SuratPage> {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
 
       decoration: BoxDecoration(
-        color: status.color.withOpacity(0.12),
+        color: status.color.withValues(alpha: 0.12),
 
         borderRadius: BorderRadius.circular(30),
       ),
@@ -459,6 +472,24 @@ class _SuratPageState extends State<SuratPage> {
         style: TextStyle(
           color: status.color,
           fontWeight: FontWeight.bold,
+          fontSize: 11,
+        ),
+      ),
+    );
+  }
+
+  Widget _syncBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: ColorsUtils.o100.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: const Text(
+        "Menunggu sinkron",
+        style: TextStyle(
+          color: ColorsUtils.o100,
+          fontWeight: FontWeight.w700,
           fontSize: 11,
         ),
       ),

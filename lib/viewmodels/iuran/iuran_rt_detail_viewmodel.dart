@@ -66,9 +66,22 @@ class IuranRTDetailViewModel extends ChangeNotifier {
         periode,
       );
 
-      setoranPerPeriode[key] = (result != null && result.id != null)
-          ? result
-          : null;
+      if (result != null && result.id != null) {
+        setoranPerPeriode[key] = result;
+      } else {
+        // if no server result, check local cache for pending item
+        final cached = await setoranRepository.getCachedSetoranRawByPeriode(
+          iuranId,
+          rtId,
+          periode,
+        );
+
+        if (cached != null) {
+          setoranPerPeriode[key] = SetoranIuranRt.fromJson(cached);
+        } else {
+          setoranPerPeriode[key] = null;
+        }
+      }
     } catch (_) {
       setoranPerPeriode[key] = null;
     }
@@ -122,7 +135,10 @@ class IuranRTDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> createSetoran(SetoranIuranRt setoran) async {
+  Future<bool> createSetoran(
+    SetoranIuranRt setoran, {
+    String? localDocumentPath,
+  }) async {
     try {
       isLoading = true;
       errorMessage = null;
@@ -131,20 +147,42 @@ class IuranRTDetailViewModel extends ChangeNotifier {
 
       String? documentRef;
 
-      if (buktiSetoran != null) {
-        documentRef = await cloudinaryService.uploadFile(
-          buktiSetoran!,
-          folder: 'setoran_iuran_rt',
-        );
+      // Try to upload locally if a path was provided (fast path)
+      if (localDocumentPath != null) {
+        try {
+          final file = File(localDocumentPath);
+          final uploaded = await cloudinaryService.uploadFile(
+            file,
+            folder: 'setoran_iuran_rt',
+          );
 
-        if (documentRef == null) {
-          throw Exception("Gagal upload bukti setoran");
+          if (uploaded != null) {
+            documentRef = uploaded;
+            localDocumentPath = null; // uploaded, no need to keep local path
+          }
+        } catch (_) {
+          // ignore and let repository handle enqueueing the local path
+        }
+      } else if (buktiSetoran != null) {
+        try {
+          final uploaded = await cloudinaryService.uploadFile(
+            buktiSetoran!,
+            folder: 'setoran_iuran_rt',
+          );
+          if (uploaded != null) {
+            documentRef = uploaded;
+          }
+        } catch (_) {
+          // ignore and let repository handle enqueueing
         }
       }
 
       final data = setoran.copyWith(documentRef: documentRef);
 
-      await setoranRepository.createSetoran(data);
+      await setoranRepository.createSetoran(
+        data,
+        localDocumentPath: localDocumentPath,
+      );
 
       final periode = DateFormat('yyyy-MM').format(data.periodeBulan);
       final key = "${data.iuranId}-${data.rtId}-$periode";
