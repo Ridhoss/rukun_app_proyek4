@@ -148,15 +148,10 @@ class SetoranIuranRtRepository {
 
       _validateStatus(result);
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _createSetoranOffline(
-          setoran,
-          localDocumentPath: localDocumentPath,
-        );
-        return;
-      }
-
-      rethrow;
+      await _createSetoranOffline(
+        setoran,
+        localDocumentPath: localDocumentPath,
+      );
     }
   }
 
@@ -171,12 +166,7 @@ class SetoranIuranRtRepository {
 
       _validateStatus(result);
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _updateSetoranOffline(id, setoran);
-        return;
-      }
-
-      rethrow;
+      await _updateSetoranOffline(id, setoran);
     }
   }
 
@@ -207,12 +197,7 @@ class SetoranIuranRtRepository {
 
       _validateStatus(result);
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _deleteSetoranOffline(id);
-        return;
-      }
-
-      rethrow;
+      await _deleteSetoranOffline(id);
     }
   }
 

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/core/route_observer.dart';
 import 'package:rukun_app_proyek4/models/iuran/iuran_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/notification_utils.dart';
+import 'package:rukun_app_proyek4/utils/sync_refresh_mixin.dart';
 import 'package:rukun_app_proyek4/viewmodels/roles/rw/iuran/iuran_page_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/crud/add_iuran_page.dart';
 import 'package:rukun_app_proyek4/views/pages/iuran/detail_iuran_rt_page.dart';
@@ -20,7 +22,37 @@ class PengurusIuranPage extends StatefulWidget {
   State<PengurusIuranPage> createState() => _PengurusIuranPageState();
 }
 
-class _PengurusIuranPageState extends State<PengurusIuranPage> {
+class _PengurusIuranPageState extends State<PengurusIuranPage>
+    with RouteAware, SyncRefreshMixin {
+  @override
+  void onSyncComplete(bool success) {
+    if (success) _refresh();
+  }
+
+  @override
+  void didPopNext() {
+    _refresh();
+  }
+
+  void _refresh() {
+    final rwId = widget.user.rw?.id;
+    if (rwId != null) {
+      context.read<RwIuranViewModel>().fetchDashboard(rwId);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();

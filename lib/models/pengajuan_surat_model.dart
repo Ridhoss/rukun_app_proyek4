@@ -98,29 +98,29 @@ class PengajuanSurat {
 
   factory PengajuanSurat.fromJson(Map<String, dynamic> json) {
     return PengajuanSurat(
-      id: json['id'],
-      wargaId: json['warga_id'],
-      rtId: json['rt_id'],
-      keperluan: json['keperluan'],
-      keterangan: json['keterangan'],
+      id: json['id'] as int?,
+      wargaId: (json['warga_id'] as num?)?.toInt(),
+      rtId: (json['rt_id'] as num?)?.toInt(),
+      keperluan: json['keperluan']?.toString() ?? '',
+      keterangan: json['keterangan']?.toString(),
       status: _status(json['status']),
-      docRef: json['doc_referensi'],
-      catatan: json['catatan'],
-      disetujuiOleh: json['disetujui_oleh'],
+      docRef: json['doc_referensi']?.toString(),
+      catatan: json['catatan']?.toString(),
+      disetujuiOleh: (json['disetujui_oleh'] as num?)?.toInt(),
       waktuDisetujui: json['waktu_disetujui'] != null
-          ? DateTime.parse(json['waktu_disetujui'])
+          ? DateTime.tryParse(json['waktu_disetujui'].toString())
           : null,
       isSigned: json['is_signed'] ?? false,
       syncStatus: json['sync_status'] as String?,
       clientTempId: (json['client_temp_id'] as num?)?.toInt(),
       waktuDibuat: json['waktu_dibuat'] != null
-          ? DateTime.parse(json['waktu_dibuat'])
+          ? DateTime.tryParse(json['waktu_dibuat'].toString())
           : null,
       waktuDiubah: json['waktu_diubah'] != null
-          ? DateTime.parse(json['waktu_diubah'])
+          ? DateTime.tryParse(json['waktu_diubah'].toString())
           : null,
       waktuDihapus: json['waktu_dihapus'] != null
-          ? DateTime.parse(json['waktu_dihapus'])
+          ? DateTime.tryParse(json['waktu_dihapus'].toString())
           : null,
       rt: json['rt'] != null ? RtModel.fromJson(json['rt']) : null,
     );

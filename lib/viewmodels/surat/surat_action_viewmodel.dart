@@ -29,15 +29,8 @@ class SuratActionViewModel extends ChangeNotifier {
       final resolvedId = await suratRepo.resolveSuratUploadId(id);
 
       if (resolvedId == null) {
-        debugPrint("SURAT BELUM TERSINKRON: $id - queueing upload");
-        await suratRepo.queueFileUploadSurat(
-          entityId: id,
-          localFilePath: file.path,
-          uploadType: 'draft',
-          extra: {'disetujui_oleh': authVm.currentUser?.id},
-        );
-
-        return true;
+        debugPrint("SURAT BELUM TERSINKRON: $id - cannot upload offline");
+        throw Exception('Surat belum tersinkron ke server. Coba lagi saat online.');
       }
 
       final url = await cloudinaryService.uploadFile(
@@ -85,14 +78,8 @@ class SuratActionViewModel extends ChangeNotifier {
       final resolvedId = await suratRepo.resolveSuratUploadId(id);
 
       if (resolvedId == null) {
-        debugPrint("SURAT BELUM TERSINKRON: $id - queueing upload");
-        await suratRepo.queueFileUploadSurat(
-          entityId: id,
-          localFilePath: file.path,
-          uploadType: 'signed',
-        );
-
-        return true;
+        debugPrint("SURAT BELUM TERSINKRON: $id - cannot upload offline");
+        throw Exception('Surat belum tersinkron ke server. Coba lagi saat online.');
       }
 
       final url = await cloudinaryService.uploadFile(

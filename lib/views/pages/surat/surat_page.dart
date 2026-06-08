@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rukun_app_proyek4/core/route_observer.dart';
 import 'package:rukun_app_proyek4/models/pengajuan_surat_model.dart';
 import 'package:rukun_app_proyek4/models/user_model.dart';
 import 'package:rukun_app_proyek4/utils/appbar_utils.dart';
 import 'package:rukun_app_proyek4/utils/colors_utils.dart';
 import 'package:rukun_app_proyek4/utils/status_utils.dart';
+import 'package:rukun_app_proyek4/utils/sync_refresh_mixin.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/surat/surat_list_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/surat/utils/surat_permission.dart';
@@ -19,7 +21,36 @@ class SuratPage extends StatefulWidget {
   State<SuratPage> createState() => _SuratPageState();
 }
 
-class _SuratPageState extends State<SuratPage> {
+class _SuratPageState extends State<SuratPage> with RouteAware, SyncRefreshMixin {
+  @override
+  void onSyncComplete(bool success) {
+    if (success) _refresh();
+  }
+
+  @override
+  void didPopNext() {
+    _refresh();
+  }
+
+  void _refresh() {
+    final rwId = widget.user.rw?.id;
+    if (rwId != null) {
+      context.read<SuratListViewModel>().refresh(rwId: rwId);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
   UserRole _mapRole(String? level) {
     switch (level) {
       case "RT":

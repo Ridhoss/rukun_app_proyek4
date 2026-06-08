@@ -126,6 +126,11 @@ class IuranRepository {
   }
 
   Future<void> createIuran(Iuran iuran) async {
+    if (await ConnectivityHelper.isOffline()) {
+      await _createIuranOffline(iuran);
+      return;
+    }
+
     try {
       final token = await _requireToken();
       await _syncPendingIuran(token);
@@ -135,17 +140,22 @@ class IuranRepository {
       );
 
       _validateStatus(result);
-    } catch (e) {
-      if (_canUseCache(e)) {
-        await _createIuranOffline(iuran);
-        return;
-      }
 
-      rethrow;
+      final data = result['data'];
+      if (data is Map) {
+        await cache.upsertIuranRaw(Map<String, dynamic>.from(data));
+      }
+    } catch (e) {
+      await _createIuranOffline(iuran);
     }
   }
 
   Future<void> updateIuran(int id, Iuran iuran) async {
+    if (await ConnectivityHelper.isOffline()) {
+      await _updateIuranOffline(id, iuran);
+      return;
+    }
+
     try {
       final token = await _requireToken();
       await _syncPendingIuran(token);
@@ -155,13 +165,13 @@ class IuranRepository {
       );
 
       _validateStatus(result);
-    } catch (e) {
-      if (_canUseCache(e)) {
-        await _updateIuranOffline(id, iuran);
-        return;
-      }
 
-      rethrow;
+      final data = result['data'];
+      if (data is Map) {
+        await cache.upsertIuranRaw(Map<String, dynamic>.from(data));
+      }
+    } catch (e) {
+      await _updateIuranOffline(id, iuran);
     }
   }
 
@@ -176,6 +186,11 @@ class IuranRepository {
   }
 
   Future<void> deleteIuran(int id) async {
+    if (await ConnectivityHelper.isOffline()) {
+      await _deleteIuranOffline(id);
+      return;
+    }
+
     try {
       final token = await _requireToken();
       await _syncPendingIuran(token);
@@ -183,13 +198,10 @@ class IuranRepository {
       final result = await _safeCall(() => service.deleteIuran(id, token));
 
       _validateStatus(result);
-    } catch (e) {
-      if (_canUseCache(e)) {
-        await _deleteIuranOffline(id);
-        return;
-      }
 
-      rethrow;
+      await cache.removeIuran(id);
+    } catch (e) {
+      await _deleteIuranOffline(id);
     }
   }
 
@@ -214,6 +226,12 @@ class IuranRepository {
     final raw = _prepareOfflinePayload(iuran.toJson(), tempId);
 
     await cache.upsertIuranRaw(raw);
+
+    final rwId = iuran.rw?.id;
+    if (rwId != null) {
+      await cache.upsertIuranRwRaw(rwId, raw);
+    }
+
     await syncQueue.queueCreateIuran(tempId: tempId, payload: raw);
   }
 
@@ -426,12 +444,46 @@ class IuranRepository {
   }
 
   Future<List<Iuran>> getIuranByRWId(int idRw) async {
-    final token = await _requireToken();
-
     if (await ConnectivityHelper.isOffline()) {
       final cached = await cache.readIuranRwRaw(idRw);
-      return cached.map(Iuran.fromJson).toList();
+      if (cached.isNotEmpty) {
+        final items = cached.map(Iuran.fromJson).toList();
+        final pendingItems = await _getPendingIuranForRw(idRw);
+        if (pendingItems.isNotEmpty) {
+          final existingIds = items.map((e) => e.id).toSet();
+          for (final pending in pendingItems) {
+            if (!existingIds.contains(pending.id)) {
+              items.add(pending);
+            }
+          }
+        }
+        return items;
+      }
+
+      final allCached = await cache.readIuranRaw();
+      final filtered = allCached
+          .where((item) => (item['rw_id'] as num?)?.toInt() == idRw)
+          .map(Iuran.fromJson)
+          .toList();
+
+      final pendingItems = await _getPendingIuranForRw(idRw);
+      if (pendingItems.isNotEmpty) {
+        final existingIds = filtered.map((e) => e.id).toSet();
+        for (final pending in pendingItems) {
+          if (!existingIds.contains(pending.id)) {
+            filtered.add(pending);
+          }
+        }
+      }
+
+      return filtered;
     }
+
+    final token = await _requireToken();
+
+    try {
+      await _syncPendingIuran(token);
+    } catch (_) {}
 
     final result = await _safeCall(() => service.getIuranByRW(idRw, token));
 
@@ -440,7 +492,39 @@ class IuranRepository {
     final List data = result['data'] ?? [];
     final items = data.map((e) => Iuran.fromJson(e)).toList();
     await cache.cacheIuranRwList(idRw, items);
+
+    final pendingItems = await _getPendingIuranForRw(idRw);
+    if (pendingItems.isNotEmpty) {
+      final existingIds = items.map((e) => e.id).toSet();
+      for (final pending in pendingItems) {
+        if (!existingIds.contains(pending.id)) {
+          items.add(pending);
+        }
+      }
+      await cache.cacheIuranRwList(idRw, items);
+    }
+
     return items;
+  }
+
+  Future<List<Iuran>> _getPendingIuranForRw(int rwId) async {
+    final pending = await syncQueue.readPendingActions();
+    final results = <Iuran>[];
+
+    for (final action in pending) {
+      if (action['entity'] != 'iuran') continue;
+      if (action['operation'] != 'create') continue;
+
+      final payload = action['payload'] as Map?;
+      if (payload == null) continue;
+
+      final raw = Map<String, dynamic>.from(payload);
+      if ((raw['rw_id'] as num?)?.toInt() != rwId) continue;
+
+      results.add(Iuran.fromJson(raw));
+    }
+
+    return results;
   }
 
   Future<IuranRWDetail> getIuranRWDetail(int id) async {
@@ -478,12 +562,7 @@ class IuranRepository {
 
       _validateStatus(result);
     } catch (e) {
-      if (_canUseCache(e)) {
-        await _createTransaksiOffline(transaksi, localFilePath: localFilePath);
-        return;
-      }
-
-      rethrow;
+      await _createTransaksiOffline(transaksi, localFilePath: localFilePath);
     }
   }
 
