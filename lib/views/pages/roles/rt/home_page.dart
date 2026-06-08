@@ -11,6 +11,7 @@ import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rt/profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rt/widgets/rt_kas_card.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/warga/profile/warga_profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
 class RtHomePage extends StatefulWidget {
@@ -57,7 +58,7 @@ class _RtHomePageState extends State<RtHomePage> with SyncRefreshMixin {
           onProfile: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const RtProfilePage()),
+              MaterialPageRoute(builder: (_) => const KelolaProfilePage()),
             );
           },
           onExport: () async {
