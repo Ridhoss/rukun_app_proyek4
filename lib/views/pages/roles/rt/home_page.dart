@@ -8,9 +8,8 @@ import 'package:rukun_app_proyek4/utils/rt_settings_utils.dart';
 import 'package:rukun_app_proyek4/utils/sync_refresh_mixin.dart';
 import 'package:rukun_app_proyek4/viewmodels/auth_viewmodel.dart';
 import 'package:rukun_app_proyek4/viewmodels/rt/rt_dashboard_viewmodel.dart';
-import 'package:rukun_app_proyek4/viewmodels/export_data_viewmodel.dart';
-import 'package:rukun_app_proyek4/views/pages/roles/rt/profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/rt/widgets/rt_kas_card.dart';
+import 'package:rukun_app_proyek4/views/pages/roles/rw/profile/export_data_page.dart';
 import 'package:rukun_app_proyek4/views/pages/roles/warga/profile/warga_profile_page.dart';
 import 'package:rukun_app_proyek4/views/pages/welcome_page.dart';
 
@@ -61,30 +60,11 @@ class _RtHomePageState extends State<RtHomePage> with SyncRefreshMixin {
               MaterialPageRoute(builder: (_) => const KelolaProfilePage()),
             );
           },
-          onExport: () async {
-            final vm = context.read<ExportDataViewModel>();
-            if (authVM.currentUser != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Memproses file Excel...")),
-              );
-              final success = await vm.exportDataKependudukan(
-                authVM.currentUser!,
-              );
-              if (context.mounted) {
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Berhasil mengekspor data!")),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(vm.errorMessage ?? "Gagal mengekspor data"),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            }
+          onExport: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ExportPage()),
+            );
           },
           onLogout: () async {
             final confirm = await LogoutDialogUtils.showLogoutDialog(context);
