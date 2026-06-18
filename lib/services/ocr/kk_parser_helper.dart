@@ -1,28 +1,46 @@
+import 'ktp_line_classifier.dart';
 import 'ocr_post_processor.dart';
 import 'ocr_service.dart';
 
-/// Result of parsing KK - only No KK
+/// Result of parsing KK — No KK + all extracted fields.
 class KkParseResult {
   final String? noKK;
+  final String? namaKepalaKeluarga;
+  final String? alamat;
+  final String? rtRw;
+  final String? kelDesa;
+  final String? kecamatan;
+  final String? kota;
+  final String? kodePos;
   final String rawText;
   final double confidence;
 
   KkParseResult({
     this.noKK,
+    this.namaKepalaKeluarga,
+    this.alamat,
+    this.rtRw,
+    this.kelDesa,
+    this.kecamatan,
+    this.kota,
+    this.kodePos,
     required this.rawText,
     this.confidence = 0.0,
   });
 
   bool get hasNoKK => noKK != null && noKK!.isNotEmpty;
-  bool get hasAnyData => hasNoKK;
+  bool get hasNamaKepala => namaKepalaKeluarga != null && namaKepalaKeluarga!.isNotEmpty;
+  bool get hasAnyData => hasNoKK || hasNamaKepala;
 }
 
-/// Parse Indonesian Kartu Keluarga — extract No KK (16 digits) with fuzzy label matching.
+/// Parse Indonesian Kartu Keluarga — extract No KK (16 digits) + all fields.
 ///
-/// Adapted from PCD-B4's keyword detection pattern:
+/// Improvements over basic OCR:
+/// - ROI cropping: only top 35% of KK is OCR'd (header region)
+/// - Spatial-aware blocks: each line has bounding box from ML Kit
 /// - Fuzzy label matching (handles "N0.", "NO .", "Kartu Keluarga" variants)
+/// - KtpLineClassifier integration: extracts Alamat, Kode Pos, etc.
 /// - Multi-factor confidence scoring
-/// - Multi-strategy digit extraction
 class KkParserHelper {
   // Fuzzy patterns for "No." label — handles common OCR misreads
   static final List<RegExp> _noLabelPatterns = [
@@ -57,24 +75,82 @@ class KkParserHelper {
 
   static KkParseResult parse(OcrResult ocrResult) {
     final rawText = ocrResult.fullText;
-    print('\n=== KK PARSER (fuzzy) ===');
+    print('\n=== KK PARSER (fuzzy + spatial) ===');
 
-    final noKK = _extractNoKk(rawText);
+    final noKK = _extractNoKk(rawText, ocrResult.blocks);
+    final classified = KtpLineClassifier.classifyKkLines(rawText);
+    final fields = _extractFields(classified);
     final confidence = _calculateConfidence(ocrResult, noKK);
 
     print('No KK: ${noKK ?? "NOT FOUND"}');
+    print('Nama Kepala: ${fields['namaKepalaKeluarga'] ?? "-"}');
     print('Confidence: ${(confidence * 100).round()}%');
     print('=== END ===\n');
 
-    return KkParseResult(noKK: noKK, rawText: rawText, confidence: confidence);
+    return KkParseResult(
+      noKK: noKK,
+      namaKepalaKeluarga: fields['namaKepalaKeluarga'],
+      alamat: fields['alamat'],
+      rtRw: fields['rtRw'],
+      kelDesa: fields['kelDesa'],
+      kecamatan: fields['kecamatan'],
+      kota: fields['kota'],
+      kodePos: fields['kodePos'],
+      rawText: rawText,
+      confidence: confidence,
+    );
   }
 
-  /// Extract No KK with fuzzy label matching + multi-strategy extraction.
-  static String? _extractNoKk(String text) {
+  /// Extract field values from classified KK lines.
+  static Map<String, String> _extractFields(List<ClassifiedKkLine> classified) {
+    final result = <String, String>{};
+
+    for (final line in classified) {
+      if (line.value == null || line.value!.isEmpty) continue;
+
+      switch (line.type) {
+        case KkFieldType.namaKepalaKeluarga:
+          result.putIfAbsent('namaKepalaKeluarga', () => line.value!);
+          break;
+        case KkFieldType.alamat:
+          result.putIfAbsent('alamat', () => line.value!);
+          break;
+        case KkFieldType.rtRw:
+          result.putIfAbsent('rtRw', () => line.value!);
+          break;
+        case KkFieldType.kelDesa:
+          result.putIfAbsent('kelDesa', () => line.value!);
+          break;
+        case KkFieldType.kecamatan:
+          result.putIfAbsent('kecamatan', () => line.value!);
+          break;
+        case KkFieldType.kota:
+          result.putIfAbsent('kota', () => line.value!);
+          break;
+        case KkFieldType.kodePos:
+          result.putIfAbsent('kodePos', () => line.value!);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  /// Extract No KK with fuzzy label matching + spatial-aware extraction.
+  ///
+  /// Strategy priority:
+  /// 1. Fuzzy "No." label match (highest confidence — label present)
+  /// 2. Block-based: find "No" block then check next blocks for 16 digits
+  /// 3. "Kartu Keluarga" title → search nearby 16 digits
+  /// 4. 16 digits near "No" text (within 200 chars)
+  /// 5. First valid 16-digit sequence in full text (lowest confidence)
+  static String? _extractNoKk(String text, List<OcrBlock> blocks) {
     // Apply OCR digit corrections
     var corrected = _applyDigitCorrections(text);
 
-    // Strategy 1: Fuzzy "No." label match
+    // Strategy 1: Fuzzy "No." label match (highest confidence)
     for (final pattern in _noLabelPatterns) {
       final match = pattern.firstMatch(corrected);
       if (match != null) {
@@ -89,11 +165,16 @@ class KkParserHelper {
       }
     }
 
-    // Strategy 2: "Kartu Keluarga" title → search nearby 16 digits
+    // Strategy 2: Block-based — find "No" block, check next blocks for 16 digits
+    if (blocks.isNotEmpty) {
+      final noKK = _findNoKkFromBlocks(blocks);
+      if (noKK != null) return noKK;
+    }
+
+    // Strategy 3: "Kartu Keluarga" title → search nearby 16 digits
     for (final titlePattern in _kkTitlePatterns) {
       final titleMatch = titlePattern.firstMatch(corrected);
       if (titleMatch != null) {
-        // Search in a window after the title (up to 500 chars)
         final searchEnd =
             (titleMatch.end + 500).clamp(0, corrected.length);
         final searchRegion = corrected.substring(titleMatch.start, searchEnd);
@@ -107,7 +188,7 @@ class KkParserHelper {
       }
     }
 
-    // Strategy 3: Find 16 digits near "No" text (within 200 chars)
+    // Strategy 4: Find 16 digits near "No" text (within 200 chars)
     final noRegion = RegExp(r'[Nn][Oo0].{0,200}', caseSensitive: false)
         .firstMatch(corrected);
     if (noRegion != null) {
@@ -120,7 +201,7 @@ class KkParserHelper {
       }
     }
 
-    // Strategy 4: Any 16-digit sequence — validate each
+    // Strategy 5: Any 16-digit sequence — validate each
     final allDigits = corrected.replaceAll(RegExp(r'[^0-9]'), '');
     final matches = RegExp(r'\d{16}').allMatches(allDigits).toList();
 
@@ -136,8 +217,32 @@ class KkParserHelper {
     return null;
   }
 
+  /// Search blocks for No KK using spatial proximity to "No" label block.
+  static String? _findNoKkFromBlocks(List<OcrBlock> blocks) {
+    for (int i = 0; i < blocks.length; i++) {
+      final blockText = blocks[i].text.trim();
+      // Check if this block contains a "No" label
+      if (RegExp(r'^[Nn][Oo0]\.?\s*[:\-=]?\s*$').hasMatch(blockText) ||
+          RegExp(r'^[Nn][Oo0]\.?\s*[Kk][Kk]?\s*[:\-=]?\s*$').hasMatch(blockText)) {
+        // Check this block and next 2 blocks for 16 digits
+        for (int j = i; j < blocks.length && j <= i + 2; j++) {
+          final corrected = _applyDigitCorrections(blocks[j].text);
+          final digits = corrected.replaceAll(RegExp(r'[^0-9]'), '');
+          if (digits.length >= 16) {
+            final noKK = digits.substring(0, 16);
+            if (isValidNoKK(noKK)) {
+              print('Found No KK (block near label "${blocks[i].text}"): $noKK');
+              return noKK;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   /// Apply common OCR digit corrections.
-  /// Only corrects characters between digits (context-aware).
+  /// Corrects characters at start/end of digit sequences too (not just between digits).
   static String _applyDigitCorrections(String text) {
     var out = text;
     // O/o → 0 between digits
@@ -150,6 +255,14 @@ class KkParserHelper {
     out = out.replaceAllMapped(RegExp(r'(?<=\d)[B](?=\d)'), (m) => '8');
     // ? → 7 between digits
     out = out.replaceAllMapped(RegExp(r'(?<=\d)[\?](?=\d)'), (m) => '7');
+
+    // Also fix at sequence boundaries: "O3217..." → "03217..."
+    out = out.replaceAllMapped(RegExp(r'\b[Oo](?=\d{15})'), (m) => '0');
+    out = out.replaceAllMapped(RegExp(r'\b[Il|L](?=\d{15})'), (m) => '1');
+    // Fix trailing: "...3217O" → "...32170"
+    out = out.replaceAllMapped(RegExp(r'(?<=\d{15})[Oo]\b'), (m) => '0');
+    out = out.replaceAllMapped(RegExp(r'(?<=\d{15})[Il|L]\b'), (m) => '1');
+
     return out;
   }
 

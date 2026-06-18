@@ -93,8 +93,21 @@ class AddKKPage extends StatelessWidget {
     return _buildCard(
       header: _buildSectionHeader('Scan Kartu Keluarga', Icons.document_scanner_outlined),
       child: ScanKKWidget(
-        onConfirmed: ({String? noKK}) {
-          vm.applyScanResults(scannedNoKK: noKK);
+        onConfirmed: ({
+          String? noKK,
+          String? namaKepalaKeluarga,
+          String? alamat,
+          String? rtRw,
+          String? kelDesa,
+          String? kecamatan,
+          String? kota,
+          String? kodePos,
+        }) {
+          vm.applyScanResults(
+            scannedNoKK: noKK,
+            scannedAlamat: alamat,
+            scannedKodePos: kodePos,
+          );
         },
       ),
     );

@@ -41,8 +41,33 @@ class AddWargaPage extends StatelessWidget {
             'Scan KTP',
             Icons.document_scanner_outlined,
             ScanKTPWidget(
-              onConfirmed: ({String? nik}) {
-                vm.applyScanResults(scannedNik: nik);
+              onConfirmed: ({
+                String? nik,
+                String? nama,
+                String? tempatTglLahir,
+                String? jenisKelamin,
+                String? golonganDarah,
+                String? alamat,
+                String? rtRw,
+                String? kelDesa,
+                String? kecamatan,
+                String? agama,
+                String? statusPerkawinan,
+                String? pekerjaan,
+                String? kewarganegaraan,
+                String? berlakuHingga,
+              }) {
+                vm.applyScanResults(
+                  scannedNik: nik,
+                  scannedNama: nama,
+                  scannedTempatLahir: tempatTglLahir,
+                  scannedJenisKelamin: jenisKelamin,
+                  scannedAlamat: alamat,
+                  scannedAgama: agama,
+                  scannedStatusPerkawinan: statusPerkawinan,
+                  scannedPekerjaan: pekerjaan,
+                  scannedKewarganegaraan: kewarganegaraan,
+                );
               },
             ),
           ),

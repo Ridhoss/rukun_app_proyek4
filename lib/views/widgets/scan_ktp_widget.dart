@@ -4,8 +4,23 @@ import 'package:provider/provider.dart';
 import '../../utils/colors_utils.dart';
 import '../../viewmodels/scan_ktp_viewmodel.dart';
 
-/// Callback when KTP scan result is confirmed — only NIK
-typedef OnKtpScanConfirmed = void Function({String? nik});
+/// Callback when KTP scan result is confirmed — all extracted fields.
+typedef OnKtpScanConfirmed = void Function({
+  String? nik,
+  String? nama,
+  String? tempatTglLahir,
+  String? jenisKelamin,
+  String? golonganDarah,
+  String? alamat,
+  String? rtRw,
+  String? kelDesa,
+  String? kecamatan,
+  String? agama,
+  String? statusPerkawinan,
+  String? pekerjaan,
+  String? kewarganegaraan,
+  String? berlakuHingga,
+});
 
 /// Widget for scanning KTP with camera or gallery
 class ScanKTPWidget extends StatelessWidget {
@@ -163,7 +178,7 @@ class _ScanKTPView extends StatelessWidget {
                 Icon(Icons.check_circle, color: Colors.green.shade700, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'NIK Terdeteksi',
+                  'KTP Terdeteksi',
                   style: TextStyle(
                     color: Colors.green.shade700,
                     fontWeight: FontWeight.w600,
@@ -173,29 +188,36 @@ class _ScanKTPView extends StatelessWidget {
             ),
           ),
 
-          // NIK
+          // Extracted fields
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Row(
+            child: Column(
               children: [
-                Icon(Icons.credit_card, size: 16, color: Colors.green.shade600),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('NIK', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                      Text(
-                        result.nik!,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: Colors.green.shade800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _fieldRow(Icons.credit_card, 'NIK', result.nik),
+                if (result.hasNama) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.person, 'Nama', result.nama),
+                ],
+                if (result.tempatTglLahir != null) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.cake, 'TTL', result.tempatTglLahir),
+                ],
+                if (result.jenisKelamin != null) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.wc, 'JK', result.jenisKelamin),
+                ],
+                if (result.alamat != null) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.home, 'Alamat', result.alamat),
+                ],
+                if (result.agama != null) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.mosque, 'Agama', result.agama),
+                ],
+                if (result.pekerjaan != null) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.work, 'Pekerjaan', result.pekerjaan),
+                ],
               ],
             ),
           ),
@@ -221,7 +243,22 @@ class _ScanKTPView extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      onConfirmed(nik: result.nik);
+                      onConfirmed(
+                        nik: result.nik,
+                        nama: result.nama,
+                        tempatTglLahir: result.tempatTglLahir,
+                        jenisKelamin: result.jenisKelamin,
+                        golonganDarah: result.golonganDarah,
+                        alamat: result.alamat,
+                        rtRw: result.rtRw,
+                        kelDesa: result.kelDesa,
+                        kecamatan: result.kecamatan,
+                        agama: result.agama,
+                        statusPerkawinan: result.statusPerkawinan,
+                        pekerjaan: result.pekerjaan,
+                        kewarganegaraan: result.kewarganegaraan,
+                        berlakuHingga: result.berlakuHingga,
+                      );
                       vm.clearResults();
                     },
                     style: ElevatedButton.styleFrom(
@@ -232,7 +269,7 @@ class _ScanKTPView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Gunakan NIK'),
+                    child: const Text('Gunakan Data'),
                   ),
                 ),
               ],
@@ -240,6 +277,31 @@ class _ScanKTPView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _fieldRow(IconData icon, String label, String? value) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.green.shade600),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+              Text(
+                value ?? '-',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Colors.green.shade800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

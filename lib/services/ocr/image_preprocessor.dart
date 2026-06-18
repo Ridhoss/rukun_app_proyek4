@@ -9,7 +9,12 @@ import 'ocr_service.dart';
 /// Image preprocessing pipeline adapted from PCD-B4.
 ///
 /// Runs in a background Isolate via compute() to avoid UI jank.
-/// Pipeline: decode → EXIF fix → portrait → resize → grayscale → Otsu binarize → save
+/// Pipeline: decode → EXIF fix → portrait → resize → **ROI crop** → grayscale → Otsu binarize → save
+///
+/// ROI Cropping by DocumentType:
+/// - ktp: crop top 40% (NIK, Nama, TTL area)
+/// - kk:  crop top 35% (header: No KK, Alamat, Kode Pos)
+/// - general: no crop
 class ImagePreprocessor {
   /// Preprocess image for OCR in a background Isolate.
   ///
@@ -33,6 +38,13 @@ class ImagePreprocessor {
     return result;
   }
 }
+
+/// ROI crop ratios for each document type.
+/// Value is the fraction of height to KEEP from the top.
+const _roiCropRatios = {
+  'ktp': 0.40, // top 40%: NIK, Nama, TTL
+  'kk': 0.35,  // top 35%: No KK, Alamat, Kode Pos
+};
 
 /// Top-level function for compute() — runs in a separate Isolate.
 String _runPipeline(Map<String, String> params) {
@@ -60,12 +72,27 @@ String _runPipeline(Map<String, String> params) {
     decoded = img.copyResize(decoded, width: 2000);
   }
 
-  // Step 4: Grayscale + Otsu binarization (from PCD-B4)
+  // Step 4: ROI crop for KTP/KK (focus on header/NIK region)
+  final cropRatio = _roiCropRatios[documentType];
+  if (cropRatio != null) {
+    final cropHeight = (decoded.height * cropRatio).round();
+    decoded = img.copyCrop(
+      decoded,
+      x: 0,
+      y: 0,
+      width: decoded.width,
+      height: cropHeight,
+    );
+    debugPrint('ROI crop [$documentType]: kept top ${(cropRatio * 100).round()}% '
+        '→ ${decoded.width}x${decoded.height}');
+  }
+
+  // Step 5: Grayscale + Otsu binarization (from PCD-B4)
   if (enableBinarization && documentType != 'general') {
     decoded = _applyBinarization(decoded);
   }
 
-  // Step 5: Save as high quality JPEG
+  // Step 6: Save as high quality JPEG
   File(outputPath)
       .writeAsBytesSync(img.encodeJpg(decoded, quality: 95));
 

@@ -1,28 +1,58 @@
+import 'ktp_line_classifier.dart';
 import 'ocr_post_processor.dart';
 import 'ocr_service.dart';
 
-/// Result of parsing KTP - only NIK
+/// Result of parsing KTP — NIK + all extracted fields.
 class KtpParseResult {
   final String? nik;
+  final String? nama;
+  final String? tempatTglLahir;
+  final String? jenisKelamin;
+  final String? golonganDarah;
+  final String? alamat;
+  final String? rtRw;
+  final String? kelDesa;
+  final String? kecamatan;
+  final String? agama;
+  final String? statusPerkawinan;
+  final String? pekerjaan;
+  final String? kewarganegaraan;
+  final String? berlakuHingga;
   final String rawText;
   final double confidence;
 
   KtpParseResult({
     this.nik,
+    this.nama,
+    this.tempatTglLahir,
+    this.jenisKelamin,
+    this.golonganDarah,
+    this.alamat,
+    this.rtRw,
+    this.kelDesa,
+    this.kecamatan,
+    this.agama,
+    this.statusPerkawinan,
+    this.pekerjaan,
+    this.kewarganegaraan,
+    this.berlakuHingga,
     required this.rawText,
     this.confidence = 0.0,
   });
 
   bool get hasNik => nik != null && nik!.isNotEmpty;
-  bool get hasAnyData => hasNik;
+  bool get hasNama => nama != null && nama!.isNotEmpty;
+  bool get hasAnyData => hasNik || hasNama;
 }
 
-/// Parse Indonesian KTP — extract NIK (16 digits) with fuzzy label matching.
+/// Parse Indonesian KTP — extract NIK (16 digits) + all fields with fuzzy label matching.
 ///
-/// Adapted from PCD-B4's keyword detection pattern:
+/// Improvements over basic OCR:
+/// - ROI cropping: only top 40% of KTP is OCR'd (NIK region)
+/// - Spatial-aware blocks: each line has bounding box from ML Kit
 /// - Fuzzy NIK label matching (handles OCR misreads like "NlK", "N1K", "NI K")
+/// - KtpLineClassifier integration: extracts Nama, TTL, Alamat, etc.
 /// - Multi-factor confidence scoring
-/// - Multi-strategy digit extraction
 class KtpParserHelper {
   // Fuzzy patterns for NIK label — handles common OCR misreads
   static final List<RegExp> _nikLabelPatterns = [
@@ -53,24 +83,105 @@ class KtpParserHelper {
 
   static KtpParseResult parse(OcrResult ocrResult) {
     final rawText = ocrResult.fullText;
-    print('\n=== KTP PARSER (fuzzy) ===');
+    print('\n=== KTP PARSER (fuzzy + spatial) ===');
 
-    final nik = _findNik(rawText);
+    final nik = _findNik(rawText, ocrResult.blocks);
+    final classified = KtpLineClassifier.classifyKtpLines(rawText);
+    final fields = _extractFields(classified);
     final confidence = _calculateConfidence(ocrResult, nik);
 
     print('NIK: ${nik ?? "NOT FOUND"}');
+    print('Nama: ${fields['nama'] ?? "-"}');
     print('Confidence: ${(confidence * 100).round()}%');
     print('=== END ===\n');
 
-    return KtpParseResult(nik: nik, rawText: rawText, confidence: confidence);
+    return KtpParseResult(
+      nik: nik,
+      nama: fields['nama'],
+      tempatTglLahir: fields['tempatTglLahir'],
+      jenisKelamin: fields['jenisKelamin'],
+      golonganDarah: fields['golonganDarah'],
+      alamat: fields['alamat'],
+      rtRw: fields['rtRw'],
+      kelDesa: fields['kelDesa'],
+      kecamatan: fields['kecamatan'],
+      agama: fields['agama'],
+      statusPerkawinan: fields['statusPerkawinan'],
+      pekerjaan: fields['pekerjaan'],
+      kewarganegaraan: fields['kewarganegaraan'],
+      berlakuHingga: fields['berlakuHingga'],
+      rawText: rawText,
+      confidence: confidence,
+    );
   }
 
-  /// Find NIK with fuzzy label matching + multi-strategy extraction.
-  static String? _findNik(String text) {
+  /// Extract field values from classified lines.
+  static Map<String, String> _extractFields(List<ClassifiedKtpLine> classified) {
+    final result = <String, String>{};
+
+    for (final line in classified) {
+      if (line.value == null || line.value!.isEmpty) continue;
+
+      switch (line.type) {
+        case KtpFieldType.nama:
+          result.putIfAbsent('nama', () => line.value!);
+          break;
+        case KtpFieldType.tempatTglLahir:
+          result.putIfAbsent('tempatTglLahir', () => line.value!);
+          break;
+        case KtpFieldType.jenisKelamin:
+          result.putIfAbsent('jenisKelamin', () => line.value!);
+          break;
+        case KtpFieldType.golonganDarah:
+          result.putIfAbsent('golonganDarah', () => line.value!);
+          break;
+        case KtpFieldType.alamat:
+          result.putIfAbsent('alamat', () => line.value!);
+          break;
+        case KtpFieldType.rtRw:
+          result.putIfAbsent('rtRw', () => line.value!);
+          break;
+        case KtpFieldType.kelDesa:
+          result.putIfAbsent('kelDesa', () => line.value!);
+          break;
+        case KtpFieldType.kecamatan:
+          result.putIfAbsent('kecamatan', () => line.value!);
+          break;
+        case KtpFieldType.agama:
+          result.putIfAbsent('agama', () => line.value!);
+          break;
+        case KtpFieldType.statusPerkawinan:
+          result.putIfAbsent('statusPerkawinan', () => line.value!);
+          break;
+        case KtpFieldType.pekerjaan:
+          result.putIfAbsent('pekerjaan', () => line.value!);
+          break;
+        case KtpFieldType.kewarganegaraan:
+          result.putIfAbsent('kewarganegaraan', () => line.value!);
+          break;
+        case KtpFieldType.berlakuHingga:
+          result.putIfAbsent('berlakuHingga', () => line.value!);
+          break;
+        default:
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  /// Find NIK with fuzzy label matching + spatial-aware extraction.
+  ///
+  /// Strategy priority:
+  /// 1. Fuzzy NIK label match (highest confidence — label present)
+  /// 2. Block near NIK label (spatial proximity)
+  /// 3. 16 digits in text near "NIK" region (within 200 chars)
+  /// 4. First valid 16-digit sequence in full text (lowest confidence)
+  static String? _findNik(String text, List<OcrBlock> blocks) {
     // Apply OCR digit corrections
     var corrected = _applyDigitCorrections(text);
 
-    // Strategy 1: Fuzzy NIK label match
+    // Strategy 1: Fuzzy NIK label match (highest confidence)
     for (final pattern in _nikLabelPatterns) {
       final match = pattern.firstMatch(corrected);
       if (match != null) {
@@ -85,7 +196,14 @@ class KtpParserHelper {
       }
     }
 
-    // Strategy 2: Find 16 digits near NIK-like text (within 200 chars)
+    // Strategy 2: Block-based search — find block containing "NIK" then
+    // check the next block(s) for 16 digits
+    if (blocks.isNotEmpty) {
+      final nik = _findNikFromBlocks(blocks);
+      if (nik != null) return nik;
+    }
+
+    // Strategy 3: Find 16 digits near NIK-like text (within 200 chars)
     final nikRegion = RegExp(r'[Nn][Iil1][Kk].{0,200}', caseSensitive: false)
         .firstMatch(corrected);
     if (nikRegion != null) {
@@ -98,7 +216,7 @@ class KtpParserHelper {
       }
     }
 
-    // Strategy 3: Any 16-digit sequence — validate each
+    // Strategy 4: Any 16-digit sequence — validate each, prefer first
     final allDigits = corrected.replaceAll(RegExp(r'[^0-9]'), '');
     final matches = RegExp(r'\d{16}').allMatches(allDigits).toList();
 
@@ -114,8 +232,32 @@ class KtpParserHelper {
     return null;
   }
 
+  /// Search blocks for NIK using spatial proximity to "NIK" label block.
+  static String? _findNikFromBlocks(List<OcrBlock> blocks) {
+    for (int i = 0; i < blocks.length; i++) {
+      final blockText = blocks[i].text.trim();
+      // Check if this block contains a NIK-like label
+      if (RegExp(r'^[Nn][Iil1][Kk]\s*[:\-=]?\s*$').hasMatch(blockText) ||
+          RegExp(r'[Nn][Iil1][Kk]').hasMatch(blockText)) {
+        // Check this block and next 2 blocks for 16 digits
+        for (int j = i; j < blocks.length && j <= i + 2; j++) {
+          final corrected = _applyDigitCorrections(blocks[j].text);
+          final digits = corrected.replaceAll(RegExp(r'[^0-9]'), '');
+          if (digits.length >= 16) {
+            final nik = digits.substring(0, 16);
+            if (isValidNik(nik)) {
+              print('Found NIK (block near label "${blocks[i].text}"): $nik');
+              return nik;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   /// Apply common OCR digit corrections.
-  /// Only corrects characters between digits (context-aware).
+  /// Corrects characters at start/end of digit sequences too (not just between digits).
   static String _applyDigitCorrections(String text) {
     var out = text;
     // O/o → 0 between digits
@@ -128,6 +270,14 @@ class KtpParserHelper {
     out = out.replaceAllMapped(RegExp(r'(?<=\d)[B](?=\d)'), (m) => '8');
     // ? → 7 between digits
     out = out.replaceAllMapped(RegExp(r'(?<=\d)[\?](?=\d)'), (m) => '7');
+
+    // Also fix at sequence boundaries: "O3217..." → "03217..."
+    out = out.replaceAllMapped(RegExp(r'\b[Oo](?=\d{15})'), (m) => '0');
+    out = out.replaceAllMapped(RegExp(r'\b[Il|L](?=\d{15})'), (m) => '1');
+    // Fix trailing: "...3217O" → "...32170"
+    out = out.replaceAllMapped(RegExp(r'(?<=\d{15})[Oo]\b'), (m) => '0');
+    out = out.replaceAllMapped(RegExp(r'(?<=\d{15})[Il|L]\b'), (m) => '1');
+
     return out;
   }
 
@@ -154,7 +304,6 @@ class KtpParserHelper {
     score += cleanRatio * 0.2;
 
     // Factor 3: KTP labels detected (20%)
-    // Check if common KTP labels are present in the text
     final labels = [
       RegExp(r'NIK', caseSensitive: false),
       RegExp(r'Nama', caseSensitive: false),

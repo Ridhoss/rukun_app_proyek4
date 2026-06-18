@@ -4,8 +4,17 @@ import 'package:provider/provider.dart';
 import '../../utils/colors_utils.dart';
 import '../../viewmodels/scan_kk_viewmodel.dart';
 
-/// Callback when scan result is confirmed — only No KK
-typedef OnScanConfirmed = void Function({String? noKK});
+/// Callback when scan result is confirmed — all extracted KK fields.
+typedef OnScanConfirmed = void Function({
+  String? noKK,
+  String? namaKepalaKeluarga,
+  String? alamat,
+  String? rtRw,
+  String? kelDesa,
+  String? kecamatan,
+  String? kota,
+  String? kodePos,
+});
 
 /// Widget for scanning KK with camera or gallery
 class ScanKKWidget extends StatelessWidget {
@@ -201,7 +210,7 @@ class _ScanKKView extends StatelessWidget {
                 Icon(Icons.check_circle, color: Colors.green.shade700, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'No KK Terdeteksi',
+                  'KK Terdeteksi',
                   style: TextStyle(
                     color: Colors.green.shade700,
                     fontWeight: FontWeight.w600,
@@ -211,29 +220,24 @@ class _ScanKKView extends StatelessWidget {
             ),
           ),
 
-          // No KK
+          // Extracted fields
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Row(
+            child: Column(
               children: [
-                Icon(Icons.credit_card, size: 16, color: Colors.green.shade600),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('No KK', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                      Text(
-                        result.noKK!,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: Colors.green.shade800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _fieldRow(Icons.credit_card, 'No KK', result.noKK),
+                if (result.hasNamaKepala) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.person, 'Kepala Keluarga', result.namaKepalaKeluarga),
+                ],
+                if (result.alamat != null) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.home, 'Alamat', result.alamat),
+                ],
+                if (result.kodePos != null) ...[
+                  const SizedBox(height: 8),
+                  _fieldRow(Icons.location_on, 'Kode Pos', result.kodePos),
+                ],
               ],
             ),
           ),
@@ -261,7 +265,16 @@ class _ScanKKView extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      onConfirmed(noKK: result.noKK);
+                      onConfirmed(
+                        noKK: result.noKK,
+                        namaKepalaKeluarga: result.namaKepalaKeluarga,
+                        alamat: result.alamat,
+                        rtRw: result.rtRw,
+                        kelDesa: result.kelDesa,
+                        kecamatan: result.kecamatan,
+                        kota: result.kota,
+                        kodePos: result.kodePos,
+                      );
                       vm.clearResults();
                     },
                     style: ElevatedButton.styleFrom(
@@ -272,7 +285,7 @@ class _ScanKKView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Gunakan No KK'),
+                    child: const Text('Gunakan Data'),
                   ),
                 ),
               ],
@@ -280,6 +293,31 @@ class _ScanKKView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _fieldRow(IconData icon, String label, String? value) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.green.shade600),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+              Text(
+                value ?? '-',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Colors.green.shade800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
