@@ -69,6 +69,9 @@ class OcrPostProcessor {
     'MALUKU', 'MALUKU UTARA', 'PAPUA', 'PAPUA BARAT',
     'ACEH', 'KEPULAUAN RIAU', 'KEPULAUAN BANGKA BELITUNG',
     'BANTEN', 'NUSA TENGGARA BARAT', 'NUSA TENGGARA TIMUR',
+    // Banten (Kota/Kabupaten)
+    'TANGERANG', 'TANGERANG SELATAN', 'KOTA TANGERANG SELATAN',
+    'SERANG', 'CILEGON', 'DEPOK', 'LEBAK', 'PANDEGLANG',
   };
 
   // ============================================================
@@ -79,10 +82,12 @@ class OcrPostProcessor {
   static String correctOcrText(String text) {
     var out = text;
 
-    // Fix digit-context mistakes: O→0, I/L/|→1, S→5, B→8
+    // Fix digit-context mistakes: O→0, I/l/|→1, S→5, B→8, b/g/G/L→6, Z/z→2
     out = out.replaceAllMapped(RegExp(r'(?<=\d)[Oo](?=\d)'), (m) => '0');
     out = out.replaceAllMapped(RegExp(r'(?<=\d)[Il|](?=\d)'), (m) => '1');
+    out = out.replaceAllMapped(RegExp(r'(?<=\d)[Zz](?=\d)'), (m) => '2');
     out = out.replaceAllMapped(RegExp(r'(?<=\d)[Ss](?=\d)'), (m) => '5');
+    out = out.replaceAllMapped(RegExp(r'(?<=\d)[bgGL](?=\d)'), (m) => '6');
     out = out.replaceAllMapped(RegExp(r'(?<=\d)[B](?=\d)'), (m) => '8');
 
     // Fix common label mistakes

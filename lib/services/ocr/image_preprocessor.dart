@@ -9,12 +9,17 @@ import 'ocr_service.dart';
 /// Image preprocessing pipeline adapted from PCD-B4.
 ///
 /// Runs in a background Isolate via compute() to avoid UI jank.
-/// Pipeline: decode → EXIF fix → portrait → resize → **ROI crop** → grayscale → Otsu binarize → save
+/// Pipeline: decode → EXIF fix → orientation → resize → **ROI crop** → grayscale/binarize → save
 ///
 /// ROI Cropping by DocumentType:
 /// - ktp: crop top 40% (NIK, Nama, TTL area)
-/// - kk:  crop top 35% (header: No KK, Alamat, Kode Pos)
+/// - kk:  crop top 45% (header: No KK, Nama Kepala, Alamat, etc.)
 /// - general: no crop
+///
+/// Binarization by DocumentType:
+/// - ktp: full Otsu binarization (KTP is black text on white card)
+/// - kk:  grayscale only (KK has colored backgrounds that break binarization)
+/// - general: no processing
 class ImagePreprocessor {
   /// Preprocess image for OCR in a background Isolate.
   ///
@@ -43,7 +48,7 @@ class ImagePreprocessor {
 /// Value is the fraction of height to KEEP from the top.
 const _roiCropRatios = {
   'ktp': 0.40, // top 40%: NIK, Nama, TTL
-  'kk': 0.35,  // top 35%: No KK, Alamat, Kode Pos
+  'kk': 0.45,  // top 45%: No KK, Nama Kepala, Alamat, RT/RW, Kode Pos, etc.
 };
 
 /// Top-level function for compute() — runs in a separate Isolate.
@@ -62,14 +67,29 @@ String _runPipeline(Map<String, String> params) {
   // Step 1: Fix EXIF orientation
   decoded = img.bakeOrientation(decoded);
 
-  // Step 2: Force portrait for KTP/KK
-  if (decoded.width > decoded.height) {
-    decoded = img.copyRotate(decoded, angle: 90);
+  // Step 2: Force correct orientation based on document type
+  // KTP = portrait (vertical), KK = landscape (horizontal)
+  if (documentType == 'ktp') {
+    // KTP is portrait — rotate landscape to portrait
+    if (decoded.width > decoded.height) {
+      decoded = img.copyRotate(decoded, angle: 90);
+    }
+  } else if (documentType == 'kk') {
+    // KK is landscape — rotate portrait to landscape
+    if (decoded.height > decoded.width) {
+      decoded = img.copyRotate(decoded, angle: 90);
+    }
   }
 
   // Step 3: Resize if too large (keep quality for ML Kit)
-  if (decoded.width > 2000) {
-    decoded = img.copyResize(decoded, width: 2000);
+  // Handle both landscape (width > 2000) and portrait (height > 2000)
+  final maxDimension = decoded.width > decoded.height ? decoded.width : decoded.height;
+  if (maxDimension > 2000) {
+    if (decoded.width > decoded.height) {
+      decoded = img.copyResize(decoded, width: 2000);
+    } else {
+      decoded = img.copyResize(decoded, height: 2000);
+    }
   }
 
   // Step 4: ROI crop for KTP/KK (focus on header/NIK region)
@@ -87,9 +107,13 @@ String _runPipeline(Map<String, String> params) {
         '→ ${decoded.width}x${decoded.height}');
   }
 
-  // Step 5: Grayscale + Otsu binarization (from PCD-B4)
-  if (enableBinarization && documentType != 'general') {
+  // Step 5: Image enhancement
+  // KTP: full Otsu binarization (black text on white card = works great)
+  // KK: grayscale only (colored backgrounds like green/blue get destroyed by binarization)
+  if (documentType == 'ktp' && enableBinarization) {
     decoded = _applyBinarization(decoded);
+  } else if (documentType == 'kk') {
+    decoded = _applyGrayscale(decoded);
   }
 
   // Step 6: Save as high quality JPEG
@@ -102,6 +126,28 @@ String _runPipeline(Map<String, String> params) {
       'in ${sw.elapsedMilliseconds}ms');
 
   return outputPath;
+}
+
+/// Apply Grayscale conversion only (no binarization).
+///
+/// Used for KK documents that have colored backgrounds (green, blue, etc.)
+/// where Otsu binarization would destroy text contrast.
+/// Grayscale improves OCR by removing color distractions while preserving
+/// text visibility.
+img.Image _applyGrayscale(img.Image original) {
+  final gray = img.Image(width: original.width, height: original.height);
+  for (int y = 0; y < original.height; y++) {
+    for (int x = 0; x < original.width; x++) {
+      final px = original.getPixel(x, y);
+      final g = (0.299 * px.r.toInt() +
+              0.587 * px.g.toInt() +
+              0.114 * px.b.toInt())
+          .round()
+          .clamp(0, 255);
+      gray.setPixelRgb(x, y, g, g, g);
+    }
+  }
+  return gray;
 }
 
 /// Apply Grayscale (ITU-R BT.601) + Otsu's binary thresholding.

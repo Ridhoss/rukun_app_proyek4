@@ -101,13 +101,22 @@ class ScanKKViewModel extends ChangeNotifier {
     }
   }
 
-  /// Perform OCR
   Future<void> _performOcr() async {
     final ocrResult = await _ocrService
         .recognizeText(_scannedImage!, documentType: DocumentType.kk)
         .timeout(const Duration(seconds: 30), onTimeout: () {
       throw Exception('OCR timeout - coba foto lebih kecil');
     });
+
+    // Debug: print raw OCR text for troubleshooting
+    print('=== RAW OCR TEXT (KK) ===');
+    print(ocrResult.fullText);
+    print('Blocks: ${ocrResult.blocks.length}');
+    for (int i = 0; i < ocrResult.blocks.length; i++) {
+      print('  Block[$i]: "${ocrResult.blocks[i].text}" '
+          '(top=${ocrResult.blocks[i].top?.toStringAsFixed(2)})');
+    }
+    print('=== END RAW OCR TEXT ===');
 
     _parseResult = KkParserHelper.parse(ocrResult);
 

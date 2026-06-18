@@ -269,12 +269,12 @@ class KtpLineClassifier {
       return ClassifiedKkLine(line, KkFieldType.noKK, value: value);
     }
 
-    // Nama Kepala Keluarga
-    if (_matchesLabel(lower, ['kepala keluarga', 'nama kepala', 'nama'])) {
+    // Nama Kepala Keluarga — avoid generic 'nama' to prevent false matches
+    if (_matchesLabel(lower, ['kepala keluarga', 'nama kepala keluarga', 'nama kepala'])) {
       final value = _extractAfterLabelMulti(line, [
+        'nama kepala keluarga',
         'kepala keluarga',
         'nama kepala',
-        'nama',
       ]);
       return ClassifiedKkLine(line, KkFieldType.namaKepalaKeluarga, value: value);
     }
@@ -291,9 +291,10 @@ class KtpLineClassifier {
       return ClassifiedKkLine(line, KkFieldType.rtRw, value: value);
     }
 
-    // Kel/Desa
-    if (_matchesLabel(lower, ['kel/desa', 'kel desa', 'kelurahan', 'desa'])) {
+    // Kel/Desa — KK format uses "Desa/Kelurahan"
+    if (_matchesLabel(lower, ['desa/kelurahan', 'kel/desa', 'kel desa', 'kelurahan', 'desa'])) {
       final value = _extractAfterLabelMulti(line, [
+        'desa/kelurahan',
         'kel/desa',
         'kel desa',
         'kelurahan',
@@ -308,9 +309,15 @@ class KtpLineClassifier {
       return ClassifiedKkLine(line, KkFieldType.kecamatan, value: value);
     }
 
-    // Kota/Kabupaten
-    if (_matchesLabel(lower, ['kota', 'kabupaten', 'kab'])) {
-      final value = _extractAfterLabelMulti(line, ['kota', 'kabupaten', 'kab']);
+    // Kota/Kabupaten — KK format uses "Kabupaten/Kota"
+    if (_matchesLabel(lower, ['kabupaten/kota', 'kab/kota', 'kota', 'kabupaten', 'kab'])) {
+      final value = _extractAfterLabelMulti(line, [
+        'kabupaten/kota',
+        'kab/kota',
+        'kota',
+        'kabupaten',
+        'kab',
+      ]);
       // Try fuzzy match city name
       final matched = OcrPostProcessor.fuzzyMatchKota(value ?? '');
       return ClassifiedKkLine(line, KkFieldType.kota, value: matched ?? value);
